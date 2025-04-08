@@ -1,0 +1,7 @@
+fmtlib_test_1
+fmtlib_test_2
+fmtlib_test_3
+
+libcutils_test
+libcutils_test_static
+KernelLibcutilsTest

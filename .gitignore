@@ -28,3 +28,4 @@ test/*
 !test/cmake
 !test/CMakeLists.txt
 !test/manifest.xml
+!test/test.list.txt

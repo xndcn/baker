@@ -28,6 +28,8 @@ add_library(libgtest-static ALIAS gtest)
 add_library(libgtest_main-static ALIAS gtest_main)
 
 function(baker dir)
+    cmake_parse_arguments(BAKER "EXCLUDE_FROM_ALL" "" "" ${ARGN})
+
     if(SKIP_BAKER)
         message(STATUS "Skipping baker execution for ${dir} (SKIP_BAKER=ON)")
     else()
@@ -49,13 +51,43 @@ function(baker dir)
 
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${dir}/CMakeLists.txt")
         message(STATUS "Adding subdirectory: ${dir}")
-        add_subdirectory(${dir})
+        if(BAKER_EXCLUDE_FROM_ALL)
+            add_subdirectory(${dir} EXCLUDE_FROM_ALL)
+        else()
+            add_subdirectory(${dir})
+        endif()
     else()
         message(FATAL_ERROR "Failed to add subdirectory ${dir}")
     endif()
 endfunction()
 
+# Fix for missing defaults bug_24465209_workaround (defined in bionic/libc/Android.bp)
+add_library(bug_24465209_workaround INTERFACE)
+# Fix for missing defalts apex-lowest-min-sdk-version (defined in packages/modules/common/sdk/Android.bp)
+add_library(apex-lowest-min-sdk-version INTERFACE)
+# Currently not used library
+add_library(libprocessgroup_headers INTERFACE)
+add_library(libprocessgroup-static INTERFACE)
+add_library(libprocessgroup-shared INTERFACE)
+add_library(libjsoncpp-static INTERFACE)
+
+# Most Android.bp add -Werror flags, but create a lot of errors
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
+
+set(TARGET "linux" ; "glibc"; "host")
 baker(external/fmtlib/)
+baker(system/core/libcutils/)
+
+
+
+# Currently not built by default
+baker(system/libbase/ EXCLUDE_FROM_ALL)
+baker(system/logging/liblog/ EXCLUDE_FROM_ALL)
+baker(system/core/libsystem/ EXCLUDE_FROM_ALL)
+baker(system/core/libutils/ EXCLUDE_FROM_ALL)
+
+# Fix for missing linkage
+set_property(TARGET liblog.defaults APPEND PROPERTY _export_header_libs libutils_headers)
 
 # fmtlib_test_2 will fail because the locale problem
 set_tests_properties(fmtlib_test_2 DIRECTORY external/fmtlib/ PROPERTIES WILL_FAIL TRUE)
