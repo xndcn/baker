@@ -16,6 +16,9 @@ class CCLibrary(Module):
 
         object = Utils.to_internal_name(name, "OBJ")
         lines.append(f'add_library({object} OBJECT)')
+        # hack for header only library, which is hard to determine whether it contains srcs
+        lines.append(f'target_sources({object} PUBLIC ".")')
+        lines.append(f'set_target_properties({object} PROPERTIES LINKER_LANGUAGE CXX)')
         # Always enable position independent code
         lines.append(f'set_target_properties({object} PROPERTIES POSITION_INDEPENDENT_CODE ON)')
 
@@ -26,10 +29,12 @@ class CCLibrary(Module):
             lines.append(f'add_library({name}-shared SHARED)')
             lines.append(f'target_link_libraries({name}-shared PUBLIC {object})')
             lines.append(f'set_target_properties({name}-shared PROPERTIES PREFIX "" OUTPUT_NAME {Utils.to_cmake_expression(name)})')
+            lines.append(f'set_target_properties({name}-shared PROPERTIES LINKER_LANGUAGE CXX)')
         if not self._module.name.endswith("_shared"):
             lines.append(f'add_library({name}-static STATIC)')
             lines.append(f'target_link_libraries({name}-static PUBLIC {object})')
             lines.append(f'set_target_properties({name}-static PROPERTIES PREFIX "" OUTPUT_NAME {Utils.to_cmake_expression(name)})')
+            lines.append(f'set_target_properties({name}-static PROPERTIES LINKER_LANGUAGE CXX)')
         # Add alias for static only library
         if self._module.name.endswith("_static"):
             lines.append(f'add_library({name} ALIAS {name}-static)')

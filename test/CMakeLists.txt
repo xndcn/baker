@@ -77,7 +77,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
 set(TARGET "linux" ; "glibc"; "host")
 baker(external/fmtlib/)
 baker(system/core/libcutils/)
-
+baker(frameworks/native/libs/math/)
 
 
 # Currently not built by default
@@ -88,6 +88,7 @@ baker(system/core/libutils/ EXCLUDE_FROM_ALL)
 
 # Fix for missing linkage
 set_property(TARGET liblog.defaults APPEND PROPERTY _export_header_libs libutils_headers)
+target_link_libraries(libmath-static PUBLIC libutils_headers)
 
 # fmtlib_test_2 will fail because the locale problem
 set_tests_properties(fmtlib_test_2 DIRECTORY external/fmtlib/ PROPERTIES WILL_FAIL TRUE)
