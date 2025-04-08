@@ -9,4 +9,8 @@
 
   <project path="external/fmtlib" name="platform/external/fmtlib" groups="pdk" />
 
+  <project path="system/core" name="platform/system/core" groups="pdk" />
+  <project path="system/libbase" name="platform/system/libbase" groups="pdk" />
+  <project path="system/logging" name="platform/system/logging" groups="pdk" />
+
 </manifest>
