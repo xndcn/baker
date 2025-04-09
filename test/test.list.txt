@@ -5,3 +5,9 @@ fmtlib_test_3
 libcutils_test
 libcutils_test_static
 KernelLibcutilsTest
+
+vec_test
+mat_test
+half_test
+quat_test
+hashcombine_test
