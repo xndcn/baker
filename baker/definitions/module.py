@@ -35,7 +35,10 @@ class Module(ABC):
         return lines
 
     def _convert_module_properties_to_cmake(self, name: str) -> list[str]:
-        return self._convert_common_properties_to_cmake(self._module.properties, name)
+        lines = self._convert_common_properties_to_cmake(self._module.properties, name)
+        # Some modules need to include themselves
+        lines.append(f'target_include_directories({name} PRIVATE ".")')
+        return lines
 
     def _convert_common_properties_to_cmake(self, properties: dict, name: str) -> list[str]:
         lines = []
