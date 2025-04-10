@@ -36,6 +36,7 @@ class Module(ABC):
 
     def _convert_module_properties_to_cmake(self, name: str) -> list[str]:
         lines = self._convert_common_properties_to_cmake(self._module.properties, name)
+        lines.append(f'apply_sources_transform({name})')
         # Some modules need to include themselves
         lines.append(f'target_include_directories({name} PRIVATE ".")')
         return lines
@@ -43,7 +44,7 @@ class Module(ABC):
     def _convert_common_properties_to_cmake(self, properties: dict, name: str) -> list[str]:
         lines = []
         if srcs := Utils.get_property(self._blueprint, properties, "srcs"):
-            lines.append(f'file(GLOB_RECURSE {Utils.to_internal_name(name, "SRCS")} {Utils.to_cmake_expression(srcs)})')
+            lines.append(f'set({Utils.to_internal_name(name, "SRCS")} {Utils.to_cmake_expression(srcs)})')
             lines.append(f'target_sources({name} PRIVATE ${{{Utils.to_internal_name(name, "SRCS")}}})')
 
         includes = ["include_dirs"]
