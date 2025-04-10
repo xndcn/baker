@@ -8,7 +8,7 @@ class CCLibrary(Module):
 
     @staticmethod
     def match(name: str) -> bool:
-        return name.find("cc_library") >= 0
+        return name.find("cc_library") >= 0 or name.find("cc_test_library") >= 0
 
     def convert_to_cmake(self) -> list[str]:
         lines = []
@@ -21,8 +21,8 @@ class CCLibrary(Module):
         lines.append(f'set_target_properties({object} PROPERTIES LINKER_LANGUAGE CXX)')
         # Always enable position independent code
         lines.append(f'set_target_properties({object} PROPERTIES POSITION_INDEPENDENT_CODE ON)')
-
-        lines += self._convert_module_properties_to_cmake(object)
+        lines += self._convert_library_properties_to_cmake(object)
+        lines.append(f'apply_sources_transform({object})')
 
         # Handle static and shared libraries
         if not self._module.name.endswith("_static"):

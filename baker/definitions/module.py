@@ -34,13 +34,13 @@ class Module(ABC):
             lines.append('endif()')
         return lines
 
-    def _convert_module_properties_to_cmake(self, name: str) -> list[str]:
+    def _convert_library_properties_to_cmake(self, name: str) -> list[str]:
         return self._convert_common_properties_to_cmake(self._module.properties, name)
 
     def _convert_common_properties_to_cmake(self, properties: dict, name: str) -> list[str]:
         lines = []
         if srcs := Utils.get_property(self._blueprint, properties, "srcs"):
-            lines.append(f'file(GLOB_RECURSE {Utils.to_internal_name(name, "SRCS")} {Utils.to_cmake_expression(srcs)})')
+            lines.append(f'set({Utils.to_internal_name(name, "SRCS")} {Utils.to_cmake_expression(srcs)})')
             lines.append(f'target_sources({name} PRIVATE ${{{Utils.to_internal_name(name, "SRCS")}}})')
 
         includes = ["include_dirs"]
@@ -100,3 +100,9 @@ class Module(ABC):
     @abstractmethod
     def convert_to_cmake(self) -> list[str]:
         pass
+
+    def name(self) -> str:
+        return self._get_property("name")
+
+    def dependencies(self) -> list[str]:
+        return []

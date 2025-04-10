@@ -14,6 +14,7 @@ class CCBinary(Module):
         name = self._get_property("name")
 
         lines.append(f'add_executable({name})')
-        lines += self._convert_module_properties_to_cmake(name)
+        lines += self._convert_library_properties_to_cmake(name)
+        lines.append(f'apply_sources_transform({name})')
 
         return lines

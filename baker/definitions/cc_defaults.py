@@ -33,7 +33,7 @@ class CCDefaults(Module):
             self._convert_to_cmake(target_properties, name, keys))
 
         if srcs := Utils.get_property(self._blueprint, properties, "srcs"):
-            lines.append(f'file(GLOB_RECURSE {Utils.to_internal_name(name, "SRCS")} {Utils.to_cmake_expression(srcs)})')
+            lines.append(f'set({Utils.to_internal_name(name, "SRCS")} {Utils.to_cmake_expression(srcs)})')
             lines.append(f'target_sources({name} INTERFACE ${{{Utils.to_internal_name(name, "SRCS")}}})')
         if defaults := Utils.get_property(self._blueprint, properties, "defaults"):
             lines.append(f'inherit_defaults({name} {Utils.to_cmake_expression(defaults)})')
@@ -45,8 +45,20 @@ class CCDefaults(Module):
         lines.append(f'add_library({name} INTERFACE)')
         keys = set()
         lines += self._convert_to_cmake(self._module.properties, name, keys)
+        lines.append(f'apply_sources_transform({name})')
         # Add keys to the target
         if keys:
             lines.append(f'set_property(TARGET {name} PROPERTY _ALL_KEYS_ {Utils.to_cmake_expression(list(keys))})')
 
         return lines
+
+    # defaults use get_property which rely on the order of the target defined
+    def dependencies(self) -> list[str]:
+        depends = []
+        def add_dependencies(properties: dict, depends: list[str]):
+            if defaults := Utils.get_property(self._blueprint, properties, "defaults"):
+                depends += defaults
+            for key, target_properties in Utils.get_property(self._blueprint, properties, "target", {}).items():
+                add_dependencies(target_properties, depends)
+        add_dependencies(self._module.properties, depends)
+        return depends

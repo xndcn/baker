@@ -14,28 +14,23 @@ option(SKIP_BAKER "Skip execution of baker command" OFF)
 
 include(CTest)
 include(cmake/defaults.cmake)
-
-include(FetchContent)
-FetchContent_Declare(
-  googletest
-  URL https://github.com/google/googletest/releases/download/v1.16.0/googletest-1.16.0.tar.gz
-  DOWNLOAD_EXTRACT_TIMESTAMP FALSE
-)
-FetchContent_MakeAvailable(googletest)
-# Add alias for gtest and gmock
-add_library(libgmock-static ALIAS gmock)
-add_library(libgtest-static ALIAS gtest)
-add_library(libgtest_main-static ALIAS gtest_main)
+include(cmake/sources.cmake)
 
 function(baker dir)
-    cmake_parse_arguments(BAKER "EXCLUDE_FROM_ALL" "" "" ${ARGN})
+    cmake_parse_arguments(BAKER "EXCLUDE_FROM_ALL;NO_RECURSE" "" "" ${ARGN})
 
     if(SKIP_BAKER)
         message(STATUS "Skipping baker execution for ${dir} (SKIP_BAKER=ON)")
     else()
         message(STATUS "Processing Android.bp in ${dir}")
+        
+        set(baker_args "${dir}")
+        if(NOT BAKER_NO_RECURSE)
+            list(APPEND baker_args "--recursive")
+        endif()
+        
         execute_process(
-            COMMAND baker "${dir}" "--recursive"
+            COMMAND baker ${baker_args}
             RESULT_VARIABLE baker_result
             OUTPUT_VARIABLE baker_output
             ERROR_VARIABLE baker_error
@@ -63,42 +58,42 @@ endfunction()
 
 # Fix for missing defaults bug_24465209_workaround (defined in bionic/libc/Android.bp)
 add_library(bug_24465209_workaround INTERFACE)
-# Fix for missing defalts apex-lowest-min-sdk-version (defined in packages/modules/common/sdk/Android.bp)
+# Fix for missing defaults apex-lowest-min-sdk-version (defined in packages/modules/common/sdk/Android.bp)
 add_library(apex-lowest-min-sdk-version INTERFACE)
+
 # Currently not used library
 add_library(libprocessgroup_headers INTERFACE)
 add_library(libprocessgroup-static INTERFACE)
 add_library(libprocessgroup-shared INTERFACE)
-add_library(libjsoncpp-static INTERFACE)
 
 # Most Android.bp add -Werror flags, but create a lot of errors
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
 
-set(TARGET "linux" ; "glibc"; "host")
+set(TARGET "linux" ; "glibc" ; "host")
 baker(external/fmtlib/)
+baker(external/googletest/)
 baker(system/core/libcutils/)
+#baker(system/tools/aidl/ NO_RECURSE)
 baker(frameworks/native/libs/math/)
+#baker(frameworks/native/libs/arect/)
+#baker(frameworks/native/libs/ui/)
 
 
 # Currently not built by default
+#baker(hardware/interfaces/graphics/ EXCLUDE_FROM_ALL)
 baker(system/libbase/ EXCLUDE_FROM_ALL)
 baker(system/logging/liblog/ EXCLUDE_FROM_ALL)
 baker(system/core/libsystem/ EXCLUDE_FROM_ALL)
 baker(system/core/libutils/ EXCLUDE_FROM_ALL)
+#baker(frameworks/native/libs/binder/ EXCLUDE_FROM_ALL)
 
 # Fix for missing linkage
 set_property(TARGET liblog.defaults APPEND PROPERTY _export_header_libs libutils_headers)
 target_link_libraries(libmath-static PUBLIC libutils_headers)
+#target_link_libraries(.libaidl-common.OBJ PUBLIC libjsoncpp-shared)
+
+# Fix for missing cmath header including
+# target_compile_options(.libui-types.OBJ PUBLIC "-includecmath")
 
 # fmtlib_test_2 will fail because the locale problem
 set_tests_properties(fmtlib_test_2 DIRECTORY external/fmtlib/ PROPERTIES WILL_FAIL TRUE)
-
-# Remove googletest includes from fmtlib-test-defaults
-get_property(old_includes TARGET fmtlib-test-defaults PROPERTY _include_dirs)
-set(new_includes)
-foreach(dir ${old_includes})
-    if(NOT dir MATCHES "external/googletest/googletest/include/gtest")
-        list(APPEND new_includes ${dir})
-    endif()
-endforeach()
-set_property(TARGET fmtlib-test-defaults PROPERTY _include_dirs ${new_includes})
