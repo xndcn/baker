@@ -14,6 +14,9 @@ class CCTestLibrary(Module):
         name = self._get_property("name")
 
         lines.append(f'add_library({name}-static STATIC)')
+        # hack for no srcs
+        lines.append(f'target_sources({name}-static PRIVATE ".")')
+        lines.append(f'set_target_properties({name}-static PROPERTIES LINKER_LANGUAGE CXX)')
         lines += self._convert_module_properties_to_cmake(f'{name}-static')
         # Always enable position independent code
         lines.append(f'set_target_properties({name}-static PROPERTIES POSITION_INDEPENDENT_CODE ON)')

@@ -7,10 +7,11 @@ from .definitions.cc_defaults import CCDefaults
 from .definitions.cc_binary import CCBinary
 from .definitions.cc_test import CCTest
 from .definitions.cc_object import CCObject
+from .definitions.filegroup import FileGroup
 
 class CMakeConverter:
     def __init__(self):
-        self._handlers = [CCLibraryHeaders, CCLibrary, CCTestLibrary, CCDefaults, CCBinary, CCTest, CCObject]
+        self._handlers = [CCLibraryHeaders, CCLibrary, CCTestLibrary, CCDefaults, CCBinary, CCTest, CCObject, FileGroup]
 
     def convert(self, project: str, root: ast.Blueprint, subdirectories=None) -> str:
         lines = []
