@@ -5,6 +5,8 @@ function(inherit_defaults target)
     foreach(default IN LISTS defaults_list)
         if(NOT TARGET ${default})
             message(WARNING "Target '${default}' does not exist. Skipping inherit_defaults.")
+            # WARN: too much missing defaults, add dummy target here
+            add_library(${default} INTERFACE)
         else()
             get_property(keys TARGET ${default} PROPERTY _ALL_KEYS_)
             foreach(key IN LISTS keys)

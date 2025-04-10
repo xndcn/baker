@@ -5,10 +5,11 @@ from .definitions.cc_library_headers import CCLibraryHeaders
 from .definitions.cc_defaults import CCDefaults
 from .definitions.cc_binary import CCBinary
 from .definitions.cc_test import CCTest
+from .definitions.filegroup import FileGroup
 
 class CMakeConverter:
     def __init__(self):
-        self._handlers = [CCLibraryHeaders, CCLibrary, CCDefaults, CCBinary, CCTest]
+        self._handlers = [CCLibraryHeaders, CCLibrary, CCDefaults, CCBinary, CCTest, FileGroup]
 
     def convert(self, project: str, root: ast.Blueprint, subdirectories=None) -> str:
         lines = []

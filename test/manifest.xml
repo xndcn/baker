@@ -7,12 +7,14 @@
            sync-j="4" />
   <superproject name="platform/superproject" remote="aosp" />
 
+  <project path="external/boringssl" name="platform/external/boringssl" groups="pdk" />
   <project path="external/fmtlib" name="platform/external/fmtlib" groups="pdk" />
   <project path="external/googletest" name="platform/external/googletest" groups="pdk" />
 
   <project path="system/core" name="platform/system/core" groups="pdk" />
   <project path="system/libbase" name="platform/system/libbase" groups="pdk" />
   <project path="system/logging" name="platform/system/logging" groups="pdk" />
+  <project path="system/tools/aidl" name="platform/system/tools/aidl" groups="pdk" />
 
   <project path="frameworks/native" name="platform/frameworks/native" groups="pdk" />
 

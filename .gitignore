@@ -26,6 +26,7 @@ wheels/
 # test
 test/*
 !test/cmake
+!test/mock_includes
 !test/CMakeLists.txt
 !test/manifest.xml
 !test/test.list.txt
