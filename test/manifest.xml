@@ -8,6 +8,7 @@
   <superproject name="platform/superproject" remote="aosp" />
 
   <project path="external/fmtlib" name="platform/external/fmtlib" groups="pdk" />
+  <project path="external/googletest" name="platform/external/googletest" groups="pdk" />
 
   <project path="system/core" name="platform/system/core" groups="pdk" />
   <project path="system/libbase" name="platform/system/libbase" groups="pdk" />
