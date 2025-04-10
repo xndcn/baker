@@ -38,6 +38,9 @@ def process_blueprint_file(blueprint_path, output_path=None, recursive=False):
 
     if not output_path:
         output_path = os.path.join(os.path.dirname(blueprint_path), 'CMakeLists.txt')
+    else:
+        # Ensure output path exists
+        os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
 
     with open(output_path, 'w') as f:
         f.write(cmake)
@@ -48,10 +51,12 @@ def main():
     parser = argparse.ArgumentParser(description='Convert Android.bp to CMakeLists.txt')
     parser.add_argument('blueprint', metavar='Android.bp', help='Path to the Android.bp file or directory')
     parser.add_argument('--recursive', '-r', action='store_true', help='Recursively convert Android.bp files in subdirectories')
+    parser.add_argument('--output', '-o', help='Specify output file path (default: CMakeLists.txt in the same directory as Android.bp)')
     args = parser.parse_args()
 
     blueprint = args.blueprint
     recursive = args.recursive
+    output_file = args.output
 
     # Determine files to process
     blueprint_files = []
@@ -70,8 +75,10 @@ def main():
     # Process all identified files
     processed_files = []
     for bp_file in blueprint_files:
-        output_file = process_blueprint_file(bp_file, recursive=recursive)
-        processed_files.append((bp_file, output_file))
+        # If output file is specified and we only have one file to process, use it
+        output_path = output_file if output_file and len(blueprint_files) == 1 else None
+        output_file_path = process_blueprint_file(bp_file, output_path=output_path, recursive=recursive)
+        processed_files.append((bp_file, output_file_path))
 
     # Print summary
     print(f"Processed {len(processed_files)} Android.bp files:")

@@ -1,10 +1,12 @@
 # Inherit properties from defaults
-function(inherit_defaults target)
+function(baker_inherit_defaults target)
     set(defaults_list ${ARGN})
     target_link_libraries(${target} INTERFACE ${defaults_list})
     foreach(default IN LISTS defaults_list)
         if(NOT TARGET ${default})
             message(WARNING "Target '${default}' does not exist. Skipping inherit_defaults.")
+            # WARN: too much missing defaults, add dummy target here
+            add_library(${default} INTERFACE)
         else()
             get_property(keys TARGET ${default} PROPERTY _ALL_KEYS_)
             foreach(key IN LISTS keys)
@@ -16,7 +18,7 @@ function(inherit_defaults target)
 endfunction()
 
 # Apply defaults to a target with proper include directories and libraries
-function(apply_defaults target)
+function(baker_apply_defaults target)
     set(defaults_list ${ARGN})
     target_link_libraries(${target} PRIVATE ${defaults_list})
     foreach(default IN LISTS defaults_list)
@@ -39,5 +41,7 @@ function(apply_defaults target)
         target_link_libraries(${target} PUBLIC $<LIST:TRANSFORM,$<TARGET_PROPERTY:${default},_export_static_libs>,APPEND,-static>)
         # Process cflags
         target_compile_options(${target} PRIVATE $<TARGET_PROPERTY:${default},_cflags>)
+        # Linker flags
+        target_link_options(${target} PRIVATE $<LIST:TRANSFORM,$<TARGET_PROPERTY:${default},_linker_script>,PREPEND,-T${CMAKE_CURRENT_SOURCE_DIR}/>)
     endforeach()
 endfunction()

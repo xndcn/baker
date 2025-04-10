@@ -36,7 +36,7 @@ class Module(ABC):
 
     def _convert_module_properties_to_cmake(self, name: str) -> list[str]:
         lines = self._convert_common_properties_to_cmake(self._module.properties, name)
-        lines.append(f'apply_sources_transform({name})')
+        lines.append(f'baker_apply_sources_transform({name})')
         # Some modules need to include themselves
         lines.append(f'target_include_directories({name} PRIVATE ".")')
         return lines
@@ -44,8 +44,7 @@ class Module(ABC):
     def _convert_common_properties_to_cmake(self, properties: dict, name: str) -> list[str]:
         lines = []
         if srcs := Utils.get_property(self._blueprint, properties, "srcs"):
-            lines.append(f'set({Utils.to_internal_name(name, "SRCS")} {Utils.to_cmake_expression(srcs)})')
-            lines.append(f'target_sources({name} PRIVATE ${{{Utils.to_internal_name(name, "SRCS")}}})')
+            lines.append(f'target_sources({name} PRIVATE {Utils.to_cmake_expression(srcs)})')
 
         includes = ["include_dirs"]
         headers = ["header_libs", "header_lib_headers"]
@@ -56,7 +55,7 @@ class Module(ABC):
             return Utils.get_property(self._blueprint, properties, name)
 
         if defaults := get_property("defaults"):
-            lines.append(f'apply_defaults({name} {Utils.to_cmake_expression(defaults)})')
+            lines.append(f'baker_apply_defaults({name} {Utils.to_cmake_expression(defaults)})')
 
         # include dirs
         for include in includes:
@@ -73,25 +72,38 @@ class Module(ABC):
                 lines.append(f'target_link_libraries({name} PUBLIC {Utils.to_cmake_expression(header_libs)})')
 
         # shared libs
+        shared_libs_lines = []
+        export_shared_libs_lines = []
         for lib in shared_libraries:
             if shared_libs := get_property(lib):
-                lines.append(f'set_property(TARGET {name} PROPERTY _shared_libs {Utils.to_cmake_expression(shared_libs)})')
-                shared_libs = f'$<LIST:TRANSFORM,$<TARGET_PROPERTY:{name},_shared_libs>,APPEND,-shared>'
-                lines.append(f'target_link_libraries({name} PRIVATE {shared_libs})')
+                shared_libs_lines.append(f'set_property(TARGET {name} APPEND PROPERTY _shared_libs {Utils.to_cmake_expression(shared_libs)})')
             if shared_libs := get_property(f"export_{lib}"):
-                lines.append(f'set_property(TARGET {name} PROPERTY _export_shared_libs {Utils.to_cmake_expression(shared_libs)})')
-                shared_libs = f'$<LIST:TRANSFORM,$<TARGET_PROPERTY:{name},_export_shared_libs>,APPEND,-shared>'
-                lines.append(f'target_link_libraries({name} PUBLIC {shared_libs})')
+                export_shared_libs_lines.append(f'set_property(TARGET {name} APPEND PROPERTY _export_shared_libs {Utils.to_cmake_expression(shared_libs)})')
+        if shared_libs_lines:
+            lines += shared_libs_lines
+            shared_libs = f'$<LIST:TRANSFORM,$<TARGET_PROPERTY:{name},_shared_libs>,APPEND,-shared>'
+            lines.append(f'target_link_libraries({name} PRIVATE {shared_libs})')
+        if export_shared_libs_lines:
+            lines += export_shared_libs_lines
+            shared_libs = f'$<LIST:TRANSFORM,$<TARGET_PROPERTY:{name},_export_shared_libs>,APPEND,-shared>'
+            lines.append(f'target_link_libraries({name} PUBLIC {shared_libs})')
 
+        static_libs_lines = []
+        export_static_libs_lines = []
         for lib in static_libraries:
             if static_libs := get_property(lib):
-                lines.append(f'set_property(TARGET {name} PROPERTY _static_libs {Utils.to_cmake_expression(static_libs)})')
-                static_libs = f'$<LIST:TRANSFORM,$<TARGET_PROPERTY:{name},_static_libs>,APPEND,-static>'
-                lines.append(f'target_link_libraries({name} PRIVATE {static_libs})')
+                static_libs_lines.append(f'set_property(TARGET {name} APPEND PROPERTY _static_libs {Utils.to_cmake_expression(static_libs)})')
             if static_libs := get_property(f"export_{lib}"):
-                lines.append(f'set_property(TARGET {name} PROPERTY _export_static_libs {Utils.to_cmake_expression(static_libs)})')
-                static_libs = f'$<LIST:TRANSFORM,$<TARGET_PROPERTY:{name},_export_static_libs>,APPEND,-static>'
-                lines.append(f'target_link_libraries({name} PUBLIC {static_libs})')
+                export_static_libs_lines.append(f'set_property(TARGET {name} APPEND PROPERTY _export_static_libs {Utils.to_cmake_expression(static_libs)})')
+
+        if static_libs_lines:
+            lines += static_libs_lines
+            static_libs = f'$<LIST:TRANSFORM,$<TARGET_PROPERTY:{name},_static_libs>,APPEND,-static>'
+            lines.append(f'target_link_libraries({name} PRIVATE {static_libs})')
+        if export_static_libs_lines:
+            lines += export_static_libs_lines
+            static_libs = f'$<LIST:TRANSFORM,$<TARGET_PROPERTY:{name},_export_static_libs>,APPEND,-static>'
+            lines.append(f'target_link_libraries({name} PUBLIC {static_libs})')
 
         # Process cflags
         if cflags := get_property("cflags"):

@@ -16,4 +16,9 @@ class Assigment:
             lines.append(f'list({name} APPEND {Utils.to_cmake_expression(value)})')
         else:
             lines.append(f'set({name} {Utils.to_cmake_expression(value)})')
+
+        # Special case for "build" assignment
+        if name == "build":
+            lines.append(f'baker_include_build(${{{name}}})')
+
         return lines

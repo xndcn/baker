@@ -12,6 +12,8 @@ Baker is a tool that converts Android.bp build files to CMakeLists.txt, enabling
 | `cc_binary` | `add_executable()` | Creates a native executable |
 | `cc_test` | `add_executable()` + `add_test()` | Creates a test executable |
 | `cc_defaults` | `set_property()` | Default properties set for other modules |
+| `cc_object` | `add_executable()` | Creates an object file through partial linking |
+| `cc_test_library` | `add_library()` | Creates a test library linked against gtest/gmock |
 
 ## Property Mapping
 
