@@ -15,18 +15,6 @@ option(SKIP_BAKER "Skip execution of baker command" OFF)
 include(CTest)
 include(cmake/defaults.cmake)
 
-include(FetchContent)
-FetchContent_Declare(
-  googletest
-  URL https://github.com/google/googletest/releases/download/v1.16.0/googletest-1.16.0.tar.gz
-  DOWNLOAD_EXTRACT_TIMESTAMP FALSE
-)
-FetchContent_MakeAvailable(googletest)
-# Add alias for gtest and gmock
-add_library(libgmock-static ALIAS gmock)
-add_library(libgtest-static ALIAS gtest)
-add_library(libgtest_main-static ALIAS gtest_main)
-
 function(baker dir)
     cmake_parse_arguments(BAKER "EXCLUDE_FROM_ALL" "" "" ${ARGN})
 
@@ -63,7 +51,7 @@ endfunction()
 
 # Fix for missing defaults bug_24465209_workaround (defined in bionic/libc/Android.bp)
 add_library(bug_24465209_workaround INTERFACE)
-# Fix for missing defalts apex-lowest-min-sdk-version (defined in packages/modules/common/sdk/Android.bp)
+# Fix for missing defaults apex-lowest-min-sdk-version (defined in packages/modules/common/sdk/Android.bp)
 add_library(apex-lowest-min-sdk-version INTERFACE)
 # Currently not used library
 add_library(libprocessgroup_headers INTERFACE)
@@ -74,31 +62,30 @@ add_library(libjsoncpp-static INTERFACE)
 # Most Android.bp add -Werror flags, but create a lot of errors
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
 
-set(TARGET "linux" ; "glibc"; "host")
+set(TARGET "linux" ; "glibc" ; "host")
 baker(external/fmtlib/)
 baker(system/core/libcutils/)
 baker(frameworks/native/libs/math/)
 
 
 # Currently not built by default
+baker(external/googletest/ EXCLUDE_FROM_ALL)
 baker(system/libbase/ EXCLUDE_FROM_ALL)
 baker(system/logging/liblog/ EXCLUDE_FROM_ALL)
 baker(system/core/libsystem/ EXCLUDE_FROM_ALL)
 baker(system/core/libutils/ EXCLUDE_FROM_ALL)
 
+# Add alias for gtest and gmock
+add_library(gmock ALIAS libgmock-static)
+add_library(gtest ALIAS libgtest-static)
+add_library(gtest_main ALIAS libgtest_main-static)
+
 # Fix for missing linkage
 set_property(TARGET liblog.defaults APPEND PROPERTY _export_header_libs libutils_headers)
 target_link_libraries(libmath-static PUBLIC libutils_headers)
+# Fix for these defaults which use directories with relative paths from the root
+target_include_directories(gtest_test_defaults INTERFACE external/googletest/googletest/)
+target_include_directories(gtest_ndk_test_defaults INTERFACE external/googletest/googletest/)
 
 # fmtlib_test_2 will fail because the locale problem
 set_tests_properties(fmtlib_test_2 DIRECTORY external/fmtlib/ PROPERTIES WILL_FAIL TRUE)
-
-# Remove googletest includes from fmtlib-test-defaults
-get_property(old_includes TARGET fmtlib-test-defaults PROPERTY _include_dirs)
-set(new_includes)
-foreach(dir ${old_includes})
-    if(NOT dir MATCHES "external/googletest/googletest/include/gtest")
-        list(APPEND new_includes ${dir})
-    endif()
-endforeach()
-set_property(TARGET fmtlib-test-defaults PROPERTY _include_dirs ${new_includes})
