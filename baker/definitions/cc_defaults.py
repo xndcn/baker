@@ -33,7 +33,7 @@ class CCDefaults(Module):
             self._convert_to_cmake(target_properties, name, keys))
 
         if srcs := Utils.get_property(self._blueprint, properties, "srcs"):
-            lines.append(f'file(GLOB_RECURSE {Utils.to_internal_name(name, "SRCS")} {Utils.to_cmake_expression(srcs)})')
+            lines.append(f'set({Utils.to_internal_name(name, "SRCS")} {Utils.to_cmake_expression(srcs)})')
             lines.append(f'target_sources({name} INTERFACE ${{{Utils.to_internal_name(name, "SRCS")}}})')
         if defaults := Utils.get_property(self._blueprint, properties, "defaults"):
             lines.append(f'inherit_defaults({name} {Utils.to_cmake_expression(defaults)})')
@@ -48,5 +48,6 @@ class CCDefaults(Module):
         # Add keys to the target
         if keys:
             lines.append(f'set_property(TARGET {name} PROPERTY _ALL_KEYS_ {Utils.to_cmake_expression(list(keys))})')
+        lines.append(f'apply_sources_transform({name})')
 
         return lines

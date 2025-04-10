@@ -13,6 +13,7 @@ set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
 option(SKIP_BAKER "Skip execution of baker command" OFF)
 
 include(CTest)
+include(cmake/sources.cmake)
 include(cmake/defaults.cmake)
 
 function(baker dir)
