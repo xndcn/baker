@@ -11,32 +11,15 @@ class CCDefaults(Module):
         return name.find("cc_defaults") >= 0
 
     def _convert_to_cmake(self, properties: dict, name: str, keys: set[str]) -> list[str]:
-        lines = []
-        def add_property(key: str, value) -> list[str]:
-            lines = []
-            if not isinstance(value, dict):
-                _key = f"_{key}"
-                lines.append(f'set_property(TARGET {name} APPEND PROPERTY {_key} {Utils.to_cmake_expression(value)})')
-                keys.add(_key)
-            else:
-                for k, v in value.items():
-                    lines += add_property(f'{key}_{k}', v)
-            return lines
-
-        # Add properties
-        for key, value in properties.items():
-            if key in ["name", "srcs", "target"]:
-                continue
-            lines += add_property(key, self._evaluate_expression(value))
+        lines = self._convert_internal_properties_to_cmake(properties, name, keys)
         # Add target properties
         lines += self._convert_target_properties_to_cmake(properties, name, lambda target_properties, name:
             self._convert_to_cmake(target_properties, name, keys))
 
         if srcs := Utils.get_property(self._blueprint, properties, "srcs"):
-            lines.append(f'set({Utils.to_internal_name(name, "SRCS")} {Utils.to_cmake_expression(srcs)})')
-            lines.append(f'target_sources({name} INTERFACE ${{{Utils.to_internal_name(name, "SRCS")}}})')
+            lines.append(f'target_sources({name} INTERFACE {Utils.to_cmake_expression(srcs)})')
         if defaults := Utils.get_property(self._blueprint, properties, "defaults"):
-            lines.append(f'inherit_defaults({name} {Utils.to_cmake_expression(defaults)})')
+            lines.append(f'baker_inherit_defaults({name} {Utils.to_cmake_expression(defaults)})')
         return lines
 
     def convert_to_cmake(self) -> list[str]:
@@ -48,6 +31,6 @@ class CCDefaults(Module):
         # Add keys to the target
         if keys:
             lines.append(f'set_property(TARGET {name} PROPERTY _ALL_KEYS_ {Utils.to_cmake_expression(list(keys))})')
-        lines.append(f'apply_sources_transform({name})')
+        lines.append(f'baker_apply_sources_transform({name})')
 
         return lines
