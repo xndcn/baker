@@ -1,7 +1,7 @@
 from ..blueprint import ast
 from .utils import Utils
 
-class Assigment:
+class Assignment:
     def __init__(self, blueprint: ast.Blueprint, assignment: ast.Assignment):
         self._blueprint = blueprint
         self._assignment = assignment
@@ -16,4 +16,9 @@ class Assigment:
             lines.append(f'list({name} APPEND {Utils.to_cmake_expression(value)})')
         else:
             lines.append(f'set({name} {Utils.to_cmake_expression(value)})')
+
+        # Special case for "build" assignment
+        if name == "build":
+            lines.append(f'baker_include_build(${{{name}}})')
+
         return lines
