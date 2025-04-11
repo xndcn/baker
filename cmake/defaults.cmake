@@ -17,31 +17,35 @@ function(baker_inherit_defaults target)
     endforeach()
 endfunction()
 
+function(baker_apply_properties target dependency)
+    # Process include directories
+    target_include_directories(${target} PRIVATE $<LIST:TRANSFORM,$<TARGET_PROPERTY:${dependency},_include_dirs>,PREPEND,${CMAKE_CURRENT_SOURCE_DIR}/>)
+    target_include_directories(${target} PRIVATE $<LIST:TRANSFORM,$<TARGET_PROPERTY:${dependency},_local_include_dirs>,PREPEND,${CMAKE_CURRENT_SOURCE_DIR}/>)
+    target_include_directories(${target} PUBLIC $<LIST:TRANSFORM,$<TARGET_PROPERTY:${dependency},_export_include_dirs>,PREPEND,${CMAKE_CURRENT_SOURCE_DIR}/>)
+    # Process header libraries
+    target_link_libraries(${target} PRIVATE $<TARGET_PROPERTY:${dependency},_header_libs>)
+    target_link_libraries(${target} PRIVATE $<TARGET_PROPERTY:${dependency},_header_lib_headers>)
+    target_link_libraries(${target} PUBLIC $<TARGET_PROPERTY:${dependency},_export_header_libs>)
+    target_link_libraries(${target} PUBLIC $<TARGET_PROPERTY:${dependency},_export_header_lib_headers>)
+    # Process shared libraries
+    target_link_libraries(${target} PRIVATE $<LIST:TRANSFORM,$<TARGET_PROPERTY:${dependency},_shared_libs>,APPEND,-shared>)
+    target_link_libraries(${target} PUBLIC $<LIST:TRANSFORM,$<TARGET_PROPERTY:${dependency},_export_shared_libs>,APPEND,-shared>)
+    # Process static libraries
+    target_link_libraries(${target} PRIVATE $<LIST:TRANSFORM,$<TARGET_PROPERTY:${dependency},_whole_static_libs>,APPEND,-static>)
+    target_link_libraries(${target} PRIVATE $<LIST:TRANSFORM,$<TARGET_PROPERTY:${dependency},_static_libs>,APPEND,-static>)
+    target_link_libraries(${target} PUBLIC $<LIST:TRANSFORM,$<TARGET_PROPERTY:${dependency},_export_whole_static_libs>,APPEND,-static>)
+    target_link_libraries(${target} PUBLIC $<LIST:TRANSFORM,$<TARGET_PROPERTY:${dependency},_export_static_libs>,APPEND,-static>)
+    # Process cflags
+    target_compile_options(${target} PRIVATE $<TARGET_PROPERTY:${dependency},_cflags>)
+    # Linker flags
+    target_link_options(${target} PRIVATE $<LIST:TRANSFORM,$<TARGET_PROPERTY:${dependency},_linker_script>,PREPEND,-T${CMAKE_CURRENT_SOURCE_DIR}/>)
+ endfunction(baker_apply_properties)
+
 # Apply defaults to a target with proper include directories and libraries
 function(baker_apply_defaults target)
     set(defaults_list ${ARGN})
     target_link_libraries(${target} PRIVATE ${defaults_list})
     foreach(default IN LISTS defaults_list)
-        # Process include directories
-        target_include_directories(${target} PRIVATE $<LIST:TRANSFORM,$<TARGET_PROPERTY:${default},_include_dirs>,PREPEND,${CMAKE_CURRENT_SOURCE_DIR}/>)
-        target_include_directories(${target} PRIVATE $<LIST:TRANSFORM,$<TARGET_PROPERTY:${default},_local_include_dirs>,PREPEND,${CMAKE_CURRENT_SOURCE_DIR}/>)
-        target_include_directories(${target} PUBLIC $<LIST:TRANSFORM,$<TARGET_PROPERTY:${default},_export_include_dirs>,PREPEND,${CMAKE_CURRENT_SOURCE_DIR}/>)
-        # Process header libraries
-        target_link_libraries(${target} PRIVATE $<TARGET_PROPERTY:${default},_header_libs>)
-        target_link_libraries(${target} PRIVATE $<TARGET_PROPERTY:${default},_header_lib_headers>)
-        target_link_libraries(${target} PUBLIC $<TARGET_PROPERTY:${default},_export_header_libs>)
-        target_link_libraries(${target} PUBLIC $<TARGET_PROPERTY:${default},_export_header_lib_headers>)
-        # Process shared libraries
-        target_link_libraries(${target} PRIVATE $<LIST:TRANSFORM,$<TARGET_PROPERTY:${default},_shared_libs>,APPEND,-shared>)
-        target_link_libraries(${target} PUBLIC $<LIST:TRANSFORM,$<TARGET_PROPERTY:${default},_export_shared_libs>,APPEND,-shared>)
-        # Process static libraries
-        target_link_libraries(${target} PRIVATE $<LIST:TRANSFORM,$<TARGET_PROPERTY:${default},_whole_static_libs>,APPEND,-static>)
-        target_link_libraries(${target} PRIVATE $<LIST:TRANSFORM,$<TARGET_PROPERTY:${default},_static_libs>,APPEND,-static>)
-        target_link_libraries(${target} PUBLIC $<LIST:TRANSFORM,$<TARGET_PROPERTY:${default},_export_whole_static_libs>,APPEND,-static>)
-        target_link_libraries(${target} PUBLIC $<LIST:TRANSFORM,$<TARGET_PROPERTY:${default},_export_static_libs>,APPEND,-static>)
-        # Process cflags
-        target_compile_options(${target} PRIVATE $<TARGET_PROPERTY:${default},_cflags>)
-        # Linker flags
-        target_link_options(${target} PRIVATE $<LIST:TRANSFORM,$<TARGET_PROPERTY:${default},_linker_script>,PREPEND,-T${CMAKE_CURRENT_SOURCE_DIR}/>)
-    endforeach()
+        baker_apply_properties(${target} ${default})
+   endforeach()
 endfunction()

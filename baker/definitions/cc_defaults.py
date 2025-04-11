@@ -11,23 +11,7 @@ class CCDefaults(Module):
         return name.find("cc_defaults") >= 0
 
     def _convert_to_cmake(self, properties: dict, name: str, keys: set[str]) -> list[str]:
-        lines = []
-        def add_property(key: str, value) -> list[str]:
-            lines = []
-            if not isinstance(value, dict):
-                _key = f"_{key}"
-                lines.append(f'set_property(TARGET {name} APPEND PROPERTY {_key} {Utils.to_cmake_expression(value)})')
-                keys.add(_key)
-            else:
-                for k, v in value.items():
-                    lines += add_property(f'{key}_{k}', v)
-            return lines
-
-        # Add properties
-        for key, value in properties.items():
-            if key in ["name", "srcs", "target"]:
-                continue
-            lines += add_property(key, self._evaluate_expression(value))
+        lines = self._convert_internal_properties_to_cmake(properties, name, keys)
         # Add target properties
         lines += self._convert_target_properties_to_cmake(properties, name, lambda target_properties, name:
             self._convert_to_cmake(target_properties, name, keys))

@@ -26,17 +26,16 @@ class CCLibrary(Module):
 
         # Handle static and shared libraries
         if not self._module.name.endswith("_static"):
-            lines.append(f'add_library({name}-shared SHARED)')
-            lines.append(f'target_link_libraries({name}-shared PRIVATE {object})')
-            #lines.append(f'target_link_libraries({name}-shared INTERFACE $<TARGET_PROPERTY:{object},INTERFACE_LINK_LIBRARIES>)')
-            #lines.append(f'target_include_directories({name}-shared INTERFACE $<TARGET_PROPERTY:{object},INTERFACE_INCLUDE_DIRECTORIES>)')
+            lines.append(f'add_library({name}-shared SHARED $<TARGET_OBJECTS:{object}>)')
+            lines.append(f'target_link_libraries({name}-shared INTERFACE $<TARGET_PROPERTY:{object},_export_libs>>)')
+            lines.append(f'target_include_directories({name}-shared INTERFACE $<TARGET_PROPERTY:{object},_export_include_dirs>>)')
             lines.append(f'set_target_properties({name}-shared PROPERTIES PREFIX "" OUTPUT_NAME {Utils.to_cmake_expression(name)})')
             lines.append(f'set_target_properties({name}-shared PROPERTIES LINKER_LANGUAGE CXX)')
         if not self._module.name.endswith("_shared"):
             lines.append(f'add_library({name}-static STATIC)')
-            lines.append(f'target_link_libraries({name}-static PRIVATE {object})')
-            #lines.append(f'target_link_libraries({name}-static INTERFACE $<TARGET_PROPERTY:{object},INTERFACE_LINK_LIBRARIES>)')
-            #lines.append(f'target_include_directories({name}-static INTERFACE $<TARGET_PROPERTY:{object},INTERFACE_INCLUDE_DIRECTORIES>)')
+            lines.append(f'target_link_libraries({name}-static INTERFACE $<TARGET_PROPERTY:{object},_export_libs>>)')
+            lines.append(f'target_include_directories({name}-static INTERFACE $<TARGET_PROPERTY:{object},_export_include_dirs>>)')
+            lines.append(f'target_include_directories({name}-static INTERFACE $<TARGET_GENEX_EVAL:{object},$<TARGET_PROPERTY:{object},INTERFACE_INCLUDE_DIRECTORIES>>)')
             lines.append(f'set_target_properties({name}-static PROPERTIES PREFIX "" OUTPUT_NAME {Utils.to_cmake_expression(name)})')
             lines.append(f'set_target_properties({name}-static PROPERTIES LINKER_LANGUAGE CXX)')
         # Add alias for static only library
