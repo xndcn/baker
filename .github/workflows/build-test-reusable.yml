@@ -63,7 +63,7 @@ jobs:
       run: |
         GENERATOR_ARG=""
         if [ -n "${{ inputs.cmake_generator }}" ]; then
-          GENERATOR_ARG="-G '${{ inputs.cmake_generator }}'"
+          GENERATOR_ARG='-G "${{ inputs.cmake_generator }}"'
         fi
 
         cmake -B build $GENERATOR_ARG \
