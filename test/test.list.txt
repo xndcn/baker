@@ -13,3 +13,5 @@ quat_test
 hashcombine_test
 
 boringssl_crypto_test
+
+aidl_unittests
