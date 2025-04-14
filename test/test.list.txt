@@ -11,3 +11,5 @@ mat_test
 half_test
 quat_test
 hashcombine_test
+
+boringssl_crypto_test

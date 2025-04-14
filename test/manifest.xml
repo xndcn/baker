@@ -7,6 +7,7 @@
            sync-j="4" />
   <superproject name="platform/superproject" remote="aosp" />
 
+  <project path="external/boringssl" name="platform/external/boringssl" groups="pdk" />
   <project path="external/fmtlib" name="platform/external/fmtlib" groups="pdk" />
   <project path="external/googletest" name="platform/external/googletest" groups="pdk" />
 

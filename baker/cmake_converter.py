@@ -1,14 +1,16 @@
 from .blueprint import ast
-from .definitions.assignment import Assigment
+from .definitions.assignment import Assignment
 from .definitions.cc_library import CCLibrary
+from .definitions.cc_test_library import CCTestLibrary
 from .definitions.cc_library_headers import CCLibraryHeaders
 from .definitions.cc_defaults import CCDefaults
 from .definitions.cc_binary import CCBinary
 from .definitions.cc_test import CCTest
+from .definitions.cc_object import CCObject
 
 class CMakeConverter:
     def __init__(self):
-        self._handlers = [CCLibraryHeaders, CCLibrary, CCDefaults, CCBinary, CCTest]
+        self._handlers = [CCLibraryHeaders, CCLibrary, CCTestLibrary, CCDefaults, CCBinary, CCTest, CCObject]
 
     def convert(self, project: str, root: ast.Blueprint, subdirectories=None) -> str:
         lines = []
@@ -20,7 +22,7 @@ class CMakeConverter:
 
         for definition in root.definitions:
             if isinstance(definition, ast.Assignment):
-                lines += Assigment(root, definition).convert_to_cmake()
+                lines += Assignment(root, definition).convert_to_cmake()
             else:
                 module = definition.name
                 for handler in self._handlers:

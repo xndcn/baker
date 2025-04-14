@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.28)
 # set_tests_properties with DIRECTORY requires CMake 3.28
-project(BakerTest)
+project(BakerTest CXX ASM)
 
 # Set C++20 as the standard
 set(CMAKE_CXX_STANDARD 20)
@@ -36,6 +36,9 @@ baker(system/libbase/ EXCLUDE_FROM_ALL)
 baker(system/logging/liblog/ EXCLUDE_FROM_ALL)
 baker(system/core/libsystem/ EXCLUDE_FROM_ALL)
 baker(system/core/libutils/ EXCLUDE_FROM_ALL)
+# boringssl requires some Android specific flags
+set(TARGET "android" "linux" ; "glibc" ; "host")
+baker(external/boringssl/ EXCLUDE_FROM_ALL)
 
 # Add alias for gtest and gmock
 add_library(gmock ALIAS libgmock-static)
@@ -51,3 +54,13 @@ target_include_directories(gtest_ndk_test_defaults INTERFACE external/googletest
 
 # fmtlib_test_2 will fail because the locale problem
 set_tests_properties(fmtlib_test_2 DIRECTORY external/fmtlib/ PROPERTIES WILL_FAIL TRUE)
+
+# Only build boringssl_crypto_test by default to speed up
+set_property(TARGET boringssl_crypto_test PROPERTY EXCLUDE_FROM_ALL FALSE)
+set_tests_properties(boringssl_crypto_test DIRECTORY external/boringssl/ PROPERTIES WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/external/boringssl/src/)
+# FIXME: boringssl_crypto_test fails with libcrypto-shared
+get_property(boringssl_test_support_libs TARGET boringssl_test_support-static PROPERTY LINK_LIBRARIES)
+set_property(TARGET boringssl_test_support-static PROPERTY LINK_LIBRARIES "$<LIST:FILTER,${boringssl_test_support_libs},EXCLUDE,libcrypto-shared>")
+get_property(boringssl_test_support_libs TARGET boringssl_test_support-static PROPERTY INTERFACE_LINK_LIBRARIES)
+set_property(TARGET boringssl_test_support-static PROPERTY INTERFACE_LINK_LIBRARIES "$<LIST:FILTER,${boringssl_test_support_libs},EXCLUDE,libcrypto-shared>")
+target_link_libraries(boringssl_test_support-static PRIVATE libcrypto_static)
