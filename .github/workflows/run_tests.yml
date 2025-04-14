@@ -7,64 +7,14 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
+  makefile-build:
+    uses: ./.github/workflows/build-test-reusable.yml
+    with:
+      build_name: "Makefile"
+      cmake_generator: "Unix Makefiles"
 
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y cmake build-essential python3 git curl
-        # Install libtinfo5
-        wget http://security.ubuntu.com/ubuntu/pool/universe/n/ncurses/libtinfo5_6.3-2ubuntu0.1_amd64.deb
-        sudo dpkg -i ./libtinfo5_6.3-2ubuntu0.1_amd64.deb
-        # Install repo tool
-        curl https://storage.googleapis.com/git-repo-downloads/repo > ~/repo
-        chmod a+x ~/repo
-
-    - name: Cache LLVM and Clang
-      id: cache-llvm
-      uses: actions/cache@v3
-      with:
-        path: clang+llvm-18.1.8-x86_64-linux-gnu-ubuntu-18.04
-        key: llvm-clang-18.1.8
-
-    - name: Install LLVM and Clang
-      if: steps.cache-llvm.outputs.cache-hit != 'true'
-      run: |
-        wget https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.8/clang+llvm-18.1.8-x86_64-linux-gnu-ubuntu-18.04.tar.xz
-        tar xf clang+llvm-18.1.8-x86_64-linux-gnu-ubuntu-18.04.tar.xz
-
-    - name: Install Baker package
-      run: |
-        pip install -e .
-
-    - name: Initialize repository with manifest
-      working-directory: test
-      run: |
-        # Use local manifest directory
-        ~/repo init -u "$GITHUB_WORKSPACE" -m test/manifest.xml -b $GITHUB_SHA --manifest-depth=1
-        ~/repo sync -c
-
-    - name: Configure with CMake
-      working-directory: test
-      run: |
-        ls -l $GITHUB_WORKSPACE/clang+llvm-18.1.8-x86_64-linux-gnu-ubuntu-18.04/bin/clang
-        $GITHUB_WORKSPACE/clang+llvm-18.1.8-x86_64-linux-gnu-ubuntu-18.04/bin/clang -v
-        cmake -B build \
-          -DCMAKE_C_COMPILER=$GITHUB_WORKSPACE/clang+llvm-18.1.8-x86_64-linux-gnu-ubuntu-18.04/bin/clang \
-          -DCMAKE_CXX_COMPILER=$GITHUB_WORKSPACE/clang+llvm-18.1.8-x86_64-linux-gnu-ubuntu-18.04/bin/clang++ \
-          -DCMAKE_BUILD_TYPE=Release .
-
-    - name: Build project
-      working-directory: test
-      run: |
-        cmake --build build -j$(nproc)
-
-    - name: Run tests
-      working-directory: test/build
-      run: |
-        ctest --output-on-failure --tests-from-file $GITHUB_WORKSPACE/test/test.list.txt
+  ninja-build:
+    uses: ./.github/workflows/build-test-reusable.yml
+    with:
+      build_name: "Ninja"
+      cmake_generator: "Ninja"
