@@ -60,6 +60,7 @@ set_tests_properties(fmtlib_test_2 DIRECTORY external/fmtlib/ PROPERTIES WILL_FA
 # Only build part of tests by default to speed up
 set_property(TARGET aidl_unittests PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET boringssl_crypto_test PROPERTY EXCLUDE_FROM_ALL FALSE)
+
 set_tests_properties(boringssl_crypto_test DIRECTORY external/boringssl/ PROPERTIES WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/external/boringssl/src/)
 # FIXME: boringssl_crypto_test fails with libcrypto-shared
 get_property(boringssl_test_support_libs TARGET boringssl_test_support-static PROPERTY LINK_LIBRARIES)
@@ -67,3 +68,6 @@ set_property(TARGET boringssl_test_support-static PROPERTY LINK_LIBRARIES "$<LIS
 get_property(boringssl_test_support_libs TARGET boringssl_test_support-static PROPERTY INTERFACE_LINK_LIBRARIES)
 set_property(TARGET boringssl_test_support-static PROPERTY INTERFACE_LINK_LIBRARIES "$<LIST:FILTER,${boringssl_test_support_libs},EXCLUDE,libcrypto-shared>")
 target_link_libraries(boringssl_test_support-static PRIVATE libcrypto_static)
+
+# Patch defaults at the end
+baker_patch_defaults()
