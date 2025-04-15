@@ -13,7 +13,7 @@ class CCDefaults(Module):
     def _convert_to_cmake(self, properties: dict, name: str, keys: set[str]) -> list[str]:
         lines = self._convert_internal_properties_to_cmake(properties, name, keys)
         # Add target properties
-        lines += self._convert_target_properties_to_cmake(properties, name, lambda target_properties, name:
+        lines += self._convert_condition_properties_to_cmake(properties, name, lambda target_properties, name:
             self._convert_to_cmake(target_properties, name, keys))
 
         if srcs := Utils.get_property(self._blueprint, properties, "srcs"):

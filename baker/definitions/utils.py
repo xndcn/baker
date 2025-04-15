@@ -58,7 +58,7 @@ class Utils:
         elif isinstance(expr, ast.VariableValue):
             return f"${{{expr.name}}}"
         elif isinstance(expr, ast.SelectValue):
-            return f'${{select_ + {"_".join(condition.name for condition in expr.conditions)}}}'
+            return f'${{_select_{"_".join(condition.name for condition in expr.conditions)}}}'
 
         # default case
         return expr

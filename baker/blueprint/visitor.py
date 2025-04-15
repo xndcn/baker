@@ -88,13 +88,10 @@ class AstBuilder(blueprintVisitor):
         return MapValue(properties)
 
     def visitConditions(self, ctx:blueprintParser.ConditionsContext):
-        if ctx.singleCondition() and not ctx.getChildCount() > 1:
-            return [self.visit(ctx.singleCondition())]
-        else:
-            conditions = []
-            for cond_ctx in ctx.singleCondition():
-                conditions.append(self.visit(cond_ctx))
-            return conditions
+        conditions = []
+        for cond_ctx in ctx.singleCondition():
+            conditions.append(self.visit(cond_ctx))
+        return conditions
 
     def visitSingleCondition(self, ctx:blueprintParser.SingleConditionContext):
         name = ctx.IDENT().getText()
@@ -116,13 +113,10 @@ class AstBuilder(blueprintVisitor):
         return SelectCase(patterns, value)
 
     def visitSelectPatterns(self, ctx:blueprintParser.SelectPatternsContext):
-        if ctx.selectOnePattern() and not ctx.getChildCount() > 1:
-            return self.visit(ctx.selectOnePattern())
-        else:
-            patterns = []
-            for pattern_ctx in ctx.selectOnePattern():
-                patterns.append(self.visit(pattern_ctx))
-            return patterns
+        patterns = []
+        for pattern_ctx in ctx.selectOnePattern():
+            patterns.append(self.visit(pattern_ctx))
+        return patterns
 
     def visitSelectOnePattern(self, ctx:blueprintParser.SelectOnePatternContext):
         if ctx.BOOLEAN():
