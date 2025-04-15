@@ -18,8 +18,6 @@ class CCDefaults(Module):
 
         if srcs := Utils.get_property(self._blueprint, properties, "srcs"):
             lines.append(f'target_sources({name} INTERFACE {Utils.to_cmake_expression(srcs)})')
-        if defaults := Utils.get_property(self._blueprint, properties, "defaults"):
-            lines.append(f'baker_inherit_defaults({name} {Utils.to_cmake_expression(defaults)})')
         return lines
 
     def convert_to_cmake(self) -> list[str]:

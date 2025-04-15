@@ -1,3 +1,4 @@
+include(${CMAKE_CURRENT_LIST_DIR}/utils.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/sources.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/defaults.cmake)
 
