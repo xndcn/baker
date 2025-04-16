@@ -26,6 +26,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
 
 set(TARGET "linux" ; "glibc" ; "host")
 baker(external/fmtlib/)
+baker(external/libcap/)
 baker(system/core/libcutils/)
 baker(frameworks/native/libs/math/)
 

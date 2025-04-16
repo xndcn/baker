@@ -8,10 +8,11 @@ from .definitions.cc_binary import CCBinary
 from .definitions.cc_test import CCTest
 from .definitions.cc_object import CCObject
 from .definitions.filegroup import FileGroup
+from .definitions.genrule import GenRule
 
 class CMakeConverter:
     def __init__(self):
-        self._handlers = [CCLibraryHeaders, CCLibrary, CCTestLibrary, CCDefaults, CCBinary, CCTest, CCObject, FileGroup]
+        self._handlers = [CCLibraryHeaders, CCLibrary, CCTestLibrary, CCDefaults, CCBinary, CCTest, CCObject, FileGroup, GenRule]
 
     def convert(self, project: str, root: ast.Blueprint, subdirectories=None) -> str:
         lines = []

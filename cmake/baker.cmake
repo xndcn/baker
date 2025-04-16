@@ -1,5 +1,6 @@
 include(${CMAKE_CURRENT_LIST_DIR}/utils.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/sources.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/genrule.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/defaults.cmake)
 
 function(baker dir)
@@ -79,6 +80,8 @@ function(baker_apply_properties target dependency)
         list(APPEND link_libs $<TARGET_PROPERTY:${dependency},_${lib}>)
         list(APPEND export_link_libs $<TARGET_PROPERTY:${dependency},_export_${lib}>)
     endforeach()
+    # Process generated headers
+    list(APPEND link_libs $<LIST:TRANSFORM,$<TARGET_PROPERTY:${dependency},_generated_headers>,APPEND,-gen>)
     # Process shared libraries
     foreach(lib "shared_libs")
         list(APPEND link_libs $<LIST:TRANSFORM,$<TARGET_PROPERTY:${dependency},_${lib}>,APPEND,-shared>)
