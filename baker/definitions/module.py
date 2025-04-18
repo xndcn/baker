@@ -36,7 +36,7 @@ class Module(ABC):
 
     def _convert_condition_properties_to_cmake(self, properties: dict, name: str, converter: Callable[[dict, str], list[str]]) -> list[str]:
         lines = self._convert_target_properties_to_cmake(properties, name, converter)
-        conditions = {"arch": "ARCH"}
+        conditions = {"arch": "ARCH", "codegen": "CODEGEN"}
         for condition, var in conditions.items():
             for key, target_properties in Utils.get_property(self._blueprint, properties, condition, {}).items():
                 lines.append(f'if("{key}" IN_LIST {var})')
@@ -50,7 +50,7 @@ class Module(ABC):
             lines = []
             if not isinstance(value, dict):
                 _key = f"_{key}"
-                lines.append(f'set_property(TARGET {name} APPEND PROPERTY {_key} {Utils.to_cmake_expression(value)})')
+                lines.append(f'set_property(TARGET {name} APPEND PROPERTY {_key} {Utils.to_cmake_expression(value, lines)})')
                 keys.add(_key)
             else:
                 for k, v in value.items():
@@ -59,7 +59,7 @@ class Module(ABC):
 
         # Add properties
         for key, value in properties.items():
-            if key in ["name", "srcs", "target", "arch"]:
+            if key in ["name", "srcs", "target", "arch", "codegen"]:
                 continue
             lines += add_property(key, self._evaluate_expression(value))
         return lines
@@ -75,16 +75,16 @@ class Module(ABC):
     def _convert_common_properties_to_cmake(self, properties: dict, name: str) -> list[str]:
         lines = []
         if srcs := Utils.get_property(self._blueprint, properties, "srcs"):
-            lines.append(f'target_sources({name} PRIVATE {Utils.to_cmake_expression(srcs)})')
+            lines.append(f'target_sources({name} PRIVATE {Utils.to_cmake_expression(srcs, lines)})')
 
         def get_property(name: str):
             return Utils.get_property(self._blueprint, properties, name)
 
         if defaults := get_property("defaults"):
-            lines.append(f'baker_apply_defaults({name} {Utils.to_cmake_expression(defaults)})')
+            lines.append(f'baker_apply_defaults({name} {Utils.to_cmake_expression(defaults, lines)})')
 
         lines += self._convert_internal_properties_to_cmake(properties, name, keys=set()) # keys is ignored here
-        # Process all condtion properties dynamically like target, arch
+        # Process all condtion properties dynamically like target, arch, codegen
         lines += self._convert_condition_properties_to_cmake(properties, name, self._convert_common_properties_to_cmake)
         return lines
 

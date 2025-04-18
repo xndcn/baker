@@ -162,7 +162,7 @@ class SelectValue(Node):
         return f"Select({self.conditions}, cases[{len(self.cases)}])"
 
 
-class Condition(Node):
+class SelectCondition(Node):
     def __init__(self, name, args=None):
         super().__init__()
         self.name = name

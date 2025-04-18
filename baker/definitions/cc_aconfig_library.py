@@ -18,7 +18,7 @@ class CCAConfigLibrary(Module):
         lines += self._convert_internal_properties_to_cmake(self._module.properties, name, set())
         # add_custom_command OUTPUT can not contains generator expressions with target property
         # so use get_property here
-        lines.append(f'get_property(package TARGET {Utils.to_cmake_expression(aconfig_declarations)} PROPERTY _package)')
+        lines.append(f'get_property(package TARGET {Utils.to_cmake_expression(aconfig_declarations, lines)} PROPERTY _package)')
         lines.append(f'set(package $<LIST:TRANSFORM,${{package}},REPLACE,[.],_>)')
         lines.append(f'''add_custom_command(
                         OUTPUT "${{CMAKE_CURRENT_BINARY_DIR}}/gen/{name}/${{package}}.cc" ; "${{CMAKE_CURRENT_BINARY_DIR}}/gen/{name}/include/${{package}}.h"

@@ -1,4 +1,5 @@
 include(${CMAKE_CURRENT_LIST_DIR}/utils.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/aconfig.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/sources.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/genrule.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/defaults.cmake)
@@ -80,21 +81,25 @@ function(baker_apply_properties target dependency)
         list(APPEND link_libs $<TARGET_PROPERTY:${dependency},_${lib}>)
         list(APPEND export_link_libs $<TARGET_PROPERTY:${dependency},_export_${lib}>)
     endforeach()
+    # Process generated sources
+    list(APPEND link_libs $<TARGET_PROPERTY:${dependency},_generated_sources>)
     # Process generated headers
-    list(APPEND link_libs $<LIST:TRANSFORM,$<TARGET_PROPERTY:${dependency},_generated_headers>,APPEND,-gen>)
+    list(APPEND link_libs $<TARGET_PROPERTY:${dependency},_generated_headers>)
     # Process shared libraries
-    foreach(lib "shared_libs")
+    foreach(lib "shared_libs" "shared_shared_libs") # shared_shared_libs for {"shared": {"shared_libs": [...]}}
         list(APPEND link_libs $<LIST:TRANSFORM,$<TARGET_PROPERTY:${dependency},_${lib}>,APPEND,-shared>)
         list(APPEND export_link_libs $<LIST:TRANSFORM,$<TARGET_PROPERTY:${dependency},_export_${lib}>,APPEND,-shared>)
     endforeach()
     # Process static libraries
-    foreach(lib "static_libs")
+    foreach(lib "static_libs" ; static_lib_headers)
         list(APPEND link_libs $<LIST:TRANSFORM,$<TARGET_PROPERTY:${dependency},_${lib}>,APPEND,-static>)
         list(APPEND export_link_libs $<LIST:TRANSFORM,$<TARGET_PROPERTY:${dependency},_export_${lib}>,APPEND,-static>)
     endforeach()
     # Process whole_static_libs
     list(APPEND link_libs $<LINK_LIBRARY:WHOLE_ARCHIVE,$<LIST:TRANSFORM,$<TARGET_PROPERTY:${dependency},_whole_static_libs>,APPEND,-static>>)
     list(APPEND export_link_libs $<LINK_LIBRARY:WHOLE_ARCHIVE,$<LIST:TRANSFORM,$<TARGET_PROPERTY:${dependency},_export_whole_static_libs>,APPEND,-static>>)
+    set(link_libs "$<LIST:TRANSFORM,${link_libs},REPLACE,#impl,+impl>")
+    set(export_link_libs "$<LIST:TRANSFORM,${export_link_libs},REPLACE,#impl,+impl>")
     # Combo libraries and include directories
     target_include_directories(${target} PRIVATE ${include_dirs})
     target_include_directories(${target} PUBLIC ${export_include_dirs})

@@ -100,7 +100,7 @@ class AstBuilder(blueprintVisitor):
             # Remove the surrounding quotes and handle escaped quotes
             text = string_ctx.getText()
             args.append(text[1:-1].replace('\\"', '"'))
-        return Condition(name, args)
+        return SelectCondition(name, args)
 
     def visitSelectCase(self, ctx:blueprintParser.SelectCaseContext):
         patterns = self.visit(ctx.selectPatterns())
@@ -120,10 +120,9 @@ class AstBuilder(blueprintVisitor):
 
     def visitSelectOnePattern(self, ctx:blueprintParser.SelectOnePatternContext):
         if ctx.BOOLEAN():
-            return SelectPattern(ctx.BOOLEAN().getText() == "true")
+            return SelectPattern(self.visitValue(ctx))
         elif ctx.STRING():
-            text = ctx.STRING().getText()
-            return SelectPattern(text[1:-1].replace('\\"', '"'))
+            return SelectPattern(self.visitValue(ctx))
         elif ctx.getText() == 'default':
             return SelectPattern('default')
         else:  # 'any' with optional binding

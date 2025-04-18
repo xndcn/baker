@@ -17,7 +17,7 @@ class AConfigDeclarations(Module):
 
         gen = Utils.to_internal_name(name, "GEN")
         lines.append(f'add_library({gen} INTERFACE)')
-        lines.append(f'target_sources({gen} INTERFACE {Utils.to_cmake_expression(srcs)})')
+        lines.append(f'target_sources({gen} INTERFACE {Utils.to_cmake_expression(srcs, lines)})')
         lines.append(f'baker_apply_sources_transform({gen})')
 
         lines.append(f'add_custom_target({name})')

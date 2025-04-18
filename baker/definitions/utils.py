@@ -56,15 +56,15 @@ class Utils:
         elif isinstance(expr, ast.MapValue):
             return {key: cls.evaluate_expression(root, value) for key, value in expr.properties.items()}
         elif isinstance(expr, ast.VariableValue):
-            return f"${{{expr.name}}}"
+            return expr
         elif isinstance(expr, ast.SelectValue):
-            return f'${{_select_{"_".join(condition.name for condition in expr.conditions)}}}'
+            return expr
 
         # default case
         return expr
 
     @classmethod
-    def to_cmake_expression(cls, value):
+    def to_cmake_expression(cls, value, lines: list[str]) -> str:
         if value is None:
             return ""
         elif isinstance(value, bool):
@@ -72,14 +72,70 @@ class Utils:
         elif isinstance(value, int):
             return str(value)
         elif isinstance(value, str):
-            # Don't quote strings that contain CMake variables (${...})
-            if "${" in value and "}" in value:
-                return value
+            # Use bracket argument if contains special CMake characters
+            if any(c in value for c in ";()#$ \t\n\"'\\"):
+                return f'[=[{value}]=]'
             return f'"{value}"'
         elif isinstance(value, list):
             # For lists, join elements with semicolons which is CMake's list separator
-            elements = [cls.to_cmake_expression(elem) for elem in value]
+            elements = [cls.to_cmake_expression(elem, lines) for elem in value]
             return " ; ".join(elements)
+        elif isinstance(value, ast.VariableValue):
+            return f"${{{value.name}}}"
+        elif isinstance(value, ast.SelectValue):
+            conditions = [f'{condition.name}_{"-".join(condition.args)}' for condition in value.conditions]
+            var_name = f'_select_{"+".join(conditions)}'
+
+            def condition_to_cmake(condition: ast.SelectCondition) -> str:
+                args = [f'"{arg}"' for arg in condition.args]
+                return f'{condition.name}({",".join(args)})'
+            
+            def patterns_to_cmake(patterns: list[ast.SelectPattern]) -> tuple[str, list[str]]:
+                patterns = list(filter(lambda p: p.pattern != "default", patterns))
+                checks = []
+                bindings = []
+                for i, pattern in enumerate(patterns):
+                    if pattern.pattern == "any" and pattern.binding is not None:
+                        bindings.append((pattern.binding, value.conditions[i]))
+                        checks.append(f'TRUE')
+                    elif pattern.pattern == "default":
+                        checks.append(f'TRUE')
+                    elif isinstance(pattern.pattern, ast.BooleanValue):
+                        checks.append(condition_to_cmake(value.conditions[i]))
+                    elif isinstance(pattern.pattern, ast.StringValue):
+                        checks.append(f'{condition_to_cmake(value.conditions[i])} STREQUAL "{pattern.pattern.value}"')
+                print([str(p) for p in patterns], checks)
+                checks = f'({" AND ".join(checks)})' if len(checks) > 1 else checks[0]
+                bindings = [f'set({binding} {condition_to_cmake(condition)})' for binding, condition in bindings]
+                return checks, bindings
+
+            def case_to_cmake(var_name: str, case: ast.SelectCase) -> str:
+                if case.is_unset:
+                    return f"unset({var_name})"
+                else:
+                    # Evaluate without the root blueprint
+                    value = cls.evaluate_expression(None, case.value)
+                    return f"set({var_name} {cls.to_cmake_expression(value, [])})"
+
+            # Find the default case and filter it out from cases
+            default_case = next(filter(lambda case: all(pattern.pattern == "default" for pattern in case.patterns), value.cases), None)
+            cases = list(filter(lambda case: case != default_case, value.cases))
+
+            # Generate CMake code for checking the conditions and setting the variable
+            for i, case in enumerate(cases):
+                checks, bindings = patterns_to_cmake(case.patterns)
+                if i == 0:
+                    lines.append(f"if({checks})")
+                else:
+                    lines.append(f"elseif({checks})")
+                if bindings:
+                    lines += ["    " + line for line in bindings]
+                lines.append(f"    {case_to_cmake(var_name, case)}")
+            if default_case:
+                lines.append(f"else()")
+                lines.append(f"    {case_to_cmake(var_name, default_case)}")
+            lines.append("endif()")
+            return f"${{{var_name}}}"
         else:
             # default case, convert to string
             return str(value)

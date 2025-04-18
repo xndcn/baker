@@ -13,9 +13,9 @@ class Assignment:
 
         if self._assignment.append and Utils.type_of_expression(self._blueprint, name) is list:
             # FIXME: handle other append types
-            lines.append(f'list({name} APPEND {Utils.to_cmake_expression(value)})')
+            lines.append(f'list({name} APPEND {Utils.to_cmake_expression(value, lines)})')
         else:
-            lines.append(f'set({name} {Utils.to_cmake_expression(value)})')
+            lines.append(f'set({name} {Utils.to_cmake_expression(value, lines)})')
 
         # Special case for "build" assignment
         if name == "build":

@@ -16,8 +16,8 @@ class FileGroup(Module):
 
         lines.append(f'add_library({name} INTERFACE)')
         if srcs := self._get_property("srcs"):
-            lines.append(f'target_sources({name} INTERFACE {Utils.to_cmake_expression(srcs)})')
+            lines.append(f'target_sources({name} INTERFACE {Utils.to_cmake_expression(srcs, lines)})')
         if path := self._get_property("path"):
-            lines.append(f'set_property(TARGET {name} PROPERTY _path {Utils.to_cmake_expression(path)})')
+            lines.append(f'set_property(TARGET {name} PROPERTY _path {Utils.to_cmake_expression(path, lines)})')
         lines.append(f'baker_apply_sources_transform({name})')
         return lines

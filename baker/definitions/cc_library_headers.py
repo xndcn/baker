@@ -16,8 +16,13 @@ class CCLibraryHeaders(Module):
 
         lines.append(f'add_library({name} INTERFACE)')
         if include_dirs := self._get_property("export_include_dirs"):
-            lines.append(f'target_include_directories({name} INTERFACE {Utils.to_cmake_expression(include_dirs)})')
+            lines.append(f'target_include_directories({name} INTERFACE {Utils.to_cmake_expression(include_dirs, lines)})')
         if header_libs := self._get_property("export_header_lib_headers"):
-            lines.append(f'target_link_libraries({name} INTERFACE {Utils.to_cmake_expression(header_libs)})')
+            lines.append(f'target_link_libraries({name} INTERFACE {Utils.to_cmake_expression(header_libs, lines)})')
+        if header_libs := self._get_property("export_generated_headers"):
+            lines.append(f'set_property(TARGET {name} PROPERTY _export_generated_headers {Utils.to_cmake_expression(header_libs, lines)})')
+            lines.append(f'target_link_libraries({name} INTERFACE $<TARGET_PROPERTY:{name},_export_generated_headers>)')
+        if shared_libs := self._get_property("export_shared_lib_headers"):
+            lines.append(f'target_link_libraries({name} INTERFACE {Utils.to_cmake_expression(shared_libs, lines)})')
 
         return lines
