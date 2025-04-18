@@ -24,6 +24,7 @@ add_library(libjsoncpp-static INTERFACE)
 # Most Android.bp add -Werror flags, but create a lot of errors
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
 
+set(ARCH "x86_64")
 set(TARGET "linux" ; "glibc" ; "host")
 baker(external/fmtlib/)
 baker(external/libcap/)
@@ -40,7 +41,7 @@ baker(system/core/libutils/ EXCLUDE_FROM_ALL)
 baker(system/tools/aidl/ EXCLUDE_FROM_ALL)
 baker(frameworks/native/libs/binder/ EXCLUDE_FROM_ALL)
 # boringssl requires some Android specific flags
-set(TARGET "android" "linux" ; "glibc" ; "host")
+set(TARGET "android" ; "linux" ; "glibc" ; "host")
 baker(external/boringssl/ EXCLUDE_FROM_ALL)
 
 # Add alias for gtest and gmock

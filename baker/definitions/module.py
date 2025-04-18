@@ -34,6 +34,16 @@ class Module(ABC):
             lines.append('endif()')
         return lines
 
+    def _convert_condition_properties_to_cmake(self, properties: dict, name: str, converter: Callable[[dict, str], list[str]]) -> list[str]:
+        lines = self._convert_target_properties_to_cmake(properties, name, converter)
+        conditions = {"arch": "ARCH"}
+        for condition, var in conditions.items():
+            for key, target_properties in Utils.get_property(self._blueprint, properties, condition, {}).items():
+                lines.append(f'if("{key}" IN_LIST {var})')
+                lines += ["  " + line for line in converter(target_properties, name)]
+                lines.append('endif()')
+        return lines
+
     def _convert_internal_properties_to_cmake(self, properties: dict, name: str, keys: set[str]) -> list[str]:
         lines = []
         def add_property(key: str, value) -> list[str]:
@@ -49,7 +59,7 @@ class Module(ABC):
 
         # Add properties
         for key, value in properties.items():
-            if key in ["name", "srcs", "target"]:
+            if key in ["name", "srcs", "target", "arch"]:
                 continue
             lines += add_property(key, self._evaluate_expression(value))
         return lines
@@ -74,8 +84,8 @@ class Module(ABC):
             lines.append(f'baker_apply_defaults({name} {Utils.to_cmake_expression(defaults)})')
 
         lines += self._convert_internal_properties_to_cmake(properties, name, keys=set()) # keys is ignored here
-        # Process all target properties dynamically like linux_glibc
-        lines += self._convert_target_properties_to_cmake(properties, name, self._convert_common_properties_to_cmake)
+        # Process all condtion properties dynamically like target, arch
+        lines += self._convert_condition_properties_to_cmake(properties, name, self._convert_common_properties_to_cmake)
         return lines
 
     @abstractmethod
