@@ -26,5 +26,6 @@
   <project path="packages/modules/ConfigInfrastructure" name="platform/packages/modules/ConfigInfrastructure" groups="pdk-cw-fs,pdk-fs" />
 
   <project path="art" name="platform/art" groups="pdk" />
+  <project path="libnativehelper" name="platform/libnativehelper" groups="pdk" />
 
 </manifest>

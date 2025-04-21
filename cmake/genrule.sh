@@ -90,23 +90,36 @@ location() {
         echo "Error: Tool '$tool_name' not found in tools" >&2
         return 1
     else
-        # File doesn't start with ":", look for it in tool_files
+        # File doesn't start with ":", look for it in tool_files firstly
         for tool_file in "${tool_files[@]}"; do
-        if [[ "$(basename "$tool_file")" == "$file" ]]; then
+        if [[ "${tool_file#./}" == "${file}" ]]; then
             echo "$tool_file"
             return 0
         fi
         done
-        echo "Error: File '$file' not found in tool_files" >&2
+        # Then find the tool in the tools array
+        for tool in "${tools[@]}"; do
+        if [[ "$(basename "$tool")" == "$file" ]]; then
+            echo "$tool"
+            return 0
+        fi
+        done
+        echo "Error: File '$file' not found in tool_files or tools" >&2
         return 1
     fi
 }
 
-# Process each source file
+# Process each source file individually
 for i in "${!outs[@]}"; do
     in="${srcs[$i]}"
+    if [ ${#outs[@]} -eq 1 ]; then
+        # When there's only one output, join all sources with spaces
+        in=$(printf "%s " "${srcs[@]}")
+        in=${in% } # Remove trailing space
+    fi
     out=${genDir}/"${outs[$i]}"
-
+    # Create the output directory if it doesn't exist
+    mkdir -p "$(dirname "$out")"
     # Evaluate the command, like $(location foo) ${in} > ${out}
     eval "$cmd"
 done

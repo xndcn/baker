@@ -32,7 +32,8 @@ baker(frameworks/native/libs/math/)
 
 
 # Currently not built by default
-baker(art/build/ EXCLUDE_FROM_ALL)
+baker(art/ EXCLUDE_FROM_ALL)
+baker(libnativehelper/ EXCLUDE_FROM_ALL)
 baker(external/googletest/ EXCLUDE_FROM_ALL)
 baker(system/libbase/ EXCLUDE_FROM_ALL)
 baker(system/logging/liblog/ EXCLUDE_FROM_ALL)
@@ -63,6 +64,7 @@ set_tests_properties(fmtlib_test_2 DIRECTORY external/fmtlib/ PROPERTIES WILL_FA
 set_property(TARGET aidl_unittests PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET boringssl_crypto_test PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET art-aconfig-flags-lib-static PROPERTY EXCLUDE_FROM_ALL FALSE)
+set_property(TARGET libartbase-shared PROPERTY EXCLUDE_FROM_ALL FALSE)
 
 set_tests_properties(boringssl_crypto_test DIRECTORY external/boringssl/ PROPERTIES WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/external/boringssl/src/)
 # FIXME: boringssl_crypto_test fails with libcrypto-shared
