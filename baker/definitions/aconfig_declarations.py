@@ -21,7 +21,7 @@ class AConfigDeclarations(Module):
         lines.append(f'baker_apply_sources_transform({gen})')
 
         lines.append(f'add_custom_target({name})')
-        lines += self._convert_internal_properties_to_cmake(self._module.properties, name, set())
+        lines += self._convert_internal_properties_to_cmake(self._module.properties, name, set(), set())
         lines.append(f'''add_custom_command(
                         OUTPUT "${{CMAKE_CURRENT_BINARY_DIR}}/gen/{name}.pb"
                         COMMAND aconfig ARGS create-cache

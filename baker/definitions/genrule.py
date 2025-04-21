@@ -19,7 +19,7 @@ class GenRule(Module):
         lines.append(f'add_library({gen} INTERFACE)')
         lines.append(f'target_sources({gen} INTERFACE {Utils.to_cmake_expression(srcs, lines)})')
         lines.append(f'baker_apply_sources_transform({gen})')
-        lines += self._convert_internal_properties_to_cmake(self._module.properties, gen, set())
+        lines += self._convert_internal_properties_to_cmake(self._module.properties, gen, set(), set())
         lines.append(f'baker_apply_genrule_transform({gen})')
 
         out = self._get_property("out")
