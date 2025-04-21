@@ -34,14 +34,18 @@ class Module(ABC):
             lines.append('endif()')
         return lines
 
-    def _convert_internal_properties_to_cmake(self, properties: dict, name: str, keys: set[str]) -> list[str]:
+    def _convert_internal_properties_to_cmake(self, properties: dict, name: str, single_keys: set[str], list_keys: set[str]) -> list[str]:
         lines = []
         def add_property(key: str, value) -> list[str]:
             lines = []
             if not isinstance(value, dict):
                 _key = f"_{key}"
-                lines.append(f'set_property(TARGET {name} APPEND PROPERTY {_key} {Utils.to_cmake_expression(value, lines)})')
-                keys.add(_key)
+                if isinstance(value, list):
+                    list_keys.add(_key)
+                    lines.append(f'set_property(TARGET {name} APPEND PROPERTY {_key} {Utils.to_cmake_expression(value, lines)})')
+                else:
+                    single_keys.add(_key)
+                    lines.append(f'set_property(TARGET {name} PROPERTY {_key} {Utils.to_cmake_expression(value, lines)})')
             else:
                 for k, v in value.items():
                     lines += add_property(f'{key}_{k}', v)
@@ -73,7 +77,8 @@ class Module(ABC):
         if defaults := get_property("defaults"):
             lines.append(f'baker_apply_defaults({name} {Utils.to_cmake_expression(defaults, lines)})')
 
-        lines += self._convert_internal_properties_to_cmake(properties, name, keys=set()) # keys is ignored here
+        # keys is ignored here for non-defaults modules
+        lines += self._convert_internal_properties_to_cmake(properties, name, set(), set())
         # Process all target properties dynamically like linux_glibc
         lines += self._convert_target_properties_to_cmake(properties, name, self._convert_common_properties_to_cmake)
         return lines

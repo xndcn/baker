@@ -20,7 +20,7 @@ class PythonBinaryHost(Module):
 
         lines.append(f'add_executable({name} IMPORTED GLOBAL)')
         lines.append(f'set_property(TARGET {name} PROPERTY IMPORTED_LOCATION ${{CMAKE_CURRENT_BINARY_DIR}}/{binary_name})')
-        lines += self._convert_internal_properties_to_cmake(self._module.properties, name, keys=set())
+        lines += self._convert_internal_properties_to_cmake(self._module.properties, name, set(), set())
 
         # Create a Python executable wrapper script
         lines.append(f'''file(GENERATE OUTPUT ${{CMAKE_CURRENT_BINARY_DIR}}/{binary_name}
