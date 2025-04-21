@@ -19,7 +19,7 @@ function(baker_apply_genrule_transform target)
     # Transform cmd
     get_target_property(cmd ${target} _cmd)
     if(cmd STREQUAL "cmd-NOTFOUND")
-        message(FATAL_ERROR "genrule '${target}' does not have a command.")
+        set(cmd "")
     endif()
     set(new_cmd "${cmd}")
     string(REPLACE "$(in)" "$\{in\}" new_cmd "${new_cmd}")

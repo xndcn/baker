@@ -19,4 +19,6 @@
 
   <project path="frameworks/native" name="platform/frameworks/native" groups="pdk" />
 
+  <project path="art" name="platform/art" groups="pdk" />
+
 </manifest>

@@ -17,14 +17,14 @@ class GenRule(Module):
         srcs = self._get_property("srcs")
         gen = Utils.to_internal_name(name, "GEN")
         lines.append(f'add_library({gen} INTERFACE)')
-        lines.append(f'target_sources({gen} INTERFACE {Utils.to_cmake_expression(srcs)})')
+        lines.append(f'target_sources({gen} INTERFACE {Utils.to_cmake_expression(srcs, lines)})')
         lines.append(f'baker_apply_sources_transform({gen})')
         lines += self._convert_internal_properties_to_cmake(self._module.properties, gen, set())
         lines.append(f'baker_apply_genrule_transform({gen})')
 
         out = self._get_property("out")
         # add_custom_command OUTPUT do not support generator expressions of target, so create a variable
-        lines.append(f'set(OUT {Utils.to_cmake_expression(out)})')
+        lines.append(f'set(OUT {Utils.to_cmake_expression(out, lines)})')
         lines.append(f'set({Utils.to_internal_name(name, "OUT")} $<LIST:TRANSFORM,${{OUT}},PREPEND,${{CMAKE_CURRENT_BINARY_DIR}}/gen/>)')
         lines.append(f'''add_custom_command(
                         OUTPUT ${{{Utils.to_internal_name(name, "OUT")}}}

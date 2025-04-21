@@ -16,8 +16,8 @@ class CCDefaults(Module):
         lines += self._convert_target_properties_to_cmake(properties, name, lambda target_properties, name:
             self._convert_to_cmake(target_properties, name, keys))
 
-        if srcs := Utils.get_property(self._blueprint, properties, "srcs"):
-            lines.append(f'target_sources({name} INTERFACE {Utils.to_cmake_expression(srcs)})')
+        if srcs := Utils.get_property(properties, "srcs"):
+            lines.append(f'target_sources({name} INTERFACE {Utils.to_cmake_expression(srcs, lines)})')
         return lines
 
     def convert_to_cmake(self) -> list[str]:
@@ -28,7 +28,7 @@ class CCDefaults(Module):
         lines += self._convert_to_cmake(self._module.properties, name, keys)
         # Add keys to the target
         if keys:
-            lines.append(f'set_property(TARGET {name} PROPERTY _ALL_KEYS_ {Utils.to_cmake_expression(list(keys))})')
+            lines.append(f'set_property(TARGET {name} PROPERTY _ALL_KEYS_ {Utils.to_cmake_expression(list(keys), [])})')
         lines.append(f'baker_apply_sources_transform({name})')
 
         return lines
