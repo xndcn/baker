@@ -66,7 +66,7 @@ jobs:
           GENERATOR_ARG="-G ${{ inputs.cmake_generator }}"
         fi
 
-        cmake -B build "$GENERATOR_ARG" \
+        cmake -B build-${{ inputs.build_name }} "$GENERATOR_ARG" \
           -DCMAKE_C_COMPILER=$GITHUB_WORKSPACE/clang+llvm-18.1.8-x86_64-linux-gnu-ubuntu-18.04/bin/clang \
           -DCMAKE_CXX_COMPILER=$GITHUB_WORKSPACE/clang+llvm-18.1.8-x86_64-linux-gnu-ubuntu-18.04/bin/clang++ \
           -DCMAKE_BUILD_TYPE=Release .
@@ -74,9 +74,9 @@ jobs:
     - name: Build project
       working-directory: test
       run: |
-        cmake --build build -j$(nproc)
+        cmake --build build-${{ inputs.build_name }} -j$(nproc)
 
     - name: Run tests
-      working-directory: test/build
+      working-directory: test/build-${{ inputs.build_name }}
       run: |
         ctest --output-on-failure --tests-from-file $GITHUB_WORKSPACE/test/test.list.txt
