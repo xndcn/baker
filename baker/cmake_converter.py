@@ -9,10 +9,17 @@ from .definitions.cc_test import CCTest
 from .definitions.cc_object import CCObject
 from .definitions.filegroup import FileGroup
 from .definitions.genrule import GenRule
+from .definitions.aconfig_declarations import AConfigDeclarations
+from .definitions.cc_aconfig_library import CCAConfigLibrary
 
 class CMakeConverter:
     def __init__(self):
-        self._handlers = [CCLibraryHeaders, CCLibrary, CCTestLibrary, CCDefaults, CCBinary, CCTest, CCObject, FileGroup, GenRule]
+        self._handlers = [
+            CCLibraryHeaders, CCLibrary, CCTestLibrary, CCDefaults, CCBinary, CCTest, CCObject,
+            FileGroup,
+            GenRule,
+            AConfigDeclarations, CCAConfigLibrary
+        ]
 
     def convert(self, project: str, root: ast.Blueprint, subdirectories=None) -> str:
         lines = []
