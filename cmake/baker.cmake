@@ -82,8 +82,10 @@ function(baker_apply_properties target dependency)
         list(APPEND link_libs $<TARGET_PROPERTY:${dependency},_${lib}>)
         list(APPEND export_link_libs $<TARGET_PROPERTY:${dependency},_export_${lib}>)
     endforeach()
+    # Process generated sources
+    list(APPEND link_libs $<TARGET_PROPERTY:${dependency},_generated_sources>)
     # Process generated headers
-    list(APPEND link_libs $<LIST:TRANSFORM,$<TARGET_PROPERTY:${dependency},_generated_headers>,APPEND,-gen>)
+    list(APPEND link_libs $<TARGET_PROPERTY:${dependency},_generated_headers>)
     # Process shared libraries
     foreach(lib "shared_libs")
         list(APPEND link_libs $<LIST:TRANSFORM,$<TARGET_PROPERTY:${dependency},_${lib}>,APPEND,-shared>)

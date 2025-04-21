@@ -3,21 +3,23 @@ from .definitions.assignment import Assignment
 from .definitions.cc_library import CCLibrary
 from .definitions.cc_test_library import CCTestLibrary
 from .definitions.cc_library_headers import CCLibraryHeaders
-from .definitions.cc_defaults import CCDefaults
+from .definitions.defaults import Defaults
 from .definitions.cc_binary import CCBinary
 from .definitions.cc_test import CCTest
 from .definitions.cc_object import CCObject
 from .definitions.filegroup import FileGroup
 from .definitions.genrule import GenRule
+from .definitions.gensrcs import GenSrcs
+from .definitions.python_binary_host import PythonBinaryHost
 from .definitions.aconfig_declarations import AConfigDeclarations
 from .definitions.cc_aconfig_library import CCAConfigLibrary
 
 class CMakeConverter:
     def __init__(self):
         self._handlers = [
-            CCLibraryHeaders, CCLibrary, CCTestLibrary, CCDefaults, CCBinary, CCTest, CCObject,
-            FileGroup,
-            GenRule,
+            Defaults, FileGroup,
+            CCLibraryHeaders, CCLibrary, CCTestLibrary, CCBinary, CCTest, CCObject,
+            GenRule, GenSrcs, PythonBinaryHost,
             AConfigDeclarations, CCAConfigLibrary
         ]
 
