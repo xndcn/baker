@@ -2,13 +2,13 @@ from ..blueprint import ast
 from .module import Module
 from .utils import Utils
 
-class CCDefaults(Module):
+class Defaults(Module):
     def __init__(self, blueprint: ast.Blueprint, module: ast.Module):
         super().__init__(blueprint, module)
 
     @staticmethod
     def match(name: str) -> bool:
-        return name.find("cc_defaults") >= 0
+        return name.find("defaults") >= 0
 
     def _convert_to_cmake(self, properties: dict, name: str, keys: set[str]) -> list[str]:
         lines = self._convert_internal_properties_to_cmake(properties, name, keys)
