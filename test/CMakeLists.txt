@@ -32,6 +32,7 @@ baker(frameworks/native/libs/math/)
 
 
 # Currently not built by default
+baker(art/build/ EXCLUDE_FROM_ALL)
 baker(external/googletest/ EXCLUDE_FROM_ALL)
 baker(system/libbase/ EXCLUDE_FROM_ALL)
 baker(system/logging/liblog/ EXCLUDE_FROM_ALL)
@@ -40,7 +41,7 @@ baker(system/core/libutils/ EXCLUDE_FROM_ALL)
 baker(system/tools/aidl/ EXCLUDE_FROM_ALL)
 baker(frameworks/native/libs/binder/ EXCLUDE_FROM_ALL)
 # boringssl requires some Android specific flags
-set(TARGET "android" "linux" ; "glibc" ; "host")
+set(TARGET "android" ; "linux" ; "glibc" ; "host")
 baker(external/boringssl/ EXCLUDE_FROM_ALL)
 
 # Add alias for gtest and gmock

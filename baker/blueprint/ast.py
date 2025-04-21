@@ -11,9 +11,10 @@ class Blueprint(Node):
         super().__init__()
         self.definitions = definitions or []
         self.variables = {}
-        for assignment in definitions:
-            if isinstance(assignment, Assignment) and assignment.name not in self.variables:
-                self.variables[assignment.name] = assignment
+
+    def add_variable(self, assignment):
+        if assignment.name not in self.variables:
+            self.variables[assignment.name] = assignment.value
 
     def accept(self, visitor):
         return visitor.visit_blueprint(self)
@@ -138,9 +139,10 @@ class MapValue(Node):
 
 
 class VariableValue(Node):
-    def __init__(self, name):
+    def __init__(self, blueprint: Blueprint, name):
         super().__init__()
         self.name = name
+        self.reference = blueprint.variables.get(self.name)
 
     def accept(self, visitor):
         return visitor.visit_variable_value(self)
@@ -162,7 +164,7 @@ class SelectValue(Node):
         return f"Select({self.conditions}, cases[{len(self.cases)}])"
 
 
-class Condition(Node):
+class SelectCondition(Node):
     def __init__(self, name, args=None):
         super().__init__()
         self.name = name

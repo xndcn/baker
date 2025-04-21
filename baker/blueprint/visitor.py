@@ -4,10 +4,10 @@ from .ast import *
 
 class AstBuilder(blueprintVisitor):
     def visitBlueprint(self, ctx:blueprintParser.BlueprintContext):
-        definitions = []
+        self._blueprint = Blueprint()
         for def_ctx in ctx.definition():
-            definitions.append(self.visit(def_ctx))
-        return Blueprint(definitions)
+            self._blueprint.definitions.append(self.visit(def_ctx))
+        return self._blueprint
 
     def visitDefinition(self, ctx:blueprintParser.DefinitionContext):
         if ctx.assignment():
@@ -19,7 +19,9 @@ class AstBuilder(blueprintVisitor):
         name = ctx.IDENT().getText()
         append = ctx.getChild(1).getText() == '+='
         value = self.visit(ctx.expression())
-        return Assignment(name, value, append)
+        assignment = Assignment(name, value, append)
+        self._blueprint.add_variable(assignment)
+        return assignment
 
     def visitModule(self, ctx:blueprintParser.ModuleContext):
         name = ctx.IDENT().getText()
@@ -75,7 +77,7 @@ class AstBuilder(blueprintVisitor):
         return SelectValue(conditions, cases)
 
     def visitVariable(self, ctx:blueprintParser.VariableContext):
-        return VariableValue(ctx.IDENT().getText())
+        return VariableValue(self._blueprint, ctx.IDENT().getText())
 
     def visitListValue(self, ctx:blueprintParser.ListValueContext):
         elements = []
@@ -88,13 +90,10 @@ class AstBuilder(blueprintVisitor):
         return MapValue(properties)
 
     def visitConditions(self, ctx:blueprintParser.ConditionsContext):
-        if ctx.singleCondition() and not ctx.getChildCount() > 1:
-            return [self.visit(ctx.singleCondition())]
-        else:
-            conditions = []
-            for cond_ctx in ctx.singleCondition():
-                conditions.append(self.visit(cond_ctx))
-            return conditions
+        conditions = []
+        for cond_ctx in ctx.singleCondition():
+            conditions.append(self.visit(cond_ctx))
+        return conditions
 
     def visitSingleCondition(self, ctx:blueprintParser.SingleConditionContext):
         name = ctx.IDENT().getText()
@@ -103,7 +102,7 @@ class AstBuilder(blueprintVisitor):
             # Remove the surrounding quotes and handle escaped quotes
             text = string_ctx.getText()
             args.append(text[1:-1].replace('\\"', '"'))
-        return Condition(name, args)
+        return SelectCondition(name, args)
 
     def visitSelectCase(self, ctx:blueprintParser.SelectCaseContext):
         patterns = self.visit(ctx.selectPatterns())
@@ -116,20 +115,16 @@ class AstBuilder(blueprintVisitor):
         return SelectCase(patterns, value)
 
     def visitSelectPatterns(self, ctx:blueprintParser.SelectPatternsContext):
-        if ctx.selectOnePattern() and not ctx.getChildCount() > 1:
-            return self.visit(ctx.selectOnePattern())
-        else:
-            patterns = []
-            for pattern_ctx in ctx.selectOnePattern():
-                patterns.append(self.visit(pattern_ctx))
-            return patterns
+        patterns = []
+        for pattern_ctx in ctx.selectOnePattern():
+            patterns.append(self.visit(pattern_ctx))
+        return patterns
 
     def visitSelectOnePattern(self, ctx:blueprintParser.SelectOnePatternContext):
         if ctx.BOOLEAN():
-            return SelectPattern(ctx.BOOLEAN().getText() == "true")
+            return SelectPattern(self.visitValue(ctx))
         elif ctx.STRING():
-            text = ctx.STRING().getText()
-            return SelectPattern(text[1:-1].replace('\\"', '"'))
+            return SelectPattern(self.visitValue(ctx))
         elif ctx.getText() == 'default':
             return SelectPattern('default')
         else:  # 'any' with optional binding

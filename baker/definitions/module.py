@@ -9,14 +9,14 @@ class Module(ABC):
         self._module = module
 
     def _get_property(self, key: str, *, default=None):
-        return Utils.get_property(self._blueprint, self._module.properties, key, default)
+        return Utils.get_property(self._module.properties, key, default)
 
     def _evaluate_expression(self, expr: ast.Node):
-        return Utils.evaluate_expression(self._blueprint, expr)
+        return Utils.evaluate_expression(expr)
 
     def _convert_target_properties_to_cmake(self, properties: dict, name: str, converter: Callable[[dict, str], list[str]]) -> list[str]:
         lines = []
-        for key, target_properties in Utils.get_property(self._blueprint, properties, "target", {}).items():
+        for key, target_properties in Utils.get_property(properties, "target", {}).items():
             parts = key.split("_")
             conditions = []
             i = 0
@@ -40,7 +40,7 @@ class Module(ABC):
             lines = []
             if not isinstance(value, dict):
                 _key = f"_{key}"
-                lines.append(f'set_property(TARGET {name} APPEND PROPERTY {_key} {Utils.to_cmake_expression(value)})')
+                lines.append(f'set_property(TARGET {name} APPEND PROPERTY {_key} {Utils.to_cmake_expression(value, lines)})')
                 keys.add(_key)
             else:
                 for k, v in value.items():
@@ -64,14 +64,14 @@ class Module(ABC):
 
     def _convert_common_properties_to_cmake(self, properties: dict, name: str) -> list[str]:
         lines = []
-        if srcs := Utils.get_property(self._blueprint, properties, "srcs"):
-            lines.append(f'target_sources({name} PRIVATE {Utils.to_cmake_expression(srcs)})')
+        if srcs := Utils.get_property(properties, "srcs"):
+            lines.append(f'target_sources({name} PRIVATE {Utils.to_cmake_expression(srcs, lines)})')
 
         def get_property(name: str):
-            return Utils.get_property(self._blueprint, properties, name)
+            return Utils.get_property(properties, name)
 
         if defaults := get_property("defaults"):
-            lines.append(f'baker_apply_defaults({name} {Utils.to_cmake_expression(defaults)})')
+            lines.append(f'baker_apply_defaults({name} {Utils.to_cmake_expression(defaults, lines)})')
 
         lines += self._convert_internal_properties_to_cmake(properties, name, keys=set()) # keys is ignored here
         # Process all target properties dynamically like linux_glibc

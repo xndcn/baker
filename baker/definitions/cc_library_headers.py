@@ -16,8 +16,8 @@ class CCLibraryHeaders(Module):
 
         lines.append(f'add_library({name} INTERFACE)')
         if include_dirs := self._get_property("export_include_dirs"):
-            lines.append(f'target_include_directories({name} INTERFACE {Utils.to_cmake_expression(include_dirs)})')
+            lines.append(f'target_include_directories({name} INTERFACE {Utils.to_cmake_expression(include_dirs, lines)})')
         if header_libs := self._get_property("export_header_lib_headers"):
-            lines.append(f'target_link_libraries({name} INTERFACE {Utils.to_cmake_expression(header_libs)})')
+            lines.append(f'target_link_libraries({name} INTERFACE {Utils.to_cmake_expression(header_libs, lines)})')
 
         return lines

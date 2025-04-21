@@ -1,4 +1,5 @@
 include(${CMAKE_CURRENT_LIST_DIR}/utils.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/select.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/sources.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/genrule.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/defaults.cmake)
