@@ -69,7 +69,7 @@ jobs:
         cmake -B build-${{ inputs.build_name }} "$GENERATOR_ARG" \
           -DCMAKE_C_COMPILER=$GITHUB_WORKSPACE/clang+llvm-18.1.8-x86_64-linux-gnu-ubuntu-18.04/bin/clang \
           -DCMAKE_CXX_COMPILER=$GITHUB_WORKSPACE/clang+llvm-18.1.8-x86_64-linux-gnu-ubuntu-18.04/bin/clang++ \
-          -DCMAKE_BUILD_TYPE=Release .
+          -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-stdlib=libc++" .
 
     - name: Build project
       working-directory: test
