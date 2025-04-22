@@ -90,6 +90,7 @@ class Module(ABC):
         # keys is ignored here for non-defaults modules
         lines += self._convert_internal_properties_to_cmake(properties, name, set(), set())
         # Process all condition properties dynamically like target, arch, codegen
+        lines += self._convert_condition_properties_to_cmake(properties, name, self._convert_common_properties_to_cmake)
         return lines
 
     @abstractmethod
