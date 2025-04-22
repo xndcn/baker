@@ -33,7 +33,9 @@ baker(frameworks/native/libs/math/)
 
 # Currently not built by default
 baker(art/ EXCLUDE_FROM_ALL)
+baker(libnativehelper/ EXCLUDE_FROM_ALL)
 baker(external/googletest/ EXCLUDE_FROM_ALL)
+baker(external/tinyxml2/ EXCLUDE_FROM_ALL)
 baker(system/libbase/ EXCLUDE_FROM_ALL)
 baker(system/logging/liblog/ EXCLUDE_FROM_ALL)
 baker(system/core/libsystem/ EXCLUDE_FROM_ALL)
@@ -64,6 +66,7 @@ set_property(TARGET aidl_unittests PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET boringssl_crypto_test PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET art-aconfig-flags-lib-static PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET art_libartbase_operator_srcs-gen PROPERTY EXCLUDE_FROM_ALL FALSE)
+set_property(TARGET asm_defines.s PROPERTY EXCLUDE_FROM_ALL FALSE)
 
 set_tests_properties(boringssl_crypto_test DIRECTORY external/boringssl/ PROPERTIES WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/external/boringssl/src/)
 # FIXME: boringssl_crypto_test fails with libcrypto-shared
@@ -72,6 +75,21 @@ set_property(TARGET boringssl_test_support-static PROPERTY LINK_LIBRARIES "$<LIS
 get_property(boringssl_test_support_libs TARGET boringssl_test_support-static PROPERTY INTERFACE_LINK_LIBRARIES)
 set_property(TARGET boringssl_test_support-static PROPERTY INTERFACE_LINK_LIBRARIES "$<LIST:FILTER,${boringssl_test_support_libs},EXCLUDE,libcrypto-shared>")
 target_link_libraries(boringssl_test_support-static PRIVATE libcrypto_static)
+
+# Add some extra definitions for ART, from art/build/art.go
+target_compile_definitions(art_defaults INTERFACE
+    "-DART_TARGET"
+    "-DART_TARGET_LINUX"
+    "-DART_FRAME_SIZE_LIMIT=1744"
+    "-DART_DEFAULT_GC_TYPE_IS_CMC"
+    "-DART_BASE_ADDRESS=0x70000000"
+    "-DART_BASE_ADDRESS_MIN_DELTA=(-0x1000000)"
+    "-DART_BASE_ADDRESS_MAX_DELTA=0x1000000"
+    "-DART_STACK_OVERFLOW_GAP_arm=8192"
+    "-DART_STACK_OVERFLOW_GAP_arm64=8192"
+    "-DART_STACK_OVERFLOW_GAP_riscv64=8192"
+    "-DART_STACK_OVERFLOW_GAP_x86=8192"
+    "-DART_STACK_OVERFLOW_GAP_x86_64=8192")
 
 # Patch defaults at the end
 baker_patch_defaults()
