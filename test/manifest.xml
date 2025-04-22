@@ -12,15 +12,23 @@
   </project>
 
   <project path="external/boringssl" name="platform/external/boringssl" groups="pdk" />
+  <project path="external/cpu_features" name="platform/external/cpu_features" groups="pdk" />
+  <project path="external/dlmalloc" name="platform/external/dlmalloc" groups="pdk" />
   <project path="external/fmtlib" name="platform/external/fmtlib" groups="pdk" />
   <project path="external/googletest" name="platform/external/googletest" groups="pdk" />
   <project path="external/libcap" name="platform/external/libcap" groups="pdk" />
+  <project path="external/lz4" name="platform/external/lz4" groups="pdk" />
+  <project path="external/lzma" name="platform/external/lzma" groups="pdk" />
   <project path="external/tinyxml2" name="platform/external/tinyxml2" groups="pdk" />
+  <project path="external/zstd" name="platform/external/zstd" groups="pdk" />
 
   <project path="system/core" name="platform/system/core" groups="pdk" />
   <project path="system/libbase" name="platform/system/libbase" groups="pdk" />
   <project path="system/logging" name="platform/system/logging" groups="pdk" />
   <project path="system/tools/aidl" name="platform/system/tools/aidl" groups="pdk" />
+  <project path="system/libprocinfo" name="platform/system/libprocinfo" groups="pdk" />
+  <project path="system/libziparchive" name="platform/system/libziparchive" groups="pdk" />
+  <project path="system/unwinding" name="platform/system/unwinding" groups="pdk" />
 
   <project path="frameworks/native" name="platform/frameworks/native" groups="pdk" />
 

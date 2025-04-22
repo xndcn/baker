@@ -8,7 +8,7 @@ function(baker_transform_source_file target SCOPE SOURCE_FILE)
         # Convert ":file_name" to target link "file_name"
         string(SUBSTRING ${file_name} 1 -1 dependency)
         set(SOURCE_FILE "")
-        target_link_libraries(${target} ${SCOPE} ${dependency})
+        target_link_libraries(${target} ${SCOPE} ${dependency}${file_ext})
     elseif(file_ext STREQUAL ".aidl")
         get_filename_component(dir_path ${SOURCE_FILE} DIRECTORY)
         file(RELATIVE_PATH dir_path "${CMAKE_CURRENT_SOURCE_DIR}" "${dir_path}")

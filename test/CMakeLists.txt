@@ -8,6 +8,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Add linker flag to fail if symbols are missing in shared libraries
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
+# Some hacks of include headers to avoid errors
+include_directories(mock-include)
 
 # Add option to skip baker execution
 option(SKIP_BAKER "Skip execution of baker command" OFF)
@@ -20,10 +22,14 @@ add_library(libprocessgroup_headers INTERFACE)
 add_library(libprocessgroup-static INTERFACE)
 add_library(libprocessgroup-shared INTERFACE)
 add_library(libjsoncpp-static INTERFACE)
+add_library(librustc_demangle_static-static STATIC ".")
+set_target_properties(librustc_demangle_static-static PROPERTIES LINKER_LANGUAGE CXX)
 
 # Most Android.bp add -Werror flags, but create a lot of errors
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
 
+set(ARCH "x86_64")
+set(CODEGEN "x86_64" ; "x86")
 set(TARGET "linux" ; "glibc" ; "host")
 baker(external/fmtlib/)
 baker(external/libcap/)
@@ -34,13 +40,21 @@ baker(frameworks/native/libs/math/)
 # Currently not built by default
 baker(art/ EXCLUDE_FROM_ALL)
 baker(libnativehelper/ EXCLUDE_FROM_ALL)
+baker(external/cpu_features/ EXCLUDE_FROM_ALL)
+baker(external/dlmalloc/ EXCLUDE_FROM_ALL)
 baker(external/googletest/ EXCLUDE_FROM_ALL)
+baker(external/lz4/lib/ EXCLUDE_FROM_ALL)
+baker(external/lzma/ EXCLUDE_FROM_ALL)
 baker(external/tinyxml2/ EXCLUDE_FROM_ALL)
+baker(external/zstd/ EXCLUDE_FROM_ALL)
 baker(system/libbase/ EXCLUDE_FROM_ALL)
+baker(system/libprocinfo/ EXCLUDE_FROM_ALL)
 baker(system/logging/liblog/ EXCLUDE_FROM_ALL)
 baker(system/core/libsystem/ EXCLUDE_FROM_ALL)
 baker(system/core/libutils/ EXCLUDE_FROM_ALL)
 baker(system/tools/aidl/ EXCLUDE_FROM_ALL)
+baker(system/libziparchive/ EXCLUDE_FROM_ALL)
+baker(system/unwinding/libunwindstack/ EXCLUDE_FROM_ALL)
 baker(frameworks/native/libs/binder/ EXCLUDE_FROM_ALL)
 # boringssl requires some Android specific flags
 set(TARGET "android" ; "linux" ; "glibc" ; "host")
@@ -50,6 +64,11 @@ baker(external/boringssl/ EXCLUDE_FROM_ALL)
 add_library(gmock ALIAS libgmock-static)
 add_library(gtest ALIAS libgtest-static)
 add_library(gtest_main ALIAS libgtest_main-static)
+
+# Add alias for libz-shared
+find_package(ZLIB REQUIRED)
+add_library(libz-shared INTERFACE)
+target_link_libraries(libz-shared INTERFACE ZLIB::ZLIB)
 
 # Fix for missing linkage
 set_property(TARGET liblog.defaults APPEND PROPERTY _export_header_libs libutils_headers)
@@ -67,6 +86,7 @@ set_property(TARGET boringssl_crypto_test PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET art-aconfig-flags-lib-static PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET art_libartbase_operator_srcs-gen PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET asm_defines.s PROPERTY EXCLUDE_FROM_ALL FALSE)
+set_property(TARGET libart-shared PROPERTY EXCLUDE_FROM_ALL FALSE)
 
 set_tests_properties(boringssl_crypto_test DIRECTORY external/boringssl/ PROPERTIES WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/external/boringssl/src/)
 # FIXME: boringssl_crypto_test fails with libcrypto-shared
@@ -76,6 +96,8 @@ get_property(boringssl_test_support_libs TARGET boringssl_test_support-static PR
 set_property(TARGET boringssl_test_support-static PROPERTY INTERFACE_LINK_LIBRARIES "$<LIST:FILTER,${boringssl_test_support_libs},EXCLUDE,libcrypto-shared>")
 target_link_libraries(boringssl_test_support-static PRIVATE libcrypto_static)
 
+# Default bfd linker may fail to link with protected symbols
+target_link_options(art_defaults INTERFACE "-fuse-ld=lld")
 # Add some extra definitions for ART, from art/build/art.go
 target_compile_definitions(art_defaults INTERFACE
     "-DART_TARGET"
@@ -90,6 +112,8 @@ target_compile_definitions(art_defaults INTERFACE
     "-DART_STACK_OVERFLOW_GAP_riscv64=8192"
     "-DART_STACK_OVERFLOW_GAP_x86=8192"
     "-DART_STACK_OVERFLOW_GAP_x86_64=8192")
+# Fix for using XSI-compliant strerror_r
+set_property(TARGET libnativehelper_defaults PROPERTY _cflags "-U_GNU_SOURCE" ; "-D_POSIX_C_SOURCE=200112L")
 
 # Patch defaults at the end
 baker_patch_defaults()
