@@ -15,7 +15,7 @@ class CCAConfigLibrary(Module):
         name = self._get_property("name") + '-static'
         aconfig_declarations = self._get_property("aconfig_declarations")
         lines.append(f'add_library({name} STATIC)')
-        lines += self._convert_internal_properties_to_cmake(self._module.properties, name, set())
+        lines += self._convert_internal_properties_to_cmake(self._module.properties, name, set(), set())
         # add_custom_command OUTPUT can not contains generator expressions with target property
         # so use get_property here
         lines.append(f'get_property(package TARGET {Utils.to_cmake_expression(aconfig_declarations, lines)} PROPERTY _package)')
