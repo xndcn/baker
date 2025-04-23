@@ -27,7 +27,9 @@ class CMakeConverter:
         lines = []
 
         # list transformations generator expression required for CMake 3.27
-        lines.append("cmake_minimum_required(VERSION 3.27)")
+        # WHOLE_ARCHIVE with multiple entries requires CMake 3.30, may fix by LINK_GROUP:RESCAN
+        # See https://gitlab.kitware.com/cmake/cmake/-/issues/25954
+        lines.append("cmake_minimum_required(VERSION 3.30)")
         lines.append(f"project({project})")
         lines.append("")
 
