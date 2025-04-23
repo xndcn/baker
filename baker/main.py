@@ -12,26 +12,12 @@ def find_blueprint_files(root_dir):
                 blueprint_files.append(os.path.join(dirpath, filename))
     return blueprint_files
 
-def get_subdirectories_with_blueprint(directory):
-    subdirs = []
-    for item in os.listdir(directory):
-        item_path = os.path.join(directory, item)
-        if os.path.isdir(item_path) and os.path.exists(os.path.join(item_path, 'Android.bp')):
-            subdirs.append(item)
-    return subdirs
-
-def process_blueprint_file(blueprint_path, output_path=None, recursive=False):
+def process_blueprint_file(blueprint_path, output_path=None, subdirectories=None):
     # Get project name from directory name
     project = os.path.basename(os.path.dirname(os.path.abspath(blueprint_path)))
 
     parser = Parser()
     ast = parser.parse_file(blueprint_path)
-
-    # Find subdirectories with Android.bp files if recursive mode is enabled
-    subdirectories = None
-    if recursive:
-        dir_path = os.path.dirname(blueprint_path)
-        subdirectories = get_subdirectories_with_blueprint(dir_path)
 
     converter = CMakeConverter()
     cmake = converter.convert(project, ast, subdirectories)
@@ -60,24 +46,33 @@ def main():
 
     # Determine files to process
     blueprint_files = []
+    root_dir = os.path.abspath(blueprint if os.path.isdir(blueprint) else os.path.dirname(blueprint))
 
     if not recursive:
         blueprint_files = [os.path.join(blueprint, 'Android.bp') if os.path.isdir(blueprint) else blueprint]
     else:
         # Find all Android.bp files recursively
-        search_root = blueprint if os.path.isdir(blueprint) else os.path.dirname(os.path.abspath(blueprint))
-        blueprint_files = find_blueprint_files(search_root)
+        blueprint_files = find_blueprint_files(root_dir)
 
     if not blueprint_files:
         print(f"No Android.bp files found at {blueprint}")
         return 1
+
+    subdirectories_map = {}
+    for bp_file in blueprint_files:
+        dir_path = os.path.dirname(os.path.relpath(bp_file, root_dir))
+        if dir_path != "":
+            parent = os.path.dirname(dir_path)
+            subdirectories_map.setdefault(parent, []).append(os.path.basename(dir_path))
 
     # Process all identified files
     processed_files = []
     for bp_file in blueprint_files:
         # If output file is specified and we only have one file to process, use it
         output_path = output_file if output_file and len(blueprint_files) == 1 else None
-        output_file_path = process_blueprint_file(bp_file, output_path=output_path, recursive=recursive)
+        dir_path = os.path.dirname(os.path.relpath(bp_file, root_dir))
+        subdirectories = subdirectories_map.get(dir_path, [])
+        output_file_path = process_blueprint_file(bp_file, output_path=output_path, subdirectories=subdirectories)
         processed_files.append((bp_file, output_file_path))
 
     # Print summary
