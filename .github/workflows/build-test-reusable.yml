@@ -72,7 +72,8 @@ jobs:
           -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_CXX_FLAGS="-stdlib=libc++ -nostdinc++ \
             -isystem $GITHUB_WORKSPACE/clang+llvm-18.1.8-x86_64-linux-gnu-ubuntu-18.04/include \
-            -isystem $GITHUB_WORKSPACE/clang+llvm-18.1.8-x86_64-linux-gnu-ubuntu-18.04/include/c++/v1" \
+            -isystem $GITHUB_WORKSPACE/clang+llvm-18.1.8-x86_64-linux-gnu-ubuntu-18.04/include/c++/v1 \
+            -isystem $GITHUB_WORKSPACE/clang+llvm-18.1.8-x86_64-linux-gnu-ubuntu-18.04/include/x86_64-unknown-linux-gnu/c++/v1" \
           -DCMAKE_SHARED_LINKER_FLAGS="-L $GITHUB_WORKSPACE/clang+llvm-18.1.8-x86_64-linux-gnu-ubuntu-18.04/lib -lc++ -lc++abi" \
           -DCMAKE_EXE_LINKER_FLAGS="-L $GITHUB_WORKSPACE/clang+llvm-18.1.8-x86_64-linux-gnu-ubuntu-18.04/lib -lc++ -lc++abi" \
           .
