@@ -12,9 +12,9 @@ class Defaults(Module):
 
     def _convert_to_cmake(self, properties: dict, name: str, single_keys: set[str], list_keys: set[str]) -> list[str]:
         lines = self._convert_internal_properties_to_cmake(properties, name, single_keys, list_keys)
-        # Add target properties
-        lines += self._convert_target_properties_to_cmake(properties, name, lambda target_properties, name:
-            self._convert_to_cmake(target_properties, name, single_keys, list_keys))
+        # Add condition properties
+        lines += self._convert_condition_properties_to_cmake(properties, name, lambda condition_properties, name:
+            self._convert_to_cmake(condition_properties, name, single_keys, list_keys))
 
         if srcs := Utils.get_property(properties, "srcs"):
             lines.append(f'target_sources({name} INTERFACE {Utils.to_cmake_expression(srcs, lines)})')
