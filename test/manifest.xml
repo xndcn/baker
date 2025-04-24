@@ -14,8 +14,10 @@
   <project path="external/boringssl" name="platform/external/boringssl" groups="pdk" />
   <project path="external/cpu_features" name="platform/external/cpu_features" groups="pdk" />
   <project path="external/dlmalloc" name="platform/external/dlmalloc" groups="pdk" />
+  <project path="external/fdlibm" name="platform/external/fdlibm" groups="pdk" />
   <project path="external/fmtlib" name="platform/external/fmtlib" groups="pdk" />
   <project path="external/googletest" name="platform/external/googletest" groups="pdk" />
+  <project path="external/icu" name="platform/external/icu" groups="pdk" />
   <project path="external/libcap" name="platform/external/libcap" groups="pdk" />
   <project path="external/lz4" name="platform/external/lz4" groups="pdk" />
   <project path="external/lzma" name="platform/external/lzma" groups="pdk" />
@@ -35,6 +37,7 @@
   <project path="packages/modules/ConfigInfrastructure" name="platform/packages/modules/ConfigInfrastructure" groups="pdk-cw-fs,pdk-fs" />
 
   <project path="art" name="platform/art" groups="pdk" />
+  <project path="libcore" name="platform/libcore" groups="pdk" />
   <project path="libnativehelper" name="platform/libnativehelper" groups="pdk" />
 
 </manifest>

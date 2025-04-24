@@ -63,7 +63,10 @@ def main():
         dir_path = os.path.dirname(os.path.relpath(bp_file, root_dir))
         if dir_path != "":
             parent = os.path.dirname(dir_path)
-            subdirectories_map.setdefault(parent, []).append(os.path.basename(dir_path))
+            # When the parent directory do not contain Android.bp, go up to the next directory
+            while parent != "" and not os.path.join(root_dir, os.path.join(parent, 'Android.bp')) in blueprint_files:
+                parent = os.path.dirname(parent)
+            subdirectories_map.setdefault(parent, []).append(os.path.relpath(dir_path, parent))
 
     # Process all identified files
     processed_files = []
