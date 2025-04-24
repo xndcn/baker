@@ -55,7 +55,8 @@ function(baker dir)
     endif()
 endfunction()
 
-function(baker_include_build build)
+function(baker_include_build)
+    set(BUILD ${ARGN})
     foreach(file ${build})
         # Process each file with baker function
         baker(${file} OUTPUT "${file}.cmake")
@@ -75,9 +76,9 @@ function(baker_apply_properties target dependency)
         list(APPEND include_dirs $<LIST:TRANSFORM,$<TARGET_PROPERTY:${dependency},_${dir}>,PREPEND,${CMAKE_CURRENT_SOURCE_DIR}/>)
         list(APPEND export_include_dirs $<LIST:TRANSFORM,$<TARGET_PROPERTY:${dependency},_export_${dir}>,PREPEND,${CMAKE_CURRENT_SOURCE_DIR}/>)
     endforeach()
-    # Process header libraries
     set(link_libs "")
     set(export_link_libs "")
+    # Process header libraries
     foreach(lib "header_libs" ; "header_lib_headers")
         list(APPEND link_libs $<TARGET_PROPERTY:${dependency},_${lib}>)
         list(APPEND export_link_libs $<TARGET_PROPERTY:${dependency},_export_${lib}>)
@@ -87,8 +88,10 @@ function(baker_apply_properties target dependency)
     # Process generated headers
     list(APPEND link_libs $<TARGET_PROPERTY:${dependency},_generated_headers>)
     # Process shared libraries
-    foreach(lib "shared_libs" ; "shared_shared_libs") # shared_shared_libs for {"shared": {"shared_libs": [...]}}
-        list(APPEND link_libs $<LIST:TRANSFORM,$<TARGET_PROPERTY:${dependency},_${lib}>,APPEND,-shared>)
+    foreach(lib "shared_libs" ; "shared_lib_headers" ; "shared_shared_libs") # shared_shared_libs for {"shared": {"shared_libs": [...]}}
+        # CMake will export private linked shared libraries for static, but not for shared
+        # so export all shared libraries by default
+        list(APPEND export_link_libs $<LIST:TRANSFORM,$<TARGET_PROPERTY:${dependency},_${lib}>,APPEND,-shared>)
         list(APPEND export_link_libs $<LIST:TRANSFORM,$<TARGET_PROPERTY:${dependency},_export_${lib}>,APPEND,-shared>)
     endforeach()
     # Process static libraries

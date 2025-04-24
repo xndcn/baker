@@ -15,3 +15,5 @@ hashcombine_test
 boringssl_crypto_test
 
 aidl_unittests
+
+libjavacore-unit-tests
