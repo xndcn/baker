@@ -34,6 +34,7 @@
 
   <project path="frameworks/native" name="platform/frameworks/native" groups="pdk" />
 
+  <project path="tools/metalava" name="platform/tools/metalava" groups="pdk,tools" />
   <project path="tools/platform-compat" name="tools/platform-compat" groups="pdk-cw-fs,pdk-fs,pdk,sysui-studio" />
 
   <project path="packages/modules/ConfigInfrastructure" name="platform/packages/modules/ConfigInfrastructure" groups="pdk-cw-fs,pdk-fs" />
