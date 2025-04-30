@@ -60,6 +60,7 @@ baker(system/tools/aidl/ EXCLUDE_FROM_ALL)
 baker(system/libziparchive/ EXCLUDE_FROM_ALL)
 baker(system/unwinding/libunwindstack/ EXCLUDE_FROM_ALL)
 baker(frameworks/native/libs/binder/ EXCLUDE_FROM_ALL)
+baker(tools/platform-compat/ EXCLUDE_FROM_ALL)
 # boringssl requires some Android specific flags
 set(TARGET "android" ; "linux" ; "glibc" ; "host")
 baker(external/boringssl/ EXCLUDE_FROM_ALL)
@@ -120,5 +121,5 @@ target_compile_definitions(art_defaults INTERFACE
 # Fix for using XSI-compliant strerror_r
 set_property(TARGET libnativehelper_defaults PROPERTY _cflags "-U_GNU_SOURCE" ; "-D_POSIX_C_SOURCE=200112L")
 
-# Patch defaults at the end
-baker_patch_defaults()
+# Patch at the end
+baker_patch()

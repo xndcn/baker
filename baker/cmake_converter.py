@@ -13,6 +13,9 @@ from .definitions.gensrcs import GenSrcs
 from .definitions.python_binary_host import PythonBinaryHost
 from .definitions.aconfig_declarations import AConfigDeclarations
 from .definitions.cc_aconfig_library import CCAConfigLibrary
+from .definitions.java_library import JavaLibrary
+from .definitions.java_sdk_library import JavaSDKLibrary
+from .definitions.java_system_modules import JavaSystemModules
 
 class CMakeConverter:
     def __init__(self):
@@ -20,6 +23,7 @@ class CMakeConverter:
             Defaults, FileGroup,
             CCLibraryHeaders, CCLibrary, CCTestLibrary, CCBinary, CCTest, CCObject,
             GenRule, GenSrcs, PythonBinaryHost,
+            JavaLibrary, JavaSDKLibrary, JavaSystemModules,
             AConfigDeclarations, CCAConfigLibrary
         ]
 

@@ -2,6 +2,7 @@ import sys
 import os
 import argparse
 from .blueprint.parser import Parser
+from .blueprint.ast import Blueprint
 from .cmake_converter import CMakeConverter
 
 def find_blueprint_files(root_dir):
@@ -17,7 +18,8 @@ def process_blueprint_file(blueprint_path, output_path=None, subdirectories=None
     project = os.path.basename(os.path.dirname(os.path.abspath(blueprint_path)))
 
     parser = Parser()
-    ast = parser.parse_file(blueprint_path)
+    # If the blueprint file does not exist, create an empty AST
+    ast = parser.parse_file(blueprint_path) if os.path.exists(blueprint_path) else Blueprint()
 
     converter = CMakeConverter()
     cmake = converter.convert(project, ast, subdirectories)
@@ -53,6 +55,11 @@ def main():
     else:
         # Find all Android.bp files recursively
         blueprint_files = find_blueprint_files(root_dir)
+        root_blueprint = os.path.join(root_dir, 'Android.bp')
+        # If the root directory does not contains an Android.bp file, add it to the list
+        # So we can generate a CMakeLists.txt for the root directory
+        if root_blueprint not in blueprint_files:
+            blueprint_files.append(root_blueprint)
 
     if not blueprint_files:
         print(f"No Android.bp files found at {blueprint}")
