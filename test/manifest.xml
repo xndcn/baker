@@ -7,6 +7,7 @@
            sync-j="4" />
   <superproject name="platform/superproject" remote="aosp" />
 
+  <project path="build/soong" name="platform/build/soong" groups="pdk,tradefed,sysui-studio" />
   <project path="build/make" name="platform/build" groups="pdk,sysui-studio" >
     <linkfile src="tools" dest="build/tools" />
   </project>
@@ -23,6 +24,7 @@
   <project path="external/lzma" name="platform/external/lzma" groups="pdk" />
   <project path="external/tinyxml2" name="platform/external/tinyxml2" groups="pdk" />
   <project path="external/zstd" name="platform/external/zstd" groups="pdk" />
+  <project path="external/turbine" name="platform/external/turbine" groups="pdk" />
 
   <project path="system/core" name="platform/system/core" groups="pdk" />
   <project path="system/libbase" name="platform/system/libbase" groups="pdk" />
