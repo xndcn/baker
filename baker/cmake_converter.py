@@ -14,8 +14,9 @@ from .definitions.python_binary_host import PythonBinaryHost
 from .definitions.aconfig_declarations import AConfigDeclarations
 from .definitions.cc_aconfig_library import CCAConfigLibrary
 from .definitions.java_library import JavaLibrary
-from .definitions.java_sdk_library import JavaSDKLibrary
+from .definitions.java_sdk_library import JavaSdkLibrary
 from .definitions.java_system_modules import JavaSystemModules
+from .definitions.droiddoc_exported_dir import DroiddocExportedDir
 
 class CMakeConverter:
     def __init__(self):
@@ -23,7 +24,7 @@ class CMakeConverter:
             Defaults, FileGroup,
             CCLibraryHeaders, CCLibrary, CCTestLibrary, CCBinary, CCTest, CCObject,
             GenRule, GenSrcs, PythonBinaryHost,
-            JavaLibrary, JavaSDKLibrary, JavaSystemModules,
+            JavaLibrary, JavaSdkLibrary, JavaSystemModules, DroiddocExportedDir,
             AConfigDeclarations, CCAConfigLibrary
         ]
 
@@ -33,6 +34,7 @@ class CMakeConverter:
         # list transformations generator expression required for CMake 3.27
         # WHOLE_ARCHIVE with multiple entries requires CMake 3.30, may fix by LINK_GROUP:RESCAN
         # See https://gitlab.kitware.com/cmake/cmake/-/issues/25954
+        # Custom Transitive Properties required for CMake 3.30
         lines.append("cmake_minimum_required(VERSION 3.30)")
         lines.append(f"project({project})")
         lines.append("")

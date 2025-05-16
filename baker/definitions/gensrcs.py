@@ -10,10 +10,14 @@ class GenSrcs(GenRule):
     def match(name: str) -> bool:
         return name.find("gensrcs") >= 0
 
-    def _convert_out_to_cmake(self, out_var: str) -> list[str]:
+    def _convert_out_to_cmake(self, out_var: str, gen_target: str) -> list[str]:
         lines = []
-        srcs = self._get_property("srcs")
         output_extension = self._get_property("output_extension")
-        lines.append(f'set({out_var} {Utils.to_cmake_expression(srcs, lines)})')
-        lines.append(f'set({out_var} "$<PATH:REPLACE_EXTENSION,${{{out_var}}},.{output_extension}>")')
+        lines.append(f'baker_get_sources(srcs {gen_target} SCOPE INTERFACE)')
+        lines.append(f'set({out_var} "")')
+        lines.append(f'foreach(src IN LISTS srcs)')
+        lines.append(f'    cmake_path(RELATIVE_PATH src)')
+        lines.append(f'    cmake_path(REPLACE_EXTENSION src .{output_extension})')
+        lines.append(f'    list(APPEND {out_var} ${{src}})')
+        lines.append(f'endforeach()')
         return lines

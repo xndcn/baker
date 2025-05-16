@@ -11,7 +11,13 @@ tool_files=()
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --cmd)
-            cmd="$2"
+            if [[ -f "$2" ]]; then
+                # Unescape the content of the command file
+                cmd=$(echo -e "$(cat "$2")")
+            else
+                echo "Error: Command file '$2' not found or not readable"
+                exit 1
+            fi
             shift 2
             ;;
         --genDir)
@@ -19,16 +25,22 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         --outs)
-            if [ -n "$2" ]; then
-                # Split outs into arrays
-                IFS=';' read -ra outs <<< "$2"
+            if [ -f "$2" ]; then
+                # Read content from the file and split into arrays
+                IFS=';' read -ra outs < "$2"
+            else
+                echo "Error: Out file '$2' not found or not readable"
+                exit 1
             fi
             shift 2
             ;;
         --srcs)
-            if [ -n "$2" ]; then
-                # Split srcs into arrays
-                IFS=';' read -ra srcs <<< "$2"
+            if [[ -f "$2" ]]; then
+                # Read content from the file and split into arrays
+                IFS=';' read -ra srcs < "$2"
+            else
+                echo "Error: Source file '$2' not found or not readable"
+                exit 1
             fi
             shift 2
             ;;

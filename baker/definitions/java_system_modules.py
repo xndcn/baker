@@ -13,15 +13,10 @@ class JavaSystemModules(Module):
     def convert_to_cmake(self) -> list[str]:
         lines = []
         name = self._get_property("name")
-        libs = self._get_property("libs", default=[])
-
-        # Create an interface library to represent the system modules
         lines.append(f'add_library({name} INTERFACE)')
-        
-        if libs:
-            # Link to the Java library dependencies
+        if libs := self._get_property("libs"):
             lines.append(f'target_link_libraries({name} INTERFACE {Utils.to_cmake_expression(libs, lines)})')
-        
+
         # Set up work and output directories
         lines.append(f'set(outDir "${{CMAKE_CURRENT_BINARY_DIR}}/system_modules/{name}")')
         lines.append(f'set(workDir "${{CMAKE_CURRENT_BINARY_DIR}}/modules/{name}")')

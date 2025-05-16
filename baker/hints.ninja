@@ -1,0 +1,491 @@
+rule g.java.javac
+    command = rm -rf "${outDir}" "${annoDir}" "${annoSrcJar}.tmp" "${srcJarDir}" "${out}.tmp" && mkdir -p "${outDir}" "${annoDir}" "${srcJarDir}" && ${g.android.soong.java.config.ZipSyncCmd} -d ${srcJarDir} -l ${srcJarDir}/list -f "*.java" ${srcJars} && (if [ -s ${srcJarDir}/list ] || [ -s ${out}.rsp ] ; then ${g.android.soong.java.config.SoongJavacWrapper}
+        ${g.android.soong.java.config.JavacCmd} 
+            ${g.android.soong.java.config.JavacHeapFlags} ${g.android.soong.java.config.JavacVmFlags} ${g.android.soong.java.config.CommonJdkFlags} ${processorpath} ${processor}
+            ${javacFlags} ${bootClasspath} ${classpath} 
+                -source ${javaVersion}
+                -target ${javaVersion}
+                -d ${outDir}
+                -s ${annoDir} @${out}.rsp @${srcJarDir}/list ; fi ) && ${g.android.soong.java.config.SoongZipCmd} -jar -o ${annoSrcJar}.tmp -C ${annoDir} -D ${annoDir} && ${g.android.soong.java.config.SoongZipCmd} -jar -o ${out}.tmp -C ${outDir} -D ${outDir} && if ! cmp -s "${out}.tmp" "${out}"; then mv "${out}.tmp" "${out}"; fi && if ! cmp -s "${annoSrcJar}.tmp" "${annoSrcJar}"; then mv "${annoSrcJar}.tmp" "${annoSrcJar}"; fi && rm -rf "${srcJarDir}" "${outDir}"
+    restat = true
+    rspfile = ${out}.rsp
+    rspfile_content = ${in}
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Module:  core-all
+# Variant: android_common
+# Type:    java_library
+# Factory: android/soong/android.moduleType.register.ModuleFactoryAdaptor.func1
+# Defined: libcore/JavaLibrary.bp:204:1
+build $
+        out/soong/.intermediates/libcore/core-all/android_common/javac/core-all.jar $
+        | $
+        out/soong/.intermediates/libcore/core-all/android_common/javac/anno.srcjar: $
+        g.java.javac $
+        libcore/ojluni/src/main/java/java/awt/font/NumericShaper.java $
+        libcore/ojluni/src/main/java/java/awt/font/TextAttribute.java $
+        libcore/ojluni/src/main/java/java/beans/IndexedPropertyChangeEvent.java $
+        libcore/ojluni/src/main/java/java/beans/PropertyChangeEvent.java $
+        libcore/ojluni/src/main/java/java/beans/PropertyChangeListener.java $
+...
+        external/okhttp/repackaged/okio/okio/src/main/java/com/android/okhttp/okio/Timeout.java $
+        external/okhttp/repackaged/okio/okio/src/main/java/com/android/okhttp/okio/Util.java $
+        external/okhttp/repackaged/okio/okio/src/main/java/com/android/okhttp/okio/package-info.java $
+        libcore/luni/src/module/java/module-info.java | $
+        out/soong/.intermediates/external/icu/android_icu4j/i18n.module.intra.core.api.stubs.source/android_common/everything/i18n.module.intra.core.api.stubs.source-stubs.srcjar $
+        out/soong/.intermediates/external/conscrypt/conscrypt.module.intra.core.api.stubs.from-source/android_common/turbine/conscrypt.module.intra.core.api.stubs.from-source.jar $
+        out/soong/.intermediates/libcore/art-aconfig-flags-java-lib-for-core-all-only/android_common/turbine/art-aconfig-flags-java-lib-for-core-all-only.jar $
+        out/soong/.intermediates/libcore/libcore-aconfig-flags-lib-for-core-all-only/android_common/turbine/libcore-aconfig-flags-lib-for-core-all-only.jar $
+        out/soong/.intermediates/tools/platform-compat/java/android/processor/compat/changeid/compat-changeid-annotation-processor/linux_glibc_common/withres/compat-changeid-annotation-processor.jar $
+        out/soong/.intermediates/tools/platform-compat/java/android/processor/compat/unsupportedappusage/unsupportedappusage-annotation-processor/linux_glibc_common/withres/unsupportedappusage-annotation-processor.jar $
+        ${g.android.soong.java.config.JavacCmd} $
+        ${g.android.soong.java.config.SoongZipCmd} $
+        ${g.android.soong.java.config.ZipSyncCmd} || $
+        ${g.android.soong.java.config.SoongJavacWrapper}
+    description = ${m.core-all_android_common.moduleDesc}javac${m.core-all_android_common.moduleDescSuffix}
+    tags = module_name=core-all;module_type=java_library;rule_name=javac
+    annoDir = out/soong/.intermediates/libcore/core-all/android_common/javac/anno
+    annoSrcJar = out/soong/.intermediates/libcore/core-all/android_common/javac/anno.srcjar
+    bootClasspath = --system=none
+    classpath = -classpath out/soong/.intermediates/external/conscrypt/conscrypt.module.intra.core.api.stubs.from-source/android_common/turbine/conscrypt.module.intra.core.api.stubs.from-source.jar:out/soong/.intermediates/libcore/art-aconfig-flags-java-lib-for-core-all-only/android_common/turbine/art-aconfig-flags-java-lib-for-core-all-only.jar:out/soong/.intermediates/libcore/libcore-aconfig-flags-lib-for-core-all-only/android_common/turbine/libcore-aconfig-flags-lib-for-core-all-only.jar
+    javaVersion = 21
+    javacFlags = ${m.core-all_android_common.javacFlags}
+    outDir = out/soong/.intermediates/libcore/core-all/android_common/javac/classes
+    processor = -processor android.processor.compat.changeid.ChangeIdProcessor,android.processor.compat.unsupportedappusage.UnsupportedAppUsageProcessor
+    processorpath = -processorpath out/soong/.intermediates/tools/platform-compat/java/android/processor/compat/changeid/compat-changeid-annotation-processor/linux_glibc_common/withres/compat-changeid-annotation-processor.jar:out/soong/.intermediates/tools/platform-compat/java/android/processor/compat/unsupportedappusage/unsupportedappusage-annotation-processor/linux_glibc_common/withres/unsupportedappusage-annotation-processor.jar
+    srcJarDir = out/soong/.intermediates/libcore/core-all/android_common/javac/srcjars
+    srcJars = out/soong/.intermediates/external/icu/android_icu4j/i18n.module.intra.core.api.stubs.source/android_common/everything/i18n.module.intra.core.api.stubs.source-stubs.srcjar
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Module:  i18n.module.intra.core.api.stubs.source
+# Variant: android_common
+# Type:    droidstubs__bottomUpMutatorModule
+# Factory: android/soong/android.createModule.ModuleFactoryAdaptor.func2
+# Defined: external/icu/android_icu4j/Android.bp:266:1
+rule m.i18n.module.intra.core.api.stubs.source_android_common.metalava
+    command = out/host/linux-x86/bin/sbox --sandbox-path out/soong/.temp --output-dir out/soong/.intermediates/external/icu/android_icu4j/i18n.module.intra.core.api.stubs.source/android_common/everything --manifest out/soong/.intermediates/external/icu/android_icu4j/i18n.module.intra.core.api.stubs.source/android_common/metalava.sbox.textproto --write-if-changed
+    restat = true
+    rspfile = out/soong/.intermediates/external/icu/android_icu4j/i18n.module.intra.core.api.stubs.source/android_common/everything.metalava.rsp
+    rspfile_content = ${in}
+
+build $
+        out/soong/.intermediates/external/icu/android_icu4j/i18n.module.intra.core.api.stubs.source/android_common/everything/check_last_released_api.timestamp $
+        | $
+        out/soong/.intermediates/external/icu/android_icu4j/i18n.module.intra.core.api.stubs.source/android_common/everything/i18n.module.intra.core.api.stubs.source-stubs.srcjar $
+        out/soong/.intermediates/external/icu/android_icu4j/i18n.module.intra.core.api.stubs.source/android_common/everything/i18n.module.intra.core.api.stubs.source_api.txt $
+        out/soong/.intermediates/external/icu/android_icu4j/i18n.module.intra.core.api.stubs.source/android_common/everything/i18n.module.intra.core.api.stubs.source_removed.txt $
+        out/soong/.intermediates/external/icu/android_icu4j/i18n.module.intra.core.api.stubs.source/android_common/everything/last_released_baseline.txt: $
+        m.i18n.module.intra.core.api.stubs.source_android_common.metalava $
+        external/icu/android_icu4j/libcore_bridge/src/java/com/android/i18n/system/AppSpecializationHooks.java $
+        external/icu/android_icu4j/libcore_bridge/src/java/com/android/i18n/system/ZygoteHooks.java $
+        external/icu/android_icu4j/libcore_bridge/src/java/com/android/i18n/timezone/CountryTimeZones.java $
+        external/icu/android_icu4j/libcore_bridge/src/java/com/android/i18n/timezone/CountryZonesFinder.java $
+        external/icu/android_icu4j/libcore_bridge/src/java/com/android/i18n/timezone/DebugInfo.java $
+...
+        out/host/linux-x86/bin/zipsync $
+        out/host/linux-x86/framework/metalava.jar out/host/linux-x86/bin/sbox
+    description = ${m.i18n.module.intra.core.api.stubs.source_android_common.moduleDesc}metalava merged${m.i18n.module.intra.core.api.stubs.source_android_common.moduleDescSuffix}
+    tags = module_name=i18n.module.intra.core.api.stubs.source;module_type=droidstubs__bottomUpMutatorModule;rule_name=metalava
+
+
+
+__SBOX_SANDBOX_DIR__/tools/out/bin/metalava 
+    -J-XX:OnError=\"cat hs_err_pid%p.log\"
+    -J-XX:CICompilerCount=6
+    -J-XX:+UseDynamicNumberOfGCThreads
+    -J-XX:+TieredCompilation
+    -J-XX:TieredStopAtLevel=1
+    -J--add-opens=java.base/java.util=ALL-UNNAMED
+    --java-source 21
+    @__SBOX_SANDBOX_DIR__/out/soong/.intermediates/external/icu/android_icu4j/i18n.module.intra.core.api.stubs.source/android_common/everything.metalava.rsp
+    @__SBOX_SANDBOX_DIR__/out/srcjars/list
+    --classpath __SBOX_SANDBOX_DIR__/out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs/android_common/turbine-combined/art.module.intra.core.api.stubs.jar:__SBOX_SANDBOX_DIR__/out/soong/.intermediates/libcore/mmodules/intracoreapi/art-module-intra-core-api-stubs-system-modules-lib/android_common/turbine-combined/art-module-intra-core-api-stubs-system-modules-lib.jar
+    --color --quiet --format=v2 --repeat-errors-max 10 --hide UnresolvedImport
+    --api-class-resolution api --format-defaults overloaded-method-order=source,add-additional-overrides=yes
+    --config-file build/soong/java/metalava/main-config.xml
+    --config-file build/soong/java/metalava/source-model-selection-config.xml
+    --api __SBOX_SANDBOX_DIR__/out/i18n.module.intra.core.api.stubs.source_api.txt
+    --removed-api __SBOX_SANDBOX_DIR__/out/i18n.module.intra.core.api.stubs.source_removed.txt
+    --stubs out/soong/.intermediates/external/icu/android_icu4j/i18n.module.intra.core.api.stubs.source/android_common/everything/stubsDir
+    --check-compatibility:api:released external/icu/android_icu4j/api/intra/last-api.txt
+    --check-compatibility:removed:released external/icu/android_icu4j/api/intra/last-removed.txt
+    --baseline:compatibility:released external/icu/android_icu4j/api/intra/last-incompatibilities.txt
+    --hide-annotation libcore.api.Hide  --show-single-annotation libcore.api.IntraCoreApi  \
+    --hide HiddenSuperclass --hide BroadcastBehavior --hide DeprecationMismatch --hide MissingPermission \
+    --hide SdkConstant --hide Todo --error-when-new-category Documentation \
+    --hide Deprecated --hide IntDef --hide Nullable \
+    --update-baseline:compatibility:released
+    __SBOX_SANDBOX_DIR__/out/last_released_baseline.txt
+    --error-message:compatibility:released $'\\n******************************\\nYou have tried to change the API from what has been previously released in\\nan SDK.  Please fix the errors listed above.\\n******************************\\n'
+    --use-same-format-as external/icu/android_icu4j/api/intra/current.txt && __SBOX_SANDBOX_DIR__/tools/out/bin/soong_zip -write_if_changed -jar -o __SBOX_SANDBOX_DIR__/out/i18n.module.intra.core.api.stubs.source-stubs.srcjar -C out/soong/.intermediates/external/icu/android_icu4j/i18n.module.intra.core.api.stubs.source/android_common/everything/stubsDir -D out/soong/.intermediates/external/icu/android_icu4j/i18n.module.intra.core.api.stubs.source/android_common/everything/stubsDir && touch __SBOX_SANDBOX_DIR__/out/check_last_released_api.timestamp && rm -rf out/soong/.intermediates/external/icu/android_icu4j/i18n.module.intra.core.api.stubs.source/android_common/everything/srcjars"
+
+
+
+rule g.java.jarsTosystemModules
+    command = rm -rf ${outDir} ${workDir} && mkdir -p ${workDir}/jmod &&
+        ${g.java.moduleInfoJavaPath} java.base ${in} > ${workDir}/module-info.java &&
+        ${g.android.soong.java.config.JavacCmd} --system=none --patch-module=java.base=${classpath} ${workDir}/module-info.java && ${g.android.soong.java.config.SoongZipCmd} -jar -o ${workDir}/classes.jar -C ${workDir} -f ${workDir}/module-info.class && ${g.android.soong.java.config.MergeZipsCmd} -j ${workDir}/module.jar ${workDir}/classes.jar ${in} && ${g.android.soong.java.config.JmodCmd} create --module-version ${g.android.soong.java.config.JlinkVersion} --target-platform android   --class-path ${workDir}/module.jar ${workDir}/jmod/java.base.jmod && ${g.android.soong.java.config.JlinkCmd} --module-path ${workDir}/jmod --add-modules java.base --output ${outDir}   --disable-plugin system-modules && cp ${g.android.soong.java.config.JrtFsJar} ${outDir}/lib/
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Module:  art-module-public-api-stubs-system-modules
+# Variant: android_common
+# Type:    java_system_modules
+# Factory: android/soong/android.ModuleFactoryAdaptor.func1
+# Defined: libcore/JavaLibrary.bp:969:1
+build $
+        out/soong/.intermediates/libcore/art-module-public-api-stubs-system-modules/android_common/system/lib/modules $
+        out/soong/.intermediates/libcore/art-module-public-api-stubs-system-modules/android_common/system/lib/jrt-fs.jar $
+        out/soong/.intermediates/libcore/art-module-public-api-stubs-system-modules/android_common/system/release: g.java.jarsTosystemModules $
+        out/soong/.intermediates/libcore/art.module.public.api.stubs/android_common/turbine-combined/art.module.public.api.stubs.jar $
+        out/soong/.intermediates/libcore/core-lambda-stubs-for-system-modules/android_common/turbine-combined/core-lambda-stubs-for-system-modules.jar $
+        out/soong/.intermediates/libcore/core-generated-annotation-stubs/android_common/turbine-combined/core-generated-annotation-stubs.jar $
+        out/soong/.intermediates/libcore/art.module.api.annotations.for.system.modules/android_common/turbine-combined/art.module.api.annotations.for.system.modules.jar $
+        out/soong/.intermediates/tools/metalava/stub-annotations/android_common/turbine-combined/stub-annotations.jar | ${g.java.moduleInfoJavaPath} $
+        ${g.android.soong.java.config.JavacCmd} $
+        ${g.android.soong.java.config.SoongZipCmd} ${g.android.soong.java.config.MergeZipsCmd} $
+        ${g.android.soong.java.config.JmodCmd} ${g.android.soong.java.config.JlinkCmd} $
+        ${g.android.soong.java.config.JrtFsJar}
+    description = ${m.art-module-public-api-stubs-system-modules_android_common.moduleDesc}system modules${m.art-module-public-api-stubs-system-modules_android_common.moduleDescSuffix}
+    classpath = out/soong/.intermediates/libcore/art.module.public.api.stubs/android_common/turbine-combined/art.module.public.api.stubs.jar:out/soong/.intermediates/libcore/core-lambda-stubs-for-system-modules/android_common/turbine-combined/core-lambda-stubs-for-system-modules.jar:out/soong/.intermediates/libcore/core-generated-annotation-stubs/android_common/turbine-combined/core-generated-annotation-stubs.jar:out/soong/.intermediates/libcore/art.module.api.annotations.for.system.modules/android_common/turbine-combined/art.module.api.annotations.for.system.modules.jar:out/soong/.intermediates/tools/metalava/stub-annotations/android_common/turbine-combined/stub-annotations.jar
+    outDir = out/soong/.intermediates/libcore/art-module-public-api-stubs-system-modules/android_common/system
+    workDir = out/soong/.intermediates/libcore/art-module-public-api-stubs-system-modules/android_common/modules
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Module:  art-module-intra-core-api-stubs-bootstrap-system-modules
+# Variant: android_common
+# Type:    java_system_modules
+# Factory: android/soong/android.ModuleFactoryAdaptor.func1
+# Defined: libcore/mmodules/intracoreapi/Android.bp:87:1
+build $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art-module-intra-core-api-stubs-bootstrap-system-modules/android_common/system/lib/modules $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art-module-intra-core-api-stubs-bootstrap-system-modules/android_common/system/lib/jrt-fs.jar $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art-module-intra-core-api-stubs-bootstrap-system-modules/android_common/system/release: g.java.jarsTosystemModules $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs/android_common/turbine-combined/art.module.intra.core.api.stubs.jar | ${g.java.moduleInfoJavaPath} $
+        ${g.android.soong.java.config.JavacCmd} $
+        ${g.android.soong.java.config.SoongZipCmd} ${g.android.soong.java.config.MergeZipsCmd} $
+        ${g.android.soong.java.config.JmodCmd} ${g.android.soong.java.config.JlinkCmd} $
+        ${g.android.soong.java.config.JrtFsJar}
+    description = ${m.art-module-intra-core-api-stubs-bootstrap-system-modules_android_common.moduleDesc}system modules${m.art-module-intra-core-api-stubs-bootstrap-system-modules_android_common.moduleDescSuffix}
+    classpath = out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs/android_common/turbine-combined/art.module.intra.core.api.stubs.jar
+    outDir = out/soong/.intermediates/libcore/mmodules/intracoreapi/art-module-intra-core-api-stubs-bootstrap-system-modules/android_common/system
+    workDir = out/soong/.intermediates/libcore/mmodules/intracoreapi/art-module-intra-core-api-stubs-bootstrap-system-modules/android_common/modules
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Module:  art-module-intra-core-api-stubs-system-modules-lib
+# Variant: android_common
+# Type:    java_library
+# Factory: android/soong/android.ModuleFactoryAdaptor.func1
+# Defined: libcore/mmodules/intracoreapi/Android.bp:96:1
+build $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art-module-intra-core-api-stubs-system-modules-lib/android_common/turbine/art-module-intra-core-api-stubs-system-modules-lib.jar: g.java.turbine $
+        libcore/ojluni/src/lambda/java/java/lang/invoke/LambdaMetafactory.java libcore/ojluni/src/lambda/java/java/lang/invoke/SerializedLambda.java $
+        libcore/ojluni/src/generated-annotation/java/javax/annotation/processing/Generated.java | ${g.android.soong.java.config.TurbineJar} $
+        ${g.android.soong.java.config.JavaCmd} ${g.android.soong.java.config.Ziptime} $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art-module-intra-core-api-stubs-bootstrap-system-modules/android_common/system/lib/modules $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art-module-intra-core-api-stubs-bootstrap-system-modules/android_common/system/lib/jrt-fs.jar $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art-module-intra-core-api-stubs-bootstrap-system-modules/android_common/system/release $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs/android_common/turbine-combined/art.module.intra.core.api.stubs.jar
+    description = ${m.art-module-intra-core-api-stubs-system-modules-lib_android_common.moduleDesc}turbine${m.art-module-intra-core-api-stubs-system-modules-lib_android_common.moduleDescSuffix}
+    bootClasspath = --system out/soong/.intermediates/libcore/mmodules/intracoreapi/art-module-intra-core-api-stubs-bootstrap-system-modules/android_common/system
+    classpath = --classpath out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs/android_common/turbine-combined/art.module.intra.core.api.stubs.jar
+    javaVersion = 1.9
+    javacFlags = ${m.art-module-intra-core-api-stubs-system-modules-lib_android_common.javacFlags}
+    outDir = out/soong/.intermediates/libcore/mmodules/intracoreapi/art-module-intra-core-api-stubs-system-modules-lib/android_common/turbine/classes
+    srcJars =
+
+build $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art-module-intra-core-api-stubs-system-modules-lib/android_common/turbine-combined/art-module-intra-core-api-stubs-system-modules-lib.jar: g.java.combineJar $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art-module-intra-core-api-stubs-system-modules-lib/android_common/turbine/art-module-intra-core-api-stubs-system-modules-lib.jar | ${g.android.soong.java.config.MergeZipsCmd}
+    description = ${m.art-module-intra-core-api-stubs-system-modules-lib_android_common.moduleDesc}for turbine${m.art-module-intra-core-api-stubs-system-modules-lib_android_common.moduleDescSuffix}
+    jarArgs = -stripDir  META-INF/TRANSITIVE -stripFile module-info.class
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Module:  art-module-intra-core-api-stubs-system-modules
+# Variant: android_common
+# Type:    java_system_modules
+# Factory: android/soong/android.ModuleFactoryAdaptor.func1
+# Defined: libcore/mmodules/intracoreapi/Android.bp:111:1
+build $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art-module-intra-core-api-stubs-system-modules/android_common/system/lib/modules $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art-module-intra-core-api-stubs-system-modules/android_common/system/lib/jrt-fs.jar $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art-module-intra-core-api-stubs-system-modules/android_common/system/release: g.java.jarsTosystemModules $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs/android_common/turbine-combined/art.module.intra.core.api.stubs.jar $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art-module-intra-core-api-stubs-system-modules-lib/android_common/turbine-combined/art-module-intra-core-api-stubs-system-modules-lib.jar | ${g.java.moduleInfoJavaPath} $
+        ${g.android.soong.java.config.JavacCmd} $
+        ${g.android.soong.java.config.SoongZipCmd} ${g.android.soong.java.config.MergeZipsCmd} $
+        ${g.android.soong.java.config.JmodCmd} ${g.android.soong.java.config.JlinkCmd} $
+        ${g.android.soong.java.config.JrtFsJar}
+    description = ${m.art-module-intra-core-api-stubs-system-modules_android_common.moduleDesc}system modules${m.art-module-intra-core-api-stubs-system-modules_android_common.moduleDescSuffix}
+    classpath = out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs/android_common/turbine-combined/art.module.intra.core.api.stubs.jar:out/soong/.intermediates/libcore/mmodules/intracoreapi/art-module-intra-core-api-stubs-system-modules-lib/android_common/turbine-combined/art-module-intra-core-api-stubs-system-modules-lib.jar
+    outDir = out/soong/.intermediates/libcore/mmodules/intracoreapi/art-module-intra-core-api-stubs-system-modules/android_common/system
+    workDir = out/soong/.intermediates/libcore/mmodules/intracoreapi/art-module-intra-core-api-stubs-system-modules/android_common/modules
+
+
+
+
+
+
+
+
+
+
+
+
+rule g.java.combineJar
+    command = ${g.android.soong.java.config.MergeZipsCmd} --ignore-duplicates -j ${jarArgs} ${out} ${in}
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Module:  art.module.intra.core.api.stubs
+# Variant: android_common
+# Type:    java_library__bottomUpMutatorModule
+# Factory: android/soong/android.createModule.ModuleFactoryAdaptor.func2
+# Defined: libcore/mmodules/intracoreapi/Android.bp:58:1
+build $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs/android_common/turbine-combined/art.module.intra.core.api.stubs.jar: $
+        g.java.combineJar $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs.from-source/android_common/turbine/art.module.intra.core.api.stubs.from-source.jar $
+        | ${g.android.soong.java.config.MergeZipsCmd}
+    description = ${m.art.module.intra.core.api.stubs_android_common.moduleDesc}for turbine${m.art.module.intra.core.api.stubs_android_common.moduleDescSuffix}
+    tags = module_name=art.module.intra.core.api.stubs;module_type=java_library__bottomUpMutatorModule;rule_name=combineJar
+    jarArgs = -stripDir  META-INF/TRANSITIVE -stripFile module-info.class -stripFile META-INF/versions/*/module-info.class
+
+
+rule g.java.turbine
+    command = ${g.android.soong.java.config.JavaCmd} ${g.android.soong.java.config.JavaVmFlags} -jar ${g.android.soong.java.config.TurbineJar} 
+        ${outputFlags} --sources @${out}.rsp --javacopts ${g.android.soong.java.config.CommonJdkFlags} 
+        ${javacFlags} -source ${javaVersion} -target ${javaVersion} -- ${turbineFlags} && (for o in ${outputs}; do if cmp -s $${o}.tmp $${o} ; then rm $${o}.tmp ; else mv $${o}.tmp $${o} ; fi; done )
+    restat = true
+    rspfile = ${out}.rsp
+    rspfile_content = ${in}
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Module:  art.module.intra.core.api.stubs.from-source
+# Variant: android_common
+# Type:    java_library__bottomUpMutatorModule
+# Factory: android/soong/android.createModule.ModuleFactoryAdaptor.func2
+# Defined: libcore/mmodules/intracoreapi/Android.bp:58:1
+build $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs.from-source/android_common/turbine/art.module.intra.core.api.stubs.from-source.jar: $
+        g.java.turbine | $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs.source/android_common/everything/art.module.intra.core.api.stubs.source-stubs.srcjar $
+        ${g.android.soong.java.config.TurbineJar} $
+        ${g.android.soong.java.config.JavaCmd}
+    description = ${m.art.module.intra.core.api.stubs.from-source_android_common.moduleDesc}turbine${m.art.module.intra.core.api.stubs.from-source_android_common.moduleDescSuffix}
+    tags = module_name=art.module.intra.core.api.stubs.from-source;module_type=java_library__bottomUpMutatorModule;rule_name=turbine
+    javaVersion = 1.8
+    javacFlags = ${m.art.module.intra.core.api.stubs.from-source_android_common.javacFlags}
+    outputFlags = --output out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs.from-source/android_common/turbine/art.module.intra.core.api.stubs.from-source.jar.tmp
+    outputs = out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs.from-source/android_common/turbine/art.module.intra.core.api.stubs.from-source.jar
+    turbineFlags = --source_jars out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs.source/android_common/everything/art.module.intra.core.api.stubs.source-stubs.srcjar --bootclasspath "" --classpath
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Module:  art.module.intra.core.api.stubs.source
+# Variant: android_common
+# Type:    droidstubs__bottomUpMutatorModule
+# Factory: android/soong/android.createModule.ModuleFactoryAdaptor.func2
+# Defined: libcore/mmodules/intracoreapi/Android.bp:58:1
+rule m.art.module.intra.core.api.stubs.source_android_common.metalava
+    command = out/host/linux-x86/bin/sbox --sandbox-path out/soong/.temp --output-dir out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs.source/android_common/everything --manifest out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs.source/android_common/metalava.sbox.textproto --write-if-changed
+    restat = true
+    rspfile = out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs.source/android_common/everything.metalava.rsp
+    rspfile_content = ${in}
+
+build $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs.source/android_common/everything/art.module.intra.core.api.stubs.source-stubs.srcjar $
+        | $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs.source/android_common/everything/art.module.intra.core.api.stubs.source_api.txt $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs.source/android_common/everything/art.module.intra.core.api.stubs.source_removed.txt $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs.source/android_common/everything/check_last_released_api.timestamp $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs.source/android_common/everything/last_released_baseline.txt: $
+        m.art.module.intra.core.api.stubs.source_android_common.metalava $
+        external/bouncycastle/repackaged/bcprov/src/main/java/com/android/org/bouncycastle/asn1/ASN1ApplicationSpecific.java $
+        external/bouncycastle/repackaged/bcprov/src/main/java/com/android/org/bouncycastle/asn1/ASN1ApplicationSpecificParser.java $
+        external/bouncycastle/repackaged/bcprov/src/main/java/com/android/org/bouncycastle/asn1/ASN1BitString.java $
+        external/bouncycastle/repackaged/bcprov/src/main/java/com/android/org/bouncycastle/asn1/ASN1Boolean.java $
+...
+    description = ${m.art.module.intra.core.api.stubs.source_android_common.moduleDesc}metalava merged${m.art.module.intra.core.api.stubs.source_android_common.moduleDescSuffix}
+    tags = module_name=art.module.intra.core.api.stubs.source;module_type=droidstubs__bottomUpMutatorModule;rule_name=metalava
+
+
+
+rule g.java.jarsTosystemModules
+    command = rm -rf ${outDir} ${workDir} && 
+        mkdir -p ${workDir}/jmod && 
+        ${g.java.moduleInfoJavaPath} java.base ${in} > ${workDir}/module-info.java && 
+        ${g.android.soong.java.config.JavacCmd} --system=none --patch-module=java.base=${classpath} ${workDir}/module-info.java && 
+        ${g.android.soong.java.config.SoongZipCmd} -jar -o ${workDir}/classes.jar -C ${workDir} -f ${workDir}/module-info.class && 
+        ${g.android.soong.java.config.MergeZipsCmd} -j ${workDir}/module.jar ${workDir}/classes.jar ${in} && 
+        ${g.android.soong.java.config.JmodCmd} create --module-version ${g.android.soong.java.config.JlinkVersion} --target-platform LINUX-OTHER   --class-path ${workDir}/module.jar ${workDir}/jmod/java.base.jmod && 
+        ${g.android.soong.java.config.JlinkCmd} --module-path ${workDir}/jmod --add-modules java.base --output ${outDir}   --disable-plugin system-modules && rm -rf ${workDir} && 
+        cp ${g.android.soong.java.config.JrtFsJar} ${outDir}/lib/
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Module:  art-module-intra-core-api-stubs-bootstrap-system-modules
+# Variant: android_common
+# Type:    java_system_modules
+# Factory: android/soong/android.moduleType.register.ModuleFactoryAdaptor.func1
+# Defined: libcore/mmodules/intracoreapi/Android.bp:97:1
+build $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art-module-intra-core-api-stubs-bootstrap-system-modules/android_common/system/lib/modules $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art-module-intra-core-api-stubs-bootstrap-system-modules/android_common/system/lib/jrt-fs.jar $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art-module-intra-core-api-stubs-bootstrap-system-modules/android_common/system/release: $
+        g.java.jarsTosystemModules $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs/android_common/turbine-combined/art.module.intra.core.api.stubs.jar $
+        | ${g.java.moduleInfoJavaPath} ${g.android.soong.java.config.JavacCmd} $
+        ${g.android.soong.java.config.SoongZipCmd} $
+        ${g.android.soong.java.config.MergeZipsCmd} $
+        ${g.android.soong.java.config.JmodCmd} $
+        ${g.android.soong.java.config.JlinkCmd} $
+        ${g.android.soong.java.config.JrtFsJar}
+    description = ${m.art-module-intra-core-api-stubs-bootstrap-system-modules_android_common.moduleDesc}system modules${m.art-module-intra-core-api-stubs-bootstrap-system-modules_android_common.moduleDescSuffix}
+    tags = module_name=art-module-intra-core-api-stubs-bootstrap-system-modules;module_type=java_system_modules;rule_name=jarsTosystemModules
+    classpath = out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs/android_common/turbine-combined/art.module.intra.core.api.stubs.jar
+    outDir = out/soong/.intermediates/libcore/mmodules/intracoreapi/art-module-intra-core-api-stubs-bootstrap-system-modules/android_common/system
+    workDir = out/soong/.intermediates/libcore/mmodules/intracoreapi/art-module-intra-core-api-stubs-bootstrap-system-modules/android_common/modules
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Module:  art.module.intra.core.api.stubs.from-source
+# Variant: android_common
+# Type:    java_library__bottomUpMutatorModule
+# Factory: android/soong/android.createModule.ModuleFactoryAdaptor.func2
+# Defined: libcore/mmodules/intracoreapi/Android.bp:58:1
+build $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs.from-source/android_common/turbine/art.module.intra.core.api.stubs.from-source.jar: $
+        g.java.turbine | $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs.source/android_common/everything/art.module.intra.core.api.stubs.source-stubs.srcjar $
+        ${g.android.soong.java.config.TurbineJar} $
+        ${g.android.soong.java.config.JavaCmd}
+    description = ${m.art.module.intra.core.api.stubs.from-source_android_common.moduleDesc}turbine${m.art.module.intra.core.api.stubs.from-source_android_common.moduleDescSuffix}
+    tags = module_name=art.module.intra.core.api.stubs.from-source;module_type=java_library__bottomUpMutatorModule;rule_name=turbine
+    javaVersion = 1.8
+    javacFlags = ${m.art.module.intra.core.api.stubs.from-source_android_common.javacFlags}
+    outputFlags = --output out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs.from-source/android_common/turbine/art.module.intra.core.api.stubs.from-source.jar.tmp
+    outputs = out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs.from-source/android_common/turbine/art.module.intra.core.api.stubs.from-source.jar
+    turbineFlags = --source_jars out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs.source/android_common/everything/art.module.intra.core.api.stubs.source-stubs.srcjar --bootclasspath "" --classpath
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Module:  art.module.intra.core.api.stubs.source
+# Variant: android_common
+# Type:    droidstubs__bottomUpMutatorModule
+# Factory: android/soong/android.createModule.ModuleFactoryAdaptor.func2
+# Defined: libcore/mmodules/intracoreapi/Android.bp:58:1
+
+build $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs.source/android_common/everything/art.module.intra.core.api.stubs.source-stubs.srcjar $
+        | $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs.source/android_common/everything/art.module.intra.core.api.stubs.source_api.txt $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs.source/android_common/everything/art.module.intra.core.api.stubs.source_removed.txt $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs.source/android_common/everything/check_last_released_api.timestamp $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs.source/android_common/everything/last_released_baseline.txt: $
+        m.art.module.intra.core.api.stubs.source_android_common.metalava $
+        external/bouncycastle/repackaged/bcprov/src/main/java/com/android/org/bouncycastle/asn1/ASN1ApplicationSpecific.java $
+        external/bouncycastle/repackaged/bcprov/src/main/java/com/android/org/bouncycastle/asn1/ASN1ApplicationSpecificParser.java $
+        external/bouncycastle/repackaged/bcprov/src/main/java/com/android/org/bouncycastle/asn1/ASN1BitString.java $
+        external/bouncycastle/repackaged/bcprov/src/main/java/com/android/org/bouncycastle/asn1/ASN1Boolean.java $
+        external/bouncycastle/repackaged/bcprov/src/main/java/com/android/org/bouncycastle/asn1/ASN1Choice.java $
+        external/bouncycastle/repackaged/bcprov/src/main/java/com/android/org/bouncycastle/asn1/ASN1Encodable.java $
+        external/bouncycastle/repackaged/bcprov/src/main/java/com/android/org/bouncycastle/asn1/ASN1EncodableVector.java $
+        external/bouncycastle/repackaged/bcprov/src/main/java/com/android/org/bouncycastle/asn1/ASN1Encoding.java $
+        external/bouncycastle/repackaged/bcprov/src/main/java/com/android/org/bouncycastle/asn1/ASN1Enumerated.java $
+        external/bouncycastle/repackaged/bcprov/src/main/java/com/android/org/bouncycastle/asn1/ASN1Exception.java $
+...
+        out/soong/.intermediates/libcore/core_oj_api_files/gen/gensrcs/libcore/ojluni/src/main/java/sun/reflect/CallerSensitive.java $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs.source/android_common/metalava.sbox.textproto $
+        out/host/linux-x86/bin/metalava out/host/linux-x86/bin/soong_zip $
+        out/host/linux-x86/bin/zipsync $
+        out/host/linux-x86/framework/metalava.jar out/host/linux-x86/bin/sbox
+    description = ${m.art.module.intra.core.api.stubs.source_android_common.moduleDesc}metalava merged${m.art.module.intra.core.api.stubs.source_android_common.moduleDescSuffix}
+    tags = module_name=art.module.intra.core.api.stubs.source;module_type=droidstubs__bottomUpMutatorModule;rule_name=metalava
+
+
+ command: "rm -rf out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs.source/android_common/everything/stubsDir && 
+ mkdir -p out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs.source/android_common/everything/stubsDir && r
+ m -rf __SBOX_SANDBOX_DIR__/out/srcjars && mkdir -p __SBOX_SANDBOX_DIR__/out/srcjars && 
+ __SBOX_SANDBOX_DIR__/tools/out/bin/zipsync -d __SBOX_SANDBOX_DIR__/out/srcjars -l __SBOX_SANDBOX_DIR__/out/srcjars/list -f \"*.java\" && 
+ rm -rf out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs.source/android_common/everything/home && 
+ mkdir -p out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs.source/android_common/everything/home && 
+ ANDROID_PREFS_ROOT=out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs.source/android_common/everything/home 
+    __SBOX_SANDBOX_DIR__/tools/out/bin/metalava 
+    -J-XX:OnError=\"cat hs_err_pid%p.log\" 
+    -J-XX:CICompilerCount=6 
+    -J-XX:+UseDynamicNumberOfGCThreads 
+    -J-XX:+TieredCompilation 
+    -J-XX:TieredStopAtLevel=1 
+    -J--add-opens=java.base/java.util=ALL-UNNAMED 
+    --java-source 1.8 
+    @__SBOX_SANDBOX_DIR__/out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs.source/android_common/everything.metalava.rsp 
+    @__SBOX_SANDBOX_DIR__/out/srcjars/list 
+    --color --quiet --format=v2 --repeat-errors-max 10 \
+    --hide UnresolvedImport \
+    --api-class-resolution api --format-defaults overloaded-method-order=source,add-additional-overrides=yes \
+    --config-file ../build/soong/java/metalava/main-config.xml \
+    --config-file ../build/soong/java/metalava/source-model-selection-config.xml \
+    --api out/art.module.intra.core.api.stubs.source_api.txt \
+    --removed-api out/art.module.intra.core.api.stubs.source_removed.txt \
+    --stubs /home/xiong/workspace/baker/test/xxx/libcore/mmodules/intracoreapi/stubs/ \
+    --merge-inclusion-annotations ../libcore/ojluni/annotations/mmodule \
+    --check-compatibility:api:released ../libcore/mmodules/intracoreapi/api/intra/last-api.txt \
+    --check-compatibility:removed:released ../libcore/mmodules/intracoreapi/api/intra/last-removed.txt \
+    --baseline:compatibility:released ../libcore/mmodules/intracoreapi/api/intra/last-incompatibilities.txt \
+    --hide-annotation libcore.api.Hide --show-single-annotation libcore.api.IntraCoreApi \
+    --hide HiddenSuperclass --hide BroadcastBehavior --hide DeprecationMismatch --hide MissingPermission \
+    --hide SdkConstant --hide Todo --error-when-new-category Documentation --hide Deprecated --hide IntDef --hide Nullable \
+    --update-baseline:compatibility:released out/last_released_baseline.txt 
+    --error-message:compatibility:released $'\\n******************************\\nYou have tried to change the API from what has been previously released in\\nan SDK.  Please fix the errors listed above.\\n******************************\\n' 
+    --use-same-format-as ../libcore/mmodules/intracoreapi/api/intra/current.txt && __SBOX_SANDBOX_DIR__/tools/out/bin/soong_zip -write_if_changed -jar -o __SBOX_SANDBOX_DIR__/out/art.module.intra.core.api.stubs.source-stubs.srcjar -C out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs.source/android_common/everything/stubsDir -D out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs.source/android_common/everything/stubsDir && touch __SBOX_SANDBOX_DIR__/out/check_last_released_api.timestamp && rm -rf out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs.source/android_common/everything/srcjars"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+g.java.moduleInfoJavaPath = build/soong/scripts/jars-to-module-info-java.sh
+rule g.java.jarsTosystemModules
+    command = rm -rf ${outDir} ${workDir} && mkdir -p ${workDir}/jmod && 
+    ${g.java.moduleInfoJavaPath} java.base ${in} > ${workDir}/module-info.java && 
+    ${g.android.soong.java.config.JavacCmd} --system=none --patch-module=java.base=${classpath} ${workDir}/module-info.java && 
+    ${g.android.soong.java.config.SoongZipCmd} -jar -o ${workDir}/classes.jar -C ${workDir} -f ${workDir}/module-info.class && 
+    ${g.android.soong.java.config.MergeZipsCmd} -j ${workDir}/module.jar ${workDir}/classes.jar ${in} && 
+    ${g.android.soong.java.config.JmodCmd} create --module-version ${g.android.soong.java.config.JlinkVersion} --target-platform LINUX-OTHER   --class-path ${workDir}/module.jar ${workDir}/jmod/java.base.jmod && 
+    ${g.android.soong.java.config.JlinkCmd} --module-path ${workDir}/jmod --add-modules java.base --output ${outDir}   --disable-plugin system-modules && rm -rf ${workDir} && cp ${g.android.soong.java.config.JrtFsJar} ${outDir}/lib/
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Module:  art-module-intra-core-api-stubs-bootstrap-system-modules
+# Variant: android_common
+# Type:    java_system_modules
+# Factory: android/soong/android.moduleType.register.ModuleFactoryAdaptor.func1
+# Defined: libcore/mmodules/intracoreapi/Android.bp:97:1
+build $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art-module-intra-core-api-stubs-bootstrap-system-modules/android_common/system/lib/modules $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art-module-intra-core-api-stubs-bootstrap-system-modules/android_common/system/lib/jrt-fs.jar $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art-module-intra-core-api-stubs-bootstrap-system-modules/android_common/system/release: $
+        g.java.jarsTosystemModules $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs/android_common/turbine-combined/art.module.intra.core.api.stubs.jar $
+        | ${g.java.moduleInfoJavaPath} ${g.android.soong.java.config.JavacCmd} $
+        ${g.android.soong.java.config.SoongZipCmd} $
+        ${g.android.soong.java.config.MergeZipsCmd} $
+        ${g.android.soong.java.config.JmodCmd} $
+        ${g.android.soong.java.config.JlinkCmd} $
+        ${g.android.soong.java.config.JrtFsJar}
+    description = ${m.art-module-intra-core-api-stubs-bootstrap-system-modules_android_common.moduleDesc}system modules${m.art-module-intra-core-api-stubs-bootstrap-system-modules_android_common.moduleDescSuffix}
+    tags = module_name=art-module-intra-core-api-stubs-bootstrap-system-modules;module_type=java_system_modules;rule_name=jarsTosystemModules
+    classpath = out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs/android_common/turbine-combined/art.module.intra.core.api.stubs.jar
+    outDir = out/soong/.intermediates/libcore/mmodules/intracoreapi/art-module-intra-core-api-stubs-bootstrap-system-modules/android_common/system
+    workDir = out/soong/.intermediates/libcore/mmodules/intracoreapi/art-module-intra-core-api-stubs-bootstrap-system-modules/android_common/modules
+

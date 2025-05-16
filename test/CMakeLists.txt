@@ -24,6 +24,9 @@ add_library(libprocessgroup-shared INTERFACE)
 add_library(libjsoncpp-static INTERFACE)
 add_library(librustc_demangle_static-static STATIC ".")
 set_target_properties(librustc_demangle_static-static PROPERTIES LINKER_LANGUAGE CXX)
+add_library(activity_manager_procstate_aidl INTERFACE)
+add_library(libbssl_sys_raw INTERFACE)
+add_library(libbssl_sys_raw_nostd INTERFACE)
 
 # Most Android.bp add -Werror flags, but create a lot of errors
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
