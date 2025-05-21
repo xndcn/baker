@@ -35,6 +35,7 @@
   <project path="system/unwinding" name="platform/system/unwinding" groups="pdk" />
 
   <project path="frameworks/native" name="platform/frameworks/native" groups="pdk" />
+  <project path="frameworks/libs/modules-utils" name="platform/frameworks/libs/modules-utils" groups="pdk-cw-fs,pdk-fs,sysui-studio" />
 
   <project path="tools/metalava" name="platform/tools/metalava" groups="pdk,tools" />
   <project path="tools/platform-compat" name="tools/platform-compat" groups="pdk-cw-fs,pdk-fs,pdk,sysui-studio" />
