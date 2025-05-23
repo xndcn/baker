@@ -17,6 +17,9 @@ from .definitions.java_library import JavaLibrary
 from .definitions.java_sdk_library import JavaSdkLibrary
 from .definitions.java_system_modules import JavaSystemModules
 from .definitions.droiddoc_exported_dir import DroiddocExportedDir
+from .definitions.droidstubs import Droidstubs
+from .definitions.java_aconfig_library import JavaAConfigLibrary
+from .definitions.java_api_library import JavaApiLibrary
 
 class CMakeConverter:
     def __init__(self):
@@ -24,8 +27,8 @@ class CMakeConverter:
             Defaults, FileGroup,
             CCLibraryHeaders, CCLibrary, CCTestLibrary, CCBinary, CCTest, CCObject,
             GenRule, GenSrcs, PythonBinaryHost,
-            JavaLibrary, JavaSdkLibrary, JavaSystemModules, DroiddocExportedDir,
-            AConfigDeclarations, CCAConfigLibrary
+            JavaLibrary, JavaSdkLibrary, JavaApiLibrary, JavaSystemModules, DroiddocExportedDir, Droidstubs,
+            AConfigDeclarations, CCAConfigLibrary, JavaAConfigLibrary,
         ]
 
     def convert(self, project: str, root: ast.Blueprint, subdirectories=None) -> str:

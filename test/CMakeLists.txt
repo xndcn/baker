@@ -27,6 +27,8 @@ set_target_properties(librustc_demangle_static-static PROPERTIES LINKER_LANGUAGE
 add_library(activity_manager_procstate_aidl INTERFACE)
 add_library(libbssl_sys_raw INTERFACE)
 add_library(libbssl_sys_raw_nostd INTERFACE)
+add_library(conscrypt.module.intra.core.api.stubs INTERFACE)
+add_library(stub-annotations INTERFACE)
 
 # Most Android.bp add -Werror flags, but create a lot of errors
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
@@ -43,6 +45,7 @@ baker(frameworks/native/libs/math/)
 
 # Currently not built by default
 baker(art/ EXCLUDE_FROM_ALL)
+baker(build/soong/java/core-libraries/ EXCLUDE_FROM_ALL)
 baker(libcore/ EXCLUDE_FROM_ALL)
 baker(libnativehelper/ EXCLUDE_FROM_ALL)
 baker(external/cpu_features/ EXCLUDE_FROM_ALL)
@@ -63,6 +66,7 @@ baker(system/tools/aidl/ EXCLUDE_FROM_ALL)
 baker(system/libziparchive/ EXCLUDE_FROM_ALL)
 baker(system/unwinding/libunwindstack/ EXCLUDE_FROM_ALL)
 baker(frameworks/native/libs/binder/ EXCLUDE_FROM_ALL)
+baker(frameworks/libs/modules-utils/java/ EXCLUDE_FROM_ALL)
 baker(tools/platform-compat/ EXCLUDE_FROM_ALL)
 # boringssl requires some Android specific flags
 set(TARGET "android" ; "linux" ; "glibc" ; "host")

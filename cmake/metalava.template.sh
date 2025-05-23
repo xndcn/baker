@@ -1,7 +1,10 @@
 #!/bin/bash
 
+set -e
+
 metalava=$<TARGET_PROPERTY:metalava,IMPORTED_LOCATION>
 classpath=""
+merge_inclusion_annotations=""
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -11,7 +14,9 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         --merge-inclusion-annotations)
-            merge_inclusion_annotations="$2"
+            if [[ -n "$2" ]]; then
+                merge_inclusion_annotations="--merge-inclusion-annotations $2"
+            fi
             shift 2
             ;;
         --src)
@@ -19,11 +24,8 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         --classpath)
-            if [ -n "$2" ]; then
-                # Split classpath into an array
-                IFS=';' read -ra classpath <<< "$2"
-                # Join classpath elements with ':' and assign to classpath_arg
-                classpath="--classpath "$(IFS=: ; echo "${classpath[*]}")
+            if [[ -n "$2" ]]; then
+                classpath="--classpath $2"
             fi
             shift 2
             ;;
@@ -37,34 +39,38 @@ done
 # in the src_file. So here we use symbolic links to avoid this issue.
 
 # Make sure metalava directory exists
+rm -rf metalava
 mkdir -p metalava
 
 # Create new source file to store symbolic link paths
 links_file="metalava/source_links.txt"
 > "${links_file}"  # Create the file
 
-# Process each line in the source file
-while IFS= read -r filepath; do
-    if [[ -n "${filepath}" ]]; then
-        target_path="${filepath#/}"
-        target_dir="metalava/$(dirname "${target_path}")"
-        # Create parent directory structure
-        mkdir -p "${target_dir}"
-        # Create symbolic link
-        ln -sf "${filepath}" "metalava/${target_path}"
-        echo "metalava/${target_path}" >> "${links_file}"
-    fi
-done < "${src_file}"
+if [[ -f "${src_file}" ]]; then
+    # Process each line in the source file
+    while IFS= read -r filepath; do
+        if [[ -n "${filepath}" ]]; then
+            target_path="${filepath#/}"
+            target_dir="metalava/$(dirname "${target_path}")"
+            # Create parent directory structure
+            mkdir -p "${target_dir}"
+            # Create symbolic link
+            ln -sf "${filepath}" "metalava/${target_path}"
+            echo "metalava/${target_path}" >> "${links_file}"
+        fi
+    done < "${src_file}"
+fi
 
-# Use $classpath_arg in your metalava command
-${metalava} --java-source 1.8 "@${links_file}" \
+${metalava} "@${links_file}" \
     $@ \
     ${classpath} \
     --stubs "${stubs_dir}" \
     --color --quiet --format=v2 \
     --hide UnresolvedImport \
-    --merge-inclusion-annotations "${merge_inclusion_annotations}" \
+    ${merge_inclusion_annotations} \
     $<JOIN:$<TARGET_PROPERTY:_droiddoc_options>, > \
+    $<JOIN:$<TARGET_PROPERTY:_args>, > \
+    $<JOIN:$<TARGET_PROPERTY:_flags>, > \
     --hide HiddenSuperclass --hide BroadcastBehavior --hide DeprecationMismatch \
     --hide MissingPermission --hide SdkConstant --hide Todo \
     --error-when-new-category Documentation --hide Deprecated \

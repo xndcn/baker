@@ -18,6 +18,13 @@ rule g.java.javac
 # Type:    java_library
 # Factory: android/soong/android.moduleType.register.ModuleFactoryAdaptor.func1
 # Defined: libcore/JavaLibrary.bp:204:1
+m.core-all_android_common.javacFlags = -Xlint:-dep-ann 
+    --patch-module=java.base=.:
+        out/soong:
+        out/soong/.intermediates/external/conscrypt/conscrypt.module.intra.core.api.stubs.from-source/android_common/turbine/conscrypt.module.intra.core.api.stubs.from-source.jar:
+        out/soong/.intermediates/libcore/art-aconfig-flags-java-lib-for-core-all-only/android_common/turbine/art-aconfig-flags-java-lib-for-core-all-only.jar:
+        out/soong/.intermediates/libcore/libcore-aconfig-flags-lib-for-core-all-only/android_common/turbine/libcore-aconfig-flags-lib-for-core-all-only.jar
+
 build $
         out/soong/.intermediates/libcore/core-all/android_common/javac/core-all.jar $
         | $
@@ -279,6 +286,8 @@ build $
     outputs = out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs.from-source/android_common/turbine/art.module.intra.core.api.stubs.from-source.jar
     turbineFlags = --source_jars out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs.source/android_common/everything/art.module.intra.core.api.stubs.source-stubs.srcjar --bootclasspath "" --classpath
 
+turbineFlags = --source_jars  
+    --system out/soong/.intermediates/libcore/core-all-system-modules/android_common/system --classpath out/soong/.intermediates/external/junit/junit/android_common/turbine/junit.jar out/soong/.intermediates/external/hamcrest/hamcrest-core/hamcrest/android_common/turbine/hamcrest.jar out/soong/.intermediates/external/apache-harmony/jdwp/SourceDebugExtensionMockClass_gen/android_common/gen/SourceDebugExtensionMockClass_gen.jar
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Module:  art.module.intra.core.api.stubs.source
@@ -489,3 +498,297 @@ build $
     outDir = out/soong/.intermediates/libcore/mmodules/intracoreapi/art-module-intra-core-api-stubs-bootstrap-system-modules/android_common/system
     workDir = out/soong/.intermediates/libcore/mmodules/intracoreapi/art-module-intra-core-api-stubs-bootstrap-system-modules/android_common/modules
 
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Module:  java-current-stubs-source
+# Variant: android_common
+# Type:    droidstubs
+# Factory: android/soong/android.moduleType.register.ModuleFactoryAdaptor.func1
+# Defined: libcore/JavaLibrary.bp:979:1
+
+m.java-current-stubs-source_android_common.moduleDesc = //libcore:java-current-stubs-source
+m.java-current-stubs-source_android_common.moduleDescSuffix = $ [common]
+
+rule m.java-current-stubs-source_android_common.metalava
+    command = out/host/linux-x86/bin/sbox --sandbox-path out/soong/.temp --output-dir out/soong/.intermediates/libcore/java-current-stubs-source/android_common/everything --manifest out/soong/.intermediates/libcore/java-current-stubs-source/android_common/metalava.sbox.textproto --write-if-changed
+    restat = true
+    rspfile = out/soong/.intermediates/libcore/java-current-stubs-source/android_common/everything.metalava.rsp
+    rspfile_content = ${in}
+
+
+build $
+        out/soong/.intermediates/libcore/java-current-stubs-source/android_common/everything/java-current-stubs-source-stubs.srcjar $
+        | $
+        out/soong/.intermediates/libcore/java-current-stubs-source/android_common/everything/java-current-stubs-source_api.txt $
+        out/soong/.intermediates/libcore/java-current-stubs-source/android_common/everything/java-current-stubs-source_removed.txt: $
+        m.java-current-stubs-source_android_common.metalava $
+        out/soong/.intermediates/libcore/core_oj_api_files/gen/gensrcs/libcore/ojluni/src/main/java/java/awt/font/NumericShaper.java $
+        out/soong/.intermediates/libcore/core_oj_api_files/gen/gensrcs/libcore/ojluni/src/main/java/java/awt/font/TextAttribute.java $
+        out/soong/.intermediates/libcore/core_oj_api_files/gen/gensrcs/libcore/ojluni/src/main/java/java/beans/IndexedPropertyChangeEvent.java $
+...
+        out/soong/.intermediates/libcore/core_oj_api_files/gen/gensrcs/libcore/ojluni/src/main/java/sun/reflect/CallerSensitive.java $
+        out/soong/.intermediates/libcore/java-current-stubs-source/android_common/metalava_exportable.sbox.textproto $
+        out/host/linux-x86/bin/metalava out/host/linux-x86/bin/soong_zip $
+        out/host/linux-x86/bin/zipsync $
+        out/host/linux-x86/framework/metalava.jar out/host/linux-x86/bin/sbox
+    description = ${m.java-current-stubs-source_android_common.moduleDesc}metalava merged${m.java-current-stubs-source_android_common.moduleDescSuffix}
+    tags = module_name=java-current-stubs-source;module_type=droidstubs;rule_name=metalava_exportable
+
+
+ command: "
+ rm -rf out/soong/.intermediates/libcore/java-current-stubs-source/android_common/everything/stubsDir && 
+ mkdir -p out/soong/.intermediates/libcore/java-current-stubs-source/android_common/everything/stubsDir && 
+ rm -rf __SBOX_SANDBOX_DIR__/out/srcjars && 
+ mkdir -p __SBOX_SANDBOX_DIR__/out/srcjars && 
+ __SBOX_SANDBOX_DIR__/tools/out/bin/zipsync -d 
+ __SBOX_SANDBOX_DIR__/out/srcjars -l __SBOX_SANDBOX_DIR__/out/srcjars/list -f \"*.java\" && 
+ rm -rf out/soong/.intermediates/libcore/java-current-stubs-source/android_common/everything/home && 
+ mkdir -p out/soong/.intermediates/libcore/java-current-stubs-source/android_common/everything/home && 
+ ANDROID_PREFS_ROOT=out/soong/.intermediates/libcore/java-current-stubs-source/android_common/everything/home 
+    __SBOX_SANDBOX_DIR__/tools/out/bin/metalava 
+        -J-XX:OnError=\"cat hs_err_pid%p.log\" 
+        -J-XX:CICompilerCount=6 
+        -J-XX:+UseDynamicNumberOfGCThreads 
+        -J-XX:+TieredCompilation -J-XX:TieredStopAtLevel=1 
+        -J--add-opens=java.base/java.util=ALL-UNNAMED 
+        --java-source 17 @__SBOX_SANDBOX_DIR__/out/soong/.intermediates/libcore/java-current-stubs-source/android_common/everything.metalava.rsp 
+        @__SBOX_SANDBOX_DIR__/out/srcjars/list 
+        --color --quiet --format=v2 --repeat-errors-max 10 
+        --hide UnresolvedImport 
+        --api-class-resolution api --format-defaults overloaded-method-order=source,add-additional-overrides=yes 
+        --config-file build/soong/java/metalava/main-config.xml 
+        --config-file build/soong/java/metalava/source-model-selection-config.xml 
+        --api __SBOX_SANDBOX_DIR__/out/java-current-stubs-source_api.txt 
+        --removed-api __SBOX_SANDBOX_DIR__/out/java-current-stubs-source_removed.txt 
+        --stubs out/soong/.intermediates/libcore/java-current-stubs-source/android_common/everything/stubsDir 
+        --exclude-documentation-from-stubs 
+        --stub-packages java.*:javax.*:org.w3c.dom.*:org.xml.sax.* 
+        --error-when-new-category Documentation 
+        --hide Deprecated --hide IntDef --hide Nullable && __SBOX_SANDBOX_DIR__/tools/out/bin/soong_zip -write_if_changed -jar -o __SBOX_SANDBOX_DIR__/out/java-current-stubs-source-stubs.srcjar -C out/soong/.intermediates/libcore/java-current-stubs-source/android_common/everything/stubsDir -D out/soong/.intermediates/libcore/java-current-stubs-source/android_common/everything/stubsDir && rm -rf out/soong/.intermediates/libcore/java-current-stubs-source/android_common/everything/srcjars"
+
+
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Module:  java.current.stubs
+# Variant: android_common
+# Type:    java_library
+# Factory: android/soong/android.moduleType.register.ModuleFactoryAdaptor.func1
+# Defined: libcore/JavaLibrary.bp:1020:1
+m.java.current.stubs_android_common.javacFlags = -Xlint:-dep-ann --patch-module=java.base=.:out/soong
+build $
+        out/soong/.intermediates/libcore/java.current.stubs/android_common/turbine/java.current.stubs.jar: $
+        g.java.turbine | $
+        out/soong/.intermediates/libcore/java-current-stubs-source/android_common/everything/java-current-stubs-source-stubs.srcjar $
+        ${g.android.soong.java.config.TurbineJar} $
+        ${g.android.soong.java.config.JavaCmd}
+    description = ${m.java.current.stubs_android_common.moduleDesc}turbine${m.java.current.stubs_android_common.moduleDescSuffix}
+    tags = module_name=java.current.stubs;module_type=java_library;rule_name=turbine
+    javaVersion = 21
+    javacFlags = ${m.java.current.stubs_android_common.javacFlags}
+    outputFlags = --output out/soong/.intermediates/libcore/java.current.stubs/android_common/turbine/java.current.stubs.jar.tmp
+    outputs = out/soong/.intermediates/libcore/java.current.stubs/android_common/turbine/java.current.stubs.jar
+    turbineFlags = --source_jars out/soong/.intermediates/libcore/java-current-stubs-source/android_common/everything/java-current-stubs-source-stubs.srcjar --bootclasspath "" --classpath
+
+build $
+        out/soong/.intermediates/libcore/java.current.stubs/android_common/turbine-combined/java.current.stubs.jar: $
+        g.java.combineJar $
+        out/soong/.intermediates/libcore/java.current.stubs/android_common/turbine/java.current.stubs.jar $
+        | ${g.android.soong.java.config.MergeZipsCmd}
+    description = ${m.java.current.stubs_android_common.moduleDesc}for turbine${m.java.current.stubs_android_common.moduleDescSuffix}
+    tags = module_name=java.current.stubs;module_type=java_library;rule_name=combineJar
+    jarArgs = -stripDir  META-INF/TRANSITIVE -stripFile module-info.class -stripFile META-INF/versions/*/module-info.class
+
+build $
+        out/soong/.intermediates/libcore/java.current.stubs/android_common/javac/java.current.stubs.jar $
+        | $
+        out/soong/.intermediates/libcore/java.current.stubs/android_common/javac/anno.srcjar: $
+        g.java.javac | $
+        out/soong/.intermediates/libcore/java-current-stubs-source/android_common/everything/java-current-stubs-source-stubs.srcjar $
+        ${g.android.soong.java.config.JavacCmd} $
+        ${g.android.soong.java.config.SoongZipCmd} $
+        ${g.android.soong.java.config.ZipSyncCmd} || $
+        ${g.android.soong.java.config.SoongJavacWrapper}
+    description = ${m.java.current.stubs_android_common.moduleDesc}javac${m.java.current.stubs_android_common.moduleDescSuffix}
+    tags = module_name=java.current.stubs;module_type=java_library;rule_name=javac
+    annoDir = out/soong/.intermediates/libcore/java.current.stubs/android_common/javac/anno
+    annoSrcJar = out/soong/.intermediates/libcore/java.current.stubs/android_common/javac/anno.srcjar
+    bootClasspath = --system=none
+    classpath =
+    javaVersion = 21
+    javacFlags = ${m.java.current.stubs_android_common.javacFlags}
+    outDir = out/soong/.intermediates/libcore/java.current.stubs/android_common/javac/classes
+    processor = -proc:none
+    processorpath =
+    srcJarDir = out/soong/.intermediates/libcore/java.current.stubs/android_common/javac/srcjars
+    srcJars = out/soong/.intermediates/libcore/java-current-stubs-source/android_common/everything/java-current-stubs-source-stubs.srcjar
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Module:  art-module-intra-core-api-stubs-system-modules-lib
+# Variant: android_common
+# Type:    java_library
+# Factory: android/soong/android.moduleType.register.ModuleFactoryAdaptor.func1
+# Defined: libcore/mmodules/intracoreapi/Android.bp:110:1
+m.art-module-intra-core-api-stubs-system-modules-lib_android_common.javacFlags = -Xlint:-dep-ann
+
+build $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art-module-intra-core-api-stubs-system-modules-lib/android_common/javac/art-module-intra-core-api-stubs-system-modules-lib.jar $
+        | $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art-module-intra-core-api-stubs-system-modules-lib/android_common/javac/anno.srcjar: $
+        g.java.javac $
+        libcore/ojluni/src/lambda/java/java/lang/invoke/LambdaMetafactory.java $
+        libcore/ojluni/src/lambda/java/java/lang/invoke/SerializedLambda.java $
+        libcore/ojluni/src/lambda/java/java/lang/invoke/StringConcatFactory.java $
+        | $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs.from-source/android_common/turbine/art.module.intra.core.api.stubs.from-source.jar $
+        out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs.from-source/android_common/turbine/art.module.intra.core.api.stubs.from-source.jar $
+        ${g.android.soong.java.config.JavacCmd} $
+        ${g.android.soong.java.config.SoongZipCmd} $
+        ${g.android.soong.java.config.ZipSyncCmd} || $
+        ${g.android.soong.java.config.SoongJavacWrapper}
+    description = ${m.art-module-intra-core-api-stubs-system-modules-lib_android_common.moduleDesc}javac${m.art-module-intra-core-api-stubs-system-modules-lib_android_common.moduleDescSuffix}
+    tags = module_name=art-module-intra-core-api-stubs-system-modules-lib;module_type=java_library;rule_name=javac
+    annoDir = out/soong/.intermediates/libcore/mmodules/intracoreapi/art-module-intra-core-api-stubs-system-modules-lib/android_common/javac/anno
+    annoSrcJar = out/soong/.intermediates/libcore/mmodules/intracoreapi/art-module-intra-core-api-stubs-system-modules-lib/android_common/javac/anno.srcjar
+    bootClasspath = -bootclasspath out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs.from-source/android_common/turbine/art.module.intra.core.api.stubs.from-source.jar
+    classpath = -classpath out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs.from-source/android_common/turbine/art.module.intra.core.api.stubs.from-source.jar
+    javaVersion = 1.8
+    javacFlags = ${m.art-module-intra-core-api-stubs-system-modules-lib_android_common.javacFlags}
+    outDir = out/soong/.intermediates/libcore/mmodules/intracoreapi/art-module-intra-core-api-stubs-system-modules-lib/android_common/javac/classes
+    processor = -proc:none
+    processorpath =
+    srcJarDir = out/soong/.intermediates/libcore/mmodules/intracoreapi/art-module-intra-core-api-stubs-system-modules-lib/android_common/javac/srcjars
+    srcJars =
+
+
+
+build $
+        out/soong/.intermediates/libcore/art-aconfig-flags-java-lib-for-core-all-only/android_common/javac/art-aconfig-flags-java-lib-for-core-all-only.jar $
+        | $
+        out/soong/.intermediates/libcore/art-aconfig-flags-java-lib-for-core-all-only/android_common/javac/anno.srcjar: $
+        g.java.javac | $
+        out/soong/.intermediates/libcore/art-aconfig-flags-java-lib-for-core-all-only/android_common/gen/art-aconfig-flags-java-lib-for-core-all-only.srcjar $
+        out/soong/.intermediates/libcore/libcore-bootstrap-lib-for-flags-lib-system-modules/android_common/system/lib/modules $
+        out/soong/.intermediates/libcore/libcore-bootstrap-lib-for-flags-lib-system-modules/android_common/system/lib/jrt-fs.jar $
+        out/soong/.intermediates/libcore/libcore-bootstrap-lib-for-flags-lib-system-modules/android_common/system/release $
+        ${g.android.soong.java.config.JavacCmd} $
+        ${g.android.soong.java.config.SoongZipCmd} $
+        ${g.android.soong.java.config.ZipSyncCmd} || $
+        ${g.android.soong.java.config.SoongJavacWrapper}
+    description = ${m.art-aconfig-flags-java-lib-for-core-all-only_android_common.moduleDesc}javac${m.art-aconfig-flags-java-lib-for-core-all-only_android_common.moduleDescSuffix}
+    tags = module_name=art-aconfig-flags-java-lib-for-core-all-only;module_type=java_aconfig_library;rule_name=javac
+    annoDir = out/soong/.intermediates/libcore/art-aconfig-flags-java-lib-for-core-all-only/android_common/javac/anno
+    annoSrcJar = out/soong/.intermediates/libcore/art-aconfig-flags-java-lib-for-core-all-only/android_common/javac/anno.srcjar
+    bootClasspath = --system=out/soong/.intermediates/libcore/libcore-bootstrap-lib-for-flags-lib-system-modules/android_common/system
+    classpath =
+    javaVersion = 21
+    javacFlags = ${m.art-aconfig-flags-java-lib-for-core-all-only_android_common.javacFlags}
+    outDir = out/soong/.intermediates/libcore/art-aconfig-flags-java-lib-for-core-all-only/android_common/javac/classes
+    processor = -proc:none
+    processorpath =
+    srcJarDir = out/soong/.intermediates/libcore/art-aconfig-flags-java-lib-for-core-all-only/android_common/javac/srcjars
+    srcJars = out/soong/.intermediates/libcore/art-aconfig-flags-java-lib-for-core-all-only/android_common/gen/art-aconfig-flags-java-lib-for-core-all-only.srcjar
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Module:  core.current.stubs.from-text
+# Variant: android_common
+# Type:    java_api_library
+# Factory: android/soong/android.moduleType.register.ModuleFactoryAdaptor.func1
+# Defined: build/soong/java/core-libraries/Android.bp:97:1
+out/soong/.intermediates/build/soong/java/core-libraries/core.current.stubs.from-text/android_common/metalava.sbox.textproto:
+
+build $
+        out/soong/.intermediates/build/soong/java/core-libraries/core.current.stubs.from-text/android_common/metalava/core.current.stubs.from-text-stubs.srcjar: $
+        m.core.current.stubs.from-text_android_common.metalava | $
+        build/soong/java/metalava/main-config.xml $
+        build/soong/java/metalava/source-model-selection-config.xml $
+        external/conscrypt/api/public/current.txt $
+        external/icu/android_icu4j/api/public/current.txt $
+        libcore/api/current.txt $
+        out/soong/.intermediates/tools/metalava/stub-annotations/android_common/turbine-combined/stub-annotations.jar $
+        out/soong/.intermediates/build/soong/java/core-libraries/core.current.stubs.from-text/android_common/metalava.sbox.textproto $
+        out/host/linux-x86/bin/metalava out/host/linux-x86/bin/soong_zip $
+        out/host/linux-x86/framework/metalava.jar out/host/linux-x86/bin/sbox
+    description = ${m.core.current.stubs.from-text_android_common.moduleDesc}metalava merged text${m.core.current.stubs.from-text_android_common.moduleDescSuffix}
+    tags = module_name=core.current.stubs.from-text;module_type=java_api_library;rule_name=metalava
+
+build $
+        out/soong/.intermediates/build/soong/java/core-libraries/core.current.stubs.from-text/android_common/metalava/stubs.jar $
+        | $
+        out/soong/.intermediates/build/soong/java/core-libraries/core.current.stubs.from-text/android_common/core.current.stubs.from-text/anno.srcjar: $
+        g.java.javac | $
+        out/soong/.intermediates/build/soong/java/core-libraries/core.current.stubs.from-text/android_common/metalava/core.current.stubs.from-text-stubs.srcjar $
+        out/soong/.intermediates/tools/metalava/stub-annotations/android_common/turbine-combined/stub-annotations.jar $
+        ${g.android.soong.java.config.JavacCmd} $
+        ${g.android.soong.java.config.SoongZipCmd} $
+        ${g.android.soong.java.config.ZipSyncCmd} || $
+        ${g.android.soong.java.config.SoongJavacWrapper}
+    description = ${m.core.current.stubs.from-text_android_common.moduleDesc}javac0${m.core.current.stubs.from-text_android_common.moduleDescSuffix}
+    tags = module_name=core.current.stubs.from-text;module_type=java_api_library;rule_name=javac
+    annoDir = out/soong/.intermediates/build/soong/java/core-libraries/core.current.stubs.from-text/android_common/javac/shard0/anno
+    annoSrcJar = out/soong/.intermediates/build/soong/java/core-libraries/core.current.stubs.from-text/android_common/core.current.stubs.from-text/anno.srcjar
+    bootClasspath = -bootclasspath ""
+    classpath = -classpath out/soong/.intermediates/tools/metalava/stub-annotations/android_common/turbine-combined/stub-annotations.jar
+    javaVersion = 1.8
+    javacFlags =
+    outDir = out/soong/.intermediates/build/soong/java/core-libraries/core.current.stubs.from-text/android_common/javac/shard0/classes
+    processor = -proc:none
+    processorpath =
+    srcJarDir = out/soong/.intermediates/build/soong/java/core-libraries/core.current.stubs.from-text/android_common/javac/shard0/srcjars
+    srcJars = out/soong/.intermediates/build/soong/java/core-libraries/core.current.stubs.from-text/android_common/metalava/core.current.stubs.from-text-stubs.srcjar
+
+
+metalava -J-XX:OnError=\"cat hs_err_pid%p.log\" -J-XX:CICompilerCount=6 -J-XX:+UseDynamicNumberOfGCThreads -J-XX:+TieredCompilation -J-XX:TieredStopAtLevel=1 -J--add-opens=java.base/java.util=ALL-UNNAMED
+    --source-files 
+        libcore/api/current.txt 
+        external/conscrypt/api/public/current.txt 
+        external/icu/android_icu4j/api/public/current.txt 
+    --color --quiet --include-annotations --force-convert-to-warning-nullability-annotations +*:-android.*:+android.icu.*:-dalvik.*
+    --repeat-errors-max 10 --hide UnresolvedImport 
+    --hide InvalidNullabilityOverride --hide ChangedDefault 
+    --config-file build/soong/java/metalava/main-config.xml 
+    --config-file build/soong/java/metalava/source-model-selection-config.xml 
+    --api-class-resolution api:classpath 
+    --classpath __SBOX_SANDBOX_DIR__/out/soong/.intermediates/tools/metalava/stub-annotations/android_common/turbine-combined/stub-annotations.jar 
+    --stubs out/soong/.intermediates/build/soong/java/core-libraries/core.current.stubs.from-text/android_common/metalava/stubsDir && __SBOX_SANDBOX_DIR__/tools/out/bin/soong_zip -write_if_changed -jar -o __SBOX_SANDBOX_DIR__/out/core.current.stubs.from-text-stubs.srcjar -C out/soong/.intermediates/build/soong/java/core-libraries/core.current.stubs.from-text/android_common/metalava/stubsDir -D out/soong/.intermediates/build/soong/java/core-libraries/core.current.stubs.from-text/android_common/metalava/stubsDir
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Module:  art.module.public.api.stubs.source.api.contribution
+# Variant:
+# Type:    java_api_contribution__bottomUpMutatorModule
+# Factory: android/soong/android.createModule.ModuleFactoryAdaptor.func2
+# Defined: libcore/JavaLibrary.bp:1148:1
