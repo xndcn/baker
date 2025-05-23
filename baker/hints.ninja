@@ -792,3 +792,34 @@ metalava -J-XX:OnError=\"cat hs_err_pid%p.log\" -J-XX:CICompilerCount=6 -J-XX:+U
 # Type:    java_api_contribution__bottomUpMutatorModule
 # Factory: android/soong/android.createModule.ModuleFactoryAdaptor.func2
 # Defined: libcore/JavaLibrary.bp:1148:1
+
+
+rm -rf out/soong/.intermediates/external/conscrypt/conscrypt.module.intra.core.api.stubs.source/android_common/everything/stubsDir && 
+mkdir -p out/soong/.intermediates/external/conscrypt/conscrypt.module.intra.core.api.stubs.source/android_common/everything/stubsDir && 
+rm -rf __SBOX_SANDBOX_DIR__/out/srcjars && 
+mkdir -p __SBOX_SANDBOX_DIR__/out/srcjars && 
+__SBOX_SANDBOX_DIR__/tools/out/bin/zipsync -d __SBOX_SANDBOX_DIR__/out/srcjars -l __SBOX_SANDBOX_DIR__/out/srcjars/list -f \"*.java\" && 
+rm -rf out/soong/.intermediates/external/conscrypt/conscrypt.module.intra.core.api.stubs.source/android_common/everything/home && 
+mkdir -p out/soong/.intermediates/external/conscrypt/conscrypt.module.intra.core.api.stubs.source/android_common/everything/home && 
+ANDROID_PREFS_ROOT=out/soong/.intermediates/external/conscrypt/conscrypt.module.intra.core.api.stubs.source/android_common/everything/home 
+  __SBOX_SANDBOX_DIR__/tools/out/bin/metalava -J-XX:OnError=\"cat hs_err_pid%p.log\" -J-XX:CICompilerCount=6 -J-XX:+UseDynamicNumberOfGCThreads -J-XX:+TieredCompilation -J-XX:TieredStopAtLevel=1 -J--add-opens=java.base/java.util=ALL-UNNAMED 
+  
+  --java-source 17 
+  @__SBOX_SANDBOX_DIR__/out/soong/.intermediates/external/conscrypt/conscrypt.module.intra.core.api.stubs.source/android_common/everything.metalava.rsp 
+  @__SBOX_SANDBOX_DIR__/out/srcjars/list --classpath __SBOX_SANDBOX_DIR__/out/soong/.intermediates/libcore/mmodules/intracoreapi/art.module.intra.core.api.stubs/android_common/turbine-combined/art.module.intra.core.api.stubs.jar:__SBOX_SANDBOX_DIR__/out/soong/.intermediates/libcore/mmodules/intracoreapi/art-module-intra-core-api-stubs-system-modules-lib/android_common/turbine-combined/art-module-intra-core-api-stubs-system-modules-lib.jar 
+  --color --quiet --format=v2 --repeat-errors-max 10 
+  --hide UnresolvedImport 
+  --api-class-resolution api --format-defaults overloaded-method-order=source,add-additional-overrides=yes 
+  --config-file build/soong/java/metalava/main-config.xml --config-file build/soong/java/metalava/source-model-selection-config.xml 
+  --api __SBOX_SANDBOX_DIR__/out/conscrypt.module.intra.core.api.stubs.source_api.txt 
+  --removed-api __SBOX_SANDBOX_DIR__/out/conscrypt.module.intra.core.api.stubs.source_removed.txt 
+  --stubs out/soong/.intermediates/external/conscrypt/conscrypt.module.intra.core.api.stubs.source/android_common/everything/stubsDir 
+  --check-compatibility:api:released external/conscrypt/api/intra/last-api.txt 
+  --check-compatibility:removed:released external/conscrypt/api/intra/last-removed.txt 
+  --baseline:compatibility:released external/conscrypt/api/intra/last-incompatibilities.txt 
+  --hide-annotation libcore.api.Hide 
+  --show-single-annotation libcore.api.IntraCoreApi 
+  --hide HiddenSuperclass --hide BroadcastBehavior 
+  --hide DeprecationMismatch --hide MissingPermission 
+  --hide SdkConstant --hide Todo --error-when-new-category Documentation 
+  --hide Deprecated --hide IntDef --hide Nullable --update-baseline:compatibility:released __SBOX_SANDBOX_DIR__/out/last_released_baseline.txt --error-message:compatibility:released $'\\n******************************\\nYou have tried to change the API from what has been previously released in\\nan SDK.  Please fix the errors listed above.\\n******************************\\n' --use-same-format-as external/conscrypt/api/intra/current.txt && __SBOX_SANDBOX_DIR__/tools/out/bin/soong_zip -write_if_changed -jar -o __SBOX_SANDBOX_DIR__/out/conscrypt.module.intra.core.api.stubs.source-stubs.srcjar -C out/soong/.intermediates/external/conscrypt/conscrypt.module.intra.core.api.stubs.source/android_common/everything/stubsDir -D out/soong/.intermediates/external/conscrypt/conscrypt.module.intra.core.api.stubs.source/android_common/everything/stubsDir && touch __SBOX_SANDBOX_DIR__/out/check_last_released_api.timestamp && rm -rf out/soong/.intermediates/external/conscrypt/conscrypt.module.intra.core.api.stubs.source/android_common/everything/srcjars

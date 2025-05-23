@@ -27,7 +27,6 @@ set_target_properties(librustc_demangle_static-static PROPERTIES LINKER_LANGUAGE
 add_library(activity_manager_procstate_aidl INTERFACE)
 add_library(libbssl_sys_raw INTERFACE)
 add_library(libbssl_sys_raw_nostd INTERFACE)
-add_library(conscrypt.module.intra.core.api.stubs INTERFACE)
 add_library(stub-annotations INTERFACE)
 
 # Most Android.bp add -Werror flags, but create a lot of errors
@@ -48,6 +47,7 @@ baker(art/ EXCLUDE_FROM_ALL)
 baker(build/soong/java/core-libraries/ EXCLUDE_FROM_ALL)
 baker(libcore/ EXCLUDE_FROM_ALL)
 baker(libnativehelper/ EXCLUDE_FROM_ALL)
+baker(external/conscrypt EXCLUDE_FROM_ALL)
 baker(external/cpu_features/ EXCLUDE_FROM_ALL)
 baker(external/dlmalloc/ EXCLUDE_FROM_ALL)
 baker(external/fdlibm/ EXCLUDE_FROM_ALL)
@@ -55,6 +55,7 @@ baker(external/googletest/ EXCLUDE_FROM_ALL)
 baker(external/icu EXCLUDE_FROM_ALL)
 baker(external/lz4/lib/ EXCLUDE_FROM_ALL)
 baker(external/lzma/ EXCLUDE_FROM_ALL)
+baker(external/okhttp/ EXCLUDE_FROM_ALL)
 baker(external/tinyxml2/ EXCLUDE_FROM_ALL)
 baker(external/zstd/ EXCLUDE_FROM_ALL)
 baker(system/libbase/ EXCLUDE_FROM_ALL)
@@ -97,7 +98,6 @@ set_property(TARGET aidl_unittests PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET boringssl_crypto_test PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET art-aconfig-flags-lib-static PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET art_libartbase_operator_srcs-gen PROPERTY EXCLUDE_FROM_ALL FALSE)
-set_property(TARGET asm_defines.s PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET libart-shared PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET libjavacore-unit-tests PROPERTY EXCLUDE_FROM_ALL FALSE)
 
@@ -108,6 +108,12 @@ set_property(TARGET boringssl_test_support-static PROPERTY LINK_LIBRARIES "$<LIS
 get_property(boringssl_test_support_libs TARGET boringssl_test_support-static PROPERTY INTERFACE_LINK_LIBRARIES)
 set_property(TARGET boringssl_test_support-static PROPERTY INTERFACE_LINK_LIBRARIES "$<LIST:FILTER,${boringssl_test_support_libs},EXCLUDE,libcrypto-shared>")
 target_link_libraries(boringssl_test_support-static PRIVATE libcrypto_static)
+
+get_property(boringssl_test_support_libs TARGET conscrypt_generate_constants PROPERTY LINK_LIBRARIES)
+set_property(TARGET conscrypt_generate_constants PROPERTY LINK_LIBRARIES "$<LIST:FILTER,${conscrypt_generate_constants},EXCLUDE,libcrypto-shared>")
+get_property(boringssl_test_support_libs TARGET conscrypt_generate_constants PROPERTY INTERFACE_LINK_LIBRARIES)
+set_property(TARGET conscrypt_generate_constants PROPERTY INTERFACE_LINK_LIBRARIES "$<LIST:FILTER,${conscrypt_generate_constants},EXCLUDE,libcrypto-shared>")
+target_link_libraries(conscrypt_generate_constants PRIVATE libcrypto_static)
 
 # Default bfd linker may fail to link with protected symbols
 target_link_options(art_defaults INTERFACE "-fuse-ld=lld")
@@ -130,3 +136,4 @@ set_property(TARGET libnativehelper_defaults PROPERTY _cflags "-U_GNU_SOURCE" ; 
 
 # Patch at the end
 baker_patch()
+set_property(TARGET asm_defines.s PROPERTY EXCLUDE_FROM_ALL FALSE)
