@@ -49,7 +49,7 @@ class JavaAConfigLibrary(Module):
         
         # Create the gen directory if it doesn't exist
         lines.append(f'file(MAKE_DIRECTORY "${{CMAKE_CURRENT_BINARY_DIR}}/gen/{name}/")')
-        lines.append(f'file(GENERATE OUTPUT "${{CMAKE_CURRENT_BINARY_DIR}}/gen/{name}.src" CONTENT "$<JOIN:${{outputs}},\\n>")')
+        lines.append(f'file(GENERATE OUTPUT "${{CMAKE_CURRENT_BINARY_DIR}}/gen/{name}.src" CONTENT "$<JOIN:${{outputs}},APPEND,\\n>\\n")')
 
         lines.append(f'''add_custom_command(
                         OUTPUT "${{CMAKE_CURRENT_BINARY_DIR}}/gen/{name}.jar"

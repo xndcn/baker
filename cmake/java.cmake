@@ -46,7 +46,7 @@ function(baker_add_java_library_impl lib)
     endif(defaults_list)
     get_property(source_dir TARGET ${lib} PROPERTY SOURCE_DIR)
     get_property(output_dir TARGET ${lib} PROPERTY BINARY_DIR)
-    file(GENERATE OUTPUT "${output_dir}/${lib}.src" CONTENT "$<JOIN:$<LIST:FILTER,$<TARGET_PROPERTY:${lib},INTERFACE_SOURCES>,EXCLUDE,^@>,\n>")
+    file(GENERATE OUTPUT "${output_dir}/${lib}.src" CONTENT "$<JOIN:$<LIST:FILTER,$<TARGET_PROPERTY:${lib},INTERFACE_SOURCES>,EXCLUDE,^@>,\n>\n")
     get_property(keys TARGET ${lib} PROPERTY _ALL_SINGLE_KEYS_)
 
     set(flags "")
@@ -158,7 +158,7 @@ endfunction()
 function(baker_add_metalava lib target)
     # Generate java.src file with all source file paths of the target
     get_property(output_dir TARGET ${lib} PROPERTY BINARY_DIR)
-    file(GENERATE OUTPUT "${output_dir}/${lib}.src" CONTENT "$<JOIN:$<TARGET_PROPERTY:${lib},INTERFACE_SOURCES>,\n>")
+    file(GENERATE OUTPUT "${output_dir}/${lib}.src" CONTENT "$<JOIN:$<TARGET_PROPERTY:${lib},INTERFACE_SOURCES>,\n>\n")
     file(GENERATE OUTPUT "${output_dir}/${lib}.metalava.sh" INPUT "${CMAKE_SOURCE_DIR}/cmake/metalava.template.sh" TARGET ${lib} USE_SOURCE_PERMISSIONS)
 
     set(merged_annotations_dirs "")
