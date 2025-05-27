@@ -94,12 +94,6 @@ set_property(TARGET libart-shared PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET libjavacore-unit-tests PROPERTY EXCLUDE_FROM_ALL FALSE)
 
 set_tests_properties(boringssl_crypto_test DIRECTORY external/boringssl/ PROPERTIES WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/external/boringssl/src/)
-# FIXME: boringssl_crypto_test fails with libcrypto-shared
-get_property(boringssl_test_support_libs TARGET boringssl_test_support-static PROPERTY LINK_LIBRARIES)
-set_property(TARGET boringssl_test_support-static PROPERTY LINK_LIBRARIES "$<LIST:FILTER,${boringssl_test_support_libs},EXCLUDE,libcrypto-shared>")
-get_property(boringssl_test_support_libs TARGET boringssl_test_support-static PROPERTY INTERFACE_LINK_LIBRARIES)
-set_property(TARGET boringssl_test_support-static PROPERTY INTERFACE_LINK_LIBRARIES "$<LIST:FILTER,${boringssl_test_support_libs},EXCLUDE,libcrypto-shared>")
-target_link_libraries(boringssl_test_support-static PRIVATE libcrypto_static)
 
 # Default bfd linker may fail to link with protected symbols
 target_link_options(art_defaults INTERFACE "-fuse-ld=lld")
@@ -122,3 +116,10 @@ set_property(TARGET libnativehelper_defaults PROPERTY _cflags "-U_GNU_SOURCE" ; 
 
 # Patch defaults at the end
 baker_patch_defaults()
+
+# FIXME: boringssl_crypto_test fails with libcrypto-shared
+get_property(boringssl_test_support_libs TARGET boringssl_test_support-static PROPERTY LINK_LIBRARIES)
+set_property(TARGET boringssl_test_support-static PROPERTY LINK_LIBRARIES "$<LIST:FILTER,${boringssl_test_support_libs},EXCLUDE,libcrypto-shared>")
+get_property(boringssl_test_support_libs TARGET boringssl_test_support-static PROPERTY INTERFACE_LINK_LIBRARIES)
+set_property(TARGET boringssl_test_support-static PROPERTY INTERFACE_LINK_LIBRARIES "$<LIST:FILTER,${boringssl_test_support_libs},EXCLUDE,libcrypto-shared>")
+target_link_libraries(boringssl_test_support-static PRIVATE libcrypto_static)
