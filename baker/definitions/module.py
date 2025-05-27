@@ -107,9 +107,6 @@ class Module(ABC):
         def get_property(name: str):
             return Utils.get_property(properties, name)
 
-        if defaults := get_property("defaults"):
-            lines.append(f'baker_apply_defaults({name} {Utils.to_cmake_expression(defaults, lines)})')
-
         # keys is ignored here for non-defaults modules
         lines += self._convert_internal_properties_to_cmake(properties, name, set(), set())
         # Process all condition properties dynamically like target, arch, codegen
