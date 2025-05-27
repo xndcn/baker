@@ -75,7 +75,7 @@ add_library(libz-shared INTERFACE)
 target_link_libraries(libz-shared INTERFACE ZLIB::ZLIB)
 
 # Fix for missing linkage
-set_property(TARGET liblog.defaults APPEND PROPERTY _export_header_libs libutils_headers)
+set_property(TARGET liblog.defaults APPEND PROPERTY _export_header_lib_headers libutils_headers)
 target_link_libraries(libmath-static PUBLIC libutils_headers)
 # Fix for these defaults which use directories with relative paths from the root
 target_include_directories(gtest_test_defaults INTERFACE external/googletest/googletest/)
