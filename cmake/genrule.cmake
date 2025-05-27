@@ -19,19 +19,6 @@ function(baker_transform_tool TOOL)
 endfunction(baker_transform_tool)
 
 function(baker_apply_genrule_transform target)
-    # Transform cmd
-    get_target_property(cmd ${target} _cmd)
-    if(cmd STREQUAL "cmd-NOTFOUND")
-        set(cmd "")
-    endif()
-    set(new_cmd "${cmd}")
-    string(REPLACE "$(in)" "$\{in\}" new_cmd "${new_cmd}")
-    string(REPLACE "$(out)" "$\{out\}" new_cmd "${new_cmd}")
-    string(REPLACE "$(genDir)" "$\{genDir\}" new_cmd "${new_cmd}")
-    # FIXME: check how to handle $(location) without arguments
-    string(REPLACE "$(location)" "${CMAKE_CURRENT_SOURCE_DIR}" new_cmd "${new_cmd}")
-    set_property(TARGET ${target} PROPERTY _cmd "${new_cmd}")
-
     # Transform tool_files
     get_target_property(tool_files ${target} _tool_files)
     if(tool_files STREQUAL "tool_files-NOTFOUND")

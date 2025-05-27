@@ -1,19 +1,20 @@
 #!/bin/env bash
 
-# Parse arguments
-cmd=""
+# Use generator expression to avoid special characters in the cmd
+cmd=$(cat <<'EOF'
+$<TARGET_PROPERTY:_cmd>
+EOF
+)
+
 genDir=""
 outs=()
 srcs=()
 tools=()
 tool_files=()
 
+# Parse arguments
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --cmd)
-            cmd="$2"
-            shift 2
-            ;;
         --genDir)
             genDir="$2"
             shift 2
@@ -68,6 +69,13 @@ if [ -z "$outs" ]; then
     echo "Error: --outs is required"
     exit 1
 fi
+
+# Transform cmd
+# FIXME: check how to handle $(location) without arguments
+cmd="${cmd//\$(location)/.}"
+cmd="${cmd//\$(in)/\$\{in\}}"
+cmd="${cmd//\$(out)/\$\{out\}}"
+cmd="${cmd//\$(genDir)/\$\{genDir\}}"
 
 # Create output directory if it doesn't exist
 mkdir -p "$genDir"
