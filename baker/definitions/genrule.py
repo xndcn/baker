@@ -21,10 +21,11 @@ class GenRule(Module):
         # add_custom_command OUTPUT do not support generator expressions of target, so create a variable
         out = Utils.to_internal_name(name, "OUT")
         lines += self._convert_out_to_cmake(out)
+        command_file = f'${{CMAKE_CURRENT_BINARY_DIR}}/{name}.sh'
+        lines.append(f'file(GENERATE OUTPUT "{command_file}" INPUT "${{CMAKE_SOURCE_DIR}}/cmake/genrule.template.sh" TARGET {gen_target})')
         lines.append(f'''add_custom_command(
                         OUTPUT "$<LIST:TRANSFORM,${{{out}}},PREPEND,${{CMAKE_CURRENT_BINARY_DIR}}/gen/>"
-                        COMMAND ${{CMAKE_SOURCE_DIR}}/cmake/genrule.sh ARGS
-                            --cmd "$<TARGET_PROPERTY:{gen_target},_cmd>"
+                        COMMAND {command_file} ARGS
                             --genDir "${{CMAKE_CURRENT_BINARY_DIR}}/gen/"
                             --outs "${{{out}}}"
                             --srcs "$<PATH:RELATIVE_PATH,$<TARGET_PROPERTY:{gen_target},INTERFACE_SOURCES>,${{CMAKE_CURRENT_SOURCE_DIR}}>"
