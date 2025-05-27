@@ -68,6 +68,29 @@ class Module(ABC):
             lines += add_property(key, self._evaluate_expression(value))
         return lines
 
+    def _get_internal_properties(self, properties: dict, name: str, single_keys: set[str], list_keys: set[str]) -> dict[str, any]:
+        dicts = {}
+        def add_property(key: str, value) -> dict[str, any]:
+            dicts = {}
+            if not isinstance(value, dict):
+                _key = f"{key}"
+                dicts[_key] = value
+                if isinstance(value, list):
+                    list_keys.add(_key)
+                else:
+                    single_keys.add(_key)
+            else:
+                for k, v in value.items():
+                    dicts.update(add_property(f'{key}_{k}', v))
+            return dicts
+
+        # Add properties
+        for key, value in properties.items():
+            if key in ["name", "srcs", "target", "arch", "codegen"]:
+                continue
+            dicts.update(add_property(key, self._evaluate_expression(value)))
+        return dicts
+
     def _convert_module_properties_to_cmake(self, name: str) -> list[str]:
         lines = self._convert_common_properties_to_cmake(self._module.properties, name)
         lines.append(f'baker_apply_sources_transform({name})')
