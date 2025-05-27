@@ -139,7 +139,7 @@ class Utils:
         elif isinstance(value, list):
             # For lists, join elements with semicolons which is CMake's list separator
             elements = [cls.to_cmake_expression(elem, lines) for elem in value]
-            return " ; ".join(elements)
+            return " ; ".join(elements) if elements else '""'
         elif isinstance(value, ast.VariableValue):
             return f"${{{value.name}}}"
         elif isinstance(value, ast.SelectValue):

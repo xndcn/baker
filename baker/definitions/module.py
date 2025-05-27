@@ -68,7 +68,7 @@ class Module(ABC):
             lines += add_property(key, self._evaluate_expression(value))
         return lines
 
-    def _get_internal_properties(self, properties: dict, name: str, single_keys: set[str], list_keys: set[str]) -> dict[str, any]:
+    def _get_internal_properties(self, properties: dict, single_keys: set[str], list_keys: set[str]) -> dict[str, any]:
         dicts = {}
         def add_property(key: str, value) -> dict[str, any]:
             dicts = {}
@@ -91,26 +91,43 @@ class Module(ABC):
             dicts.update(add_property(key, self._evaluate_expression(value)))
         return dicts
 
-    def _convert_module_properties_to_cmake(self, name: str) -> list[str]:
-        lines = self._convert_common_properties_to_cmake(self._module.properties, name)
-        lines.append(f'baker_apply_sources_transform({name})')
-        # Some modules need to include themselves
-        lines.append(f'target_include_directories({name} PRIVATE ".")')
-        lines.append(f'baker_apply_properties({name} {name})')
+    def _convert_module_to_cmake(self, function: str, internal_name: str = None, scope: str = "PRIVATE") -> list[str]:
+        name = self._get_property("name")
+        if not internal_name:
+            internal_name = name
+
+        single_keys = set()
+        list_keys = set()
+        properties = self._get_internal_properties(self._module.properties, single_keys, list_keys)
+        conditions = self._convert_common_properties_to_cmake(self._module.properties, internal_name, scope, single_keys, list_keys)
+
+        lines = []
+        modules = []
+        modules.append(f'{function}(')
+        modules.append(f'  name "{name}"')
+        if srcs := self._get_property("srcs"):
+            modules.append(f'  srcs {Utils.to_cmake_expression(srcs, lines)}')
+        for key, value in properties.items():
+            modules.append(f'  {key} {Utils.to_cmake_expression(value, lines)}')
+        modules.append('')
+        modules.append(f'  _ALL_SINGLE_KEYS_ {Utils.to_cmake_expression(list(single_keys), [])}')
+        modules.append(f'  _ALL_LIST_KEYS_ {Utils.to_cmake_expression(list(list_keys), [])}')
+        modules.append(')')
+        lines += modules
+        lines += conditions
+        lines.append(f'baker_apply_sources_transform({internal_name})')
         return lines
 
-    def _convert_common_properties_to_cmake(self, properties: dict, name: str) -> list[str]:
+    def _convert_common_properties_to_cmake(self, properties: dict, name: str, scope: str, single_keys: set[str], list_keys: set[str]) -> list[str]:
         lines = []
-        if srcs := Utils.get_property(properties, "srcs"):
-            lines.append(f'target_sources({name} PRIVATE {Utils.to_cmake_expression(srcs, lines)})')
+        if properties != self._module.properties:
+            if srcs := Utils.get_property(properties, "srcs"):
+                lines.append(f'target_sources({name} {scope} {Utils.to_cmake_expression(srcs, lines)})')
 
-        def get_property(name: str):
-            return Utils.get_property(properties, name)
-
-        # keys is ignored here for non-defaults modules
-        lines += self._convert_internal_properties_to_cmake(properties, name, set(), set())
+        if properties != self._module.properties:
+            lines += self._convert_internal_properties_to_cmake(properties, name, single_keys, list_keys)
         # Process all condition properties dynamically like target, arch, codegen
-        lines += self._convert_condition_properties_to_cmake(properties, name, self._convert_common_properties_to_cmake)
+        lines += self._convert_condition_properties_to_cmake(properties, name, lambda condition_properties, name: self._convert_common_properties_to_cmake(condition_properties, name, scope, single_keys, list_keys))
         return lines
 
     @abstractmethod
