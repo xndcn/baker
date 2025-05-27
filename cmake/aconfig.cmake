@@ -19,3 +19,57 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/build/tools/aconfig/aconfig")
     add_dependencies(aconfig aconfig_rust)
     set_target_properties(aconfig PROPERTIES IMPORTED_LOCATION ${CMAKE_BINARY_DIR}/aconfig_build/release/aconfig)
 endif()
+
+
+function(baker_aconfig_declarations)
+    baker_parse_metadata(${ARGN})
+
+    set(src ".${name}.SRC")
+    add_library(${src} INTERFACE)
+    target_sources(${src} INTERFACE ${ARG_srcs})
+    baker_apply_sources_transform(${src})
+
+    add_library(${name} INTERFACE)
+    baker_parse_properties(${name})
+
+    add_custom_command(
+        OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}.pb"
+        COMMAND cmake -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/gen/"
+        COMMAND aconfig ARGS create-cache
+            --package "$<TARGET_PROPERTY:${name},_package>"
+            --container "$<TARGET_PROPERTY:${name},_container>"
+            --cache "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}.pb"
+            --declarations "$<TARGET_PROPERTY:${src},INTERFACE_SOURCES>"
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        DEPENDS $<TARGET_PROPERTY:${src},INTERFACE_SOURCES>
+        VERBATIM
+    )
+    add_custom_target(${name}-gen SOURCES "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}.pb")
+
+    target_sources(${name} INTERFACE "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}.pb")
+    add_dependencies(${name} ${name}-gen)
+endfunction()
+
+function(baker_cc_aconfig_library)
+    baker_parse_metadata(${ARGN})
+
+    add_library(${name}-static STATIC)
+    baker_parse_properties(${name}-static)
+
+    # add_custom_command OUTPUT can not contains generator expressions with target property
+    # so use get_property here
+    get_property(package TARGET ${ARG_aconfig_declarations} PROPERTY _package)
+    set(package $<LIST:TRANSFORM,${package},REPLACE,[.],_>)
+    add_custom_command(
+        OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/${package}.cc" "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/include/${package}.h"
+        COMMAND aconfig ARGS create-cpp-lib
+            --cache "$<TARGET_PROPERTY:$<TARGET_PROPERTY:${name}-static,_aconfig_declarations>,INTERFACE_SOURCES>"
+            --out "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/"
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        DEPENDS $<TARGET_PROPERTY:${name}-static,_aconfig_declarations>
+        VERBATIM
+    )
+
+    target_sources(${name}-static PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/${package}.cc")
+    target_include_directories(${name}-static PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/include")
+endfunction()

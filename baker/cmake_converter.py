@@ -6,8 +6,7 @@ from .definitions.filegroup import FileGroup
 from .definitions.genrule import GenRule
 from .definitions.gensrcs import GenSrcs
 from .definitions.python_binary_host import PythonBinaryHost
-from .definitions.aconfig_declarations import AConfigDeclarations
-from .definitions.cc_aconfig_library import CCAConfigLibrary
+from .definitions.aconfig_modules import AConfigDeclarations, CCAConfigLibrary
 
 class CMakeConverter:
     def __init__(self):
