@@ -49,13 +49,13 @@ class Module(ABC):
         def add_property(key: str, value) -> list[str]:
             lines = []
             if not isinstance(value, dict):
-                _key = f"_{key}"
+                _key = f"{key}"
                 if isinstance(value, list):
                     list_keys.add(_key)
-                    lines.append(f'set_property(TARGET {name} APPEND PROPERTY {_key} {Utils.to_cmake_expression(value, lines)})')
+                    lines.append(f'set_property(TARGET {name} APPEND PROPERTY _{_key} {Utils.to_cmake_expression(value, lines)})')
                 else:
                     single_keys.add(_key)
-                    lines.append(f'set_property(TARGET {name} PROPERTY {_key} {Utils.to_cmake_expression(value, lines)})')
+                    lines.append(f'set_property(TARGET {name} PROPERTY _{_key} {Utils.to_cmake_expression(value, lines)})')
             else:
                 for k, v in value.items():
                     lines += add_property(f'{key}_{k}', v)
@@ -106,9 +106,6 @@ class Module(ABC):
 
         def get_property(name: str):
             return Utils.get_property(properties, name)
-
-        if defaults := get_property("defaults"):
-            lines.append(f'baker_apply_defaults({name} {Utils.to_cmake_expression(defaults, lines)})')
 
         # keys is ignored here for non-defaults modules
         lines += self._convert_internal_properties_to_cmake(properties, name, set(), set())
