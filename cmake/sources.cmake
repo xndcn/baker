@@ -68,6 +68,17 @@ function(baker_apply_sources_transform target)
         list(APPEND new_interface_sources ${SOURCE_FILE})
     endforeach()
 
-    set_property(TARGET ${target} PROPERTY SOURCES ${new_private_sources})
+    get_target_property(imported ${target} IMPORTED)
+    if(NOT imported)
+        set_property(TARGET ${target} PROPERTY SOURCES ${new_private_sources})
+    endif()
     set_property(TARGET ${target} PROPERTY INTERFACE_SOURCES ${new_interface_sources})
 endfunction(baker_apply_sources_transform)
+
+
+function(baker_filegroup)
+    baker_parse_metadata(${ARGN})
+
+    add_library(${name} INTERFACE)
+    target_sources(${name} INTERFACE ${ARG_srcs})
+endfunction()
