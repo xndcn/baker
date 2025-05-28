@@ -1,12 +1,7 @@
 from .blueprint import ast
 from .definitions.assignment import Assignment
-from .definitions.cc_library import CCLibrary
-from .definitions.cc_test_library import CCTestLibrary
-from .definitions.cc_library_headers import CCLibraryHeaders
+from .definitions.cc_modules import CCLibrary, CCTestLibrary, CCLibraryHeaders, CCBinary, CCTest, CCObject
 from .definitions.defaults import Defaults
-from .definitions.cc_binary import CCBinary
-from .definitions.cc_test import CCTest
-from .definitions.cc_object import CCObject
 from .definitions.filegroup import FileGroup
 from .definitions.genrule import GenRule
 from .definitions.gensrcs import GenSrcs
