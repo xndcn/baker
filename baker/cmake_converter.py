@@ -3,8 +3,7 @@ from .definitions.assignment import Assignment
 from .definitions.cc_modules import CCLibrary, CCTestLibrary, CCLibraryHeaders, CCBinary, CCTest, CCObject
 from .definitions.defaults import Defaults
 from .definitions.filegroup import FileGroup
-from .definitions.genrule import GenRule
-from .definitions.gensrcs import GenSrcs
+from .definitions.genrule import GenRule, GenSrcs
 from .definitions.python_binary_host import PythonBinaryHost
 from .definitions.aconfig_modules import AConfigDeclarations, CCAConfigLibrary
 
