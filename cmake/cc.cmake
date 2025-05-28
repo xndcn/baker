@@ -96,23 +96,35 @@ endfunction()
 function(baker_cc_object)
     baker_parse_metadata(${ARGN})
 
-    if(NOT ARG_linker_script)
-        add_library(${name} OBJECT)
-        target_sources(${name} INTERFACE $<TARGET_OBJECTS:${name}>)
-    else()
-        # cc_object with linker_script is one object by partial linking of multiple object files
-        add_executable(${name})
-        # Always enable position independent code
-        set_target_properties(${name} PROPERTIES POSITION_INDEPENDENT_CODE ON)
-        set_target_properties(${name} PROPERTIES SUFFIX .o ENABLE_EXPORTS ON)
-        # Set the linker to use the partial linking option
-        target_link_options(${name} PRIVATE -no-pie -nostdlib -Wl,-r)
-        target_link_libraries(${name} INTERFACE $<TARGET_FILE:${name}>)
-    endif()
+    set(object ".${name}.OBJ")
+    add_library(${object} OBJECT)
+    target_sources(${object} PRIVATE ${ARG_srcs})
+    set_target_properties(${object} PROPERTIES POSITION_INDEPENDENT_CODE ON)
+    baker_parse_properties(${object})
+    baker_cc_apply_properties(${object} ${object})
 
-    target_sources(${name} PRIVATE ${ARG_srcs})
-    baker_parse_properties(${name})
-    baker_cc_apply_properties(${name} ${name})
+    add_library(${name} INTERFACE)
+    # if linker_script is not specified, use the default object library
+    target_sources(${name} INTERFACE $<$<NOT:$<BOOL:$<TARGET_PROPERTY:${object},_linker_script>>>:$<TARGET_OBJECTS:${object}>>)
+
+    # cc_object with linker_script is one object by partial linking of multiple object files
+    set(link ".${name}.PARTIAL_LINK")
+    add_executable(${link} EXCLUDE_FROM_ALL)
+    # Always enable position independent code
+    set_target_properties(${link} PROPERTIES POSITION_INDEPENDENT_CODE ON)
+    set_target_properties(${link} PROPERTIES SUFFIX .o ENABLE_EXPORTS ON)
+    # Set the linker to use the partial linking option
+    target_link_options(${link} PRIVATE -no-pie -nostdlib -Wl,-r)
+    target_link_libraries(${link} PRIVATE ${object})
+    baker_cc_apply_properties(${link} ${object})
+    target_link_libraries(${name} INTERFACE $<$<BOOL:$<TARGET_PROPERTY:${object},_linker_script>>:$<TARGET_FILE:${link}>>)
+
+    # Add a custom target to handle different dependencies
+    add_custom_target(.${name}.DEP DEPENDS
+        $<$<BOOL:$<TARGET_PROPERTY:${object},_linker_script>>:${link}>
+        $<$<NOT:$<BOOL:$<TARGET_PROPERTY:${object},_linker_script>>>:${object}>
+    )
+    add_dependencies(${name} .${name}.DEP)
 endfunction()
 
 function(baker_cc_library)
