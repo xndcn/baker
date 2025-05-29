@@ -6,6 +6,7 @@ from .definitions.filegroup import FileGroup
 from .definitions.genrule import GenRule, GenSrcs
 from .definitions.python_binary_host import PythonBinaryHost
 from .definitions.aconfig_modules import AConfigDeclarations, CCAConfigLibrary
+from .definitions.java_modules import JavaApiLibrary, JavaSdkLibrary
 
 class CMakeConverter:
     def __init__(self):
@@ -13,7 +14,8 @@ class CMakeConverter:
             Defaults, FileGroup,
             CCLibraryHeaders, CCLibrary, CCTestLibrary, CCBinary, CCTest, CCObject,
             GenRule, GenSrcs, PythonBinaryHost,
-            AConfigDeclarations, CCAConfigLibrary
+            AConfigDeclarations, CCAConfigLibrary,
+            JavaApiLibrary, JavaSdkLibrary,
         ]
 
     def convert(self, project: str, root: ast.Blueprint, subdirectories=None) -> str:
@@ -22,6 +24,7 @@ class CMakeConverter:
         # list transformations generator expression required for CMake 3.27
         # WHOLE_ARCHIVE with multiple entries requires CMake 3.30, may fix by LINK_GROUP:RESCAN
         # See https://gitlab.kitware.com/cmake/cmake/-/issues/25954
+        # TRANSITIVE_LINK_PROPERTIES requires CMake 3.30
         lines.append("cmake_minimum_required(VERSION 3.30)")
         lines.append(f"project({project})")
         lines.append("")
