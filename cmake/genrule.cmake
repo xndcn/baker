@@ -43,3 +43,59 @@ function(baker_apply_genrule_transform target)
     endforeach()
     set_property(TARGET ${target} PROPERTY _tools "${new_tools}")
 endfunction(baker_apply_genrule_transform)
+
+
+function(baker_genrule)
+    baker_parse_metadata(${ARGN})
+
+    set(src ".${name}.SRC")
+    add_library(${src} INTERFACE)
+    target_sources(${src} INTERFACE ${ARG_srcs})
+    baker_apply_sources_transform(${src})
+    baker_parse_properties(${src})
+    baker_apply_genrule_transform(${src})
+
+    set(command_file "${CMAKE_CURRENT_BINARY_DIR}/${name}.genrule.sh")
+    file(GENERATE OUTPUT "${command_file}" INPUT "${CMAKE_SOURCE_DIR}/cmake/genrule.template.sh" TARGET ${src})
+    add_custom_command(
+        OUTPUT "$<LIST:TRANSFORM,${ARG_out},PREPEND,${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/>"
+        COMMAND ${command_file} ARGS
+            --genDir "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/"
+            --outs "$<GENEX_EVAL:$<TARGET_PROPERTY:${src},_out>>"
+            --srcs "$<PATH:RELATIVE_PATH,$<TARGET_PROPERTY:${src},INTERFACE_SOURCES>,${CMAKE_CURRENT_SOURCE_DIR}>"
+            --tools "$<GENEX_EVAL:$<TARGET_PROPERTY:${src},_tools>>"
+            --tool_files "$<GENEX_EVAL:$<TARGET_PROPERTY:${src},_tool_files>>"
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        DEPENDS $<GENEX_EVAL:$<TARGET_PROPERTY:${src},_tools>> ; $<GENEX_EVAL:$<TARGET_PROPERTY:${src},_tool_files>> ; $<TARGET_PROPERTY:${src},INTERFACE_LINK_LIBRARIES>
+        VERBATIM
+    )
+    add_custom_target(${name}-gen SOURCES "$<LIST:TRANSFORM,${ARG_out},PREPEND,${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/>")
+
+    add_library(${name} INTERFACE)
+    target_sources(${name} INTERFACE $<TARGET_PROPERTY:${name}-gen,SOURCES>)
+    # generated_headers expects the output directory to be in the include path
+    target_include_directories(${name} INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/)
+    add_dependencies(${name} ${name}-gen)
+    return(PROPAGATE name)
+endfunction()
+
+function(baker_gensrcs)
+    baker_parse_metadata(${ARGN})
+
+    list(APPEND ARG__ALL_LIST_KEYS_ "out")
+    set(ARG_out "$<PATH:REPLACE_EXTENSION,${ARG_srcs},.${ARG_output_extension}>")
+    set(args "")
+    foreach(key IN LISTS ARG__ALL_SINGLE_KEYS_)
+        list(APPEND args "${key}" "${ARG_${key}}")
+    endforeach()
+    foreach(key IN LISTS ARG__ALL_LIST_KEYS_)
+        list(APPEND args "${key}" "${ARG_${key}}")
+    endforeach()
+    baker_genrule(
+        name ${name}
+        srcs ${ARG_srcs}
+        ${args}
+        _ALL_SINGLE_KEYS_ ${ARG__ALL_SINGLE_KEYS_}
+        _ALL_LIST_KEYS_ ${ARG__ALL_LIST_KEYS_}
+    )
+endfunction()

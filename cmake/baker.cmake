@@ -68,14 +68,22 @@ function(baker_include_build)
 endfunction()
 
 # Parse basic metadata
-macro(baker_parse_metadata)
+# Passing arguments cmd including special characters to macro
+# may cause issues, so we have to use function here
+function(baker_parse_metadata)
     cmake_parse_arguments(ARG "" "name" "_ALL_SINGLE_KEYS_;_ALL_LIST_KEYS_" ${ARGN})
     if(NOT ARG_name)
         message(FATAL_ERROR "name must be specified")
     endif()
     set(name ${ARG_name})
     cmake_parse_arguments(ARG "" "${ARG__ALL_SINGLE_KEYS_}" "srcs;${ARG__ALL_LIST_KEYS_}" ${ARG_UNPARSED_ARGUMENTS})
-endmacro()
+
+    set(arg_ALL_SINGLE_KEYS "${ARG__ALL_SINGLE_KEYS_}")
+    list(TRANSFORM arg_ALL_SINGLE_KEYS PREPEND "ARG_")
+    set(arg_ALL_LIST_KEYS "${ARG__ALL_LIST_KEYS_}")
+    list(TRANSFORM arg_ALL_LIST_KEYS PREPEND "ARG_")
+    return(PROPAGATE name ARG_srcs ${arg_ALL_SINGLE_KEYS} ${arg_ALL_LIST_KEYS} ARG__ALL_SINGLE_KEYS_ ARG__ALL_LIST_KEYS_ ARG_UNPARSED_ARGUMENTS)
+endfunction()
 
 # Parse property keys and values
 macro(baker_parse_properties target)
