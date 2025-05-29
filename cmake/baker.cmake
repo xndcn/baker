@@ -5,6 +5,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/sources.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/genrule.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/defaults.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cc.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/java.cmake)
 
 function(baker dir)
     cmake_parse_arguments(BAKER "EXCLUDE_FROM_ALL" "OUTPUT" "" ${ARGN})
@@ -98,3 +99,9 @@ macro(baker_parse_properties target)
     list(TRANSFORM ARG__ALL_LIST_KEYS_ PREPEND _)
     set_property(TARGET ${target} PROPERTY _ALL_LIST_KEYS_ ${ARG__ALL_LIST_KEYS_})
 endmacro()
+
+function(baker_target_list_property out_var)
+    cmake_parse_arguments(ARG "" "PROPERTY" "TARGETS" ${ARGN})
+    # The magic is using $<1:$> to excape the $ character
+    set(${out_var} $<LIST:TRANSFORM,$<LIST:TRANSFORM,${ARG_TARGETS},PREPEND,$<1:$><TARGET_PROPERTY:>,APPEND,$<COMMA>${ARG_PROPERTY}$<ANGLE-R>> PARENT_SCOPE)
+endfunction()
