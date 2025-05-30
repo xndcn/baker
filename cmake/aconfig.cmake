@@ -27,26 +27,27 @@ function(baker_aconfig_declarations)
     set(src ".${name}.SRC")
     add_library(${src} INTERFACE)
     target_sources(${src} INTERFACE ${ARG_srcs})
-    baker_parse_properties(${src})
+    target_apply_sources_transform(${src})
 
     add_library(${name} OBJECT ".")
+    baker_parse_properties(${name})
     set_target_properties(${name} PROPERTIES LINKER_LANGUAGE CXX)
 
     add_custom_command(
         OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}.pb"
         COMMAND cmake -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/gen/"
         COMMAND aconfig ARGS create-cache
-            --package "$<TARGET_PROPERTY:${src},_package>"
-            --container "$<TARGET_PROPERTY:${src},_container>"
+            --package "$<TARGET_PROPERTY:${name},_package>"
+            --container "$<TARGET_PROPERTY:${name},_container>"
             --cache "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}.pb"
             --declarations "$<TARGET_PROPERTY:${src},INTERFACE_SOURCES>"
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         DEPENDS $<TARGET_PROPERTY:${src},INTERFACE_SOURCES>
         VERBATIM
     )
-    add_custom_target(.${name}.DEP SOURCES "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}.pb")
-    target_sources(${name} INTERFACE "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}.pb")
-    add_dependencies(${name} .${name}.DEP)
+
+    # Since .pb file can not been built into object, we can safely use it as source
+    target_sources(${name} PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}.pb")
 endfunction()
 
 function(baker_cc_aconfig_library)
