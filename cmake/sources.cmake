@@ -1,4 +1,9 @@
 function(baker_transform_source_file target SCOPE SOURCE_FILE)
+    # Replace curly braces in file name (foo{bar} becomes foo_bar_)
+    if(SOURCE_FILE MATCHES "\\{.*\\}")
+        string(REGEX REPLACE "\\{([^}]*)\\}" "_\\1_" SOURCE_FILE "${SOURCE_FILE}")
+    endif()
+
     get_filename_component(file_name ${SOURCE_FILE} NAME_WE)
     get_filename_component(file_ext ${SOURCE_FILE} EXT)
     if(file_name MATCHES "\\*")
@@ -8,7 +13,14 @@ function(baker_transform_source_file target SCOPE SOURCE_FILE)
         # Convert ":file_name" to target link "file_name"
         string(SUBSTRING ${file_name} 1 -1 dependency)
         set(SOURCE_FILE "")
-        target_link_libraries(${target} ${SCOPE} ${dependency}${file_ext})
+        set(dependency "${dependency}${file_ext}")
+        target_link_libraries(${target} ${SCOPE} ${dependency})
+        if(NOT TARGET .${dependency}.DEP)
+            # add_dependencies do not accept generator expressions
+            # so create a custom target to ensure the dependency is built
+            add_custom_target(.${dependency}.DEP DEPENDS $<$<TARGET_EXISTS:${dependency}>:${dependency}>)
+        endif()
+        add_dependencies(${target} .${dependency}.DEP)
     elseif(file_ext STREQUAL ".aidl")
         get_filename_component(dir_path ${SOURCE_FILE} DIRECTORY)
         file(RELATIVE_PATH dir_path "${CMAKE_CURRENT_SOURCE_DIR}" "${dir_path}")
