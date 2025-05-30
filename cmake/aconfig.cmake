@@ -45,7 +45,7 @@ function(baker_aconfig_declarations)
         VERBATIM
     )
     add_custom_target(.${name}.DEP SOURCES "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}.pb")
-    target_sources(${name} PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}.pb")
+    target_sources(${name} INTERFACE "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}.pb")
     add_dependencies(${name} .${name}.DEP)
 endfunction()
 
