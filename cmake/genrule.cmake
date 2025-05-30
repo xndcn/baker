@@ -73,9 +73,9 @@ function(baker_genrule)
     add_library(${name} OBJECT ".")
     set_target_properties(${name} PROPERTIES LINKER_LANGUAGE CXX)
     target_sources(${name} INTERFACE "$<LIST:TRANSFORM,${ARG_out},PREPEND,${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/>")
-    add_dependencies(${name} .${name}.DEP)
     # generated_headers expects the output directory to be in the include path
     target_include_directories(${name} INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/)
+    add_dependencies(${name} .${name}.DEP)
     return(PROPAGATE name)
 endfunction()
 
