@@ -45,9 +45,8 @@ function(baker_aconfig_declarations)
         DEPENDS $<TARGET_PROPERTY:${src},INTERFACE_SOURCES>
         VERBATIM
     )
-    add_custom_target(.${name}.DEP SOURCES "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}.pb")
-    target_sources(${name} INTERFACE "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}.pb")
-    add_dependencies(${name} .${name}.DEP)
+    # Since .pb file can not been built into object, we can use it as sources
+    target_sources(${name} PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}.pb")
 endfunction()
 
 function(baker_cc_aconfig_library)
