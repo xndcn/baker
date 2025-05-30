@@ -27,18 +27,17 @@ function(baker_aconfig_declarations)
     set(src ".${name}.SRC")
     add_library(${src} INTERFACE)
     target_sources(${src} INTERFACE ${ARG_srcs})
-    baker_apply_sources_transform(${src})
+    baker_parse_properties(${src})
 
     add_library(${name} OBJECT ".")
     set_target_properties(${name} PROPERTIES LINKER_LANGUAGE CXX)
-    baker_parse_properties(${name})
 
     add_custom_command(
         OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}.pb"
         COMMAND cmake -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/gen/"
         COMMAND aconfig ARGS create-cache
-            --package "$<TARGET_PROPERTY:${name},_package>"
-            --container "$<TARGET_PROPERTY:${name},_container>"
+            --package "$<TARGET_PROPERTY:${src},_package>"
+            --container "$<TARGET_PROPERTY:${src},_container>"
             --cache "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}.pb"
             --declarations "$<TARGET_PROPERTY:${src},INTERFACE_SOURCES>"
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
