@@ -69,13 +69,14 @@ function(baker_genrule)
         DEPENDS $<GENEX_EVAL:$<TARGET_PROPERTY:${src},_tools>> ; $<GENEX_EVAL:$<TARGET_PROPERTY:${src},_tool_files>> ; $<TARGET_PROPERTY:${src},INTERFACE_LINK_LIBRARIES>
         VERBATIM
     )
-    add_custom_target(${name}-gen SOURCES "$<LIST:TRANSFORM,${ARG_out},PREPEND,${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/>")
+    add_custom_target(.${name}.DEP SOURCES "$<LIST:TRANSFORM,${ARG_out},PREPEND,${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/>")
 
-    add_library(${name} INTERFACE)
-    target_sources(${name} INTERFACE $<TARGET_PROPERTY:${name}-gen,SOURCES>)
+    add_library(${name} OBJECT ".")
+    set_target_properties(${name} PROPERTIES LINKER_LANGUAGE CXX)
+    target_sources(${name} INTERFACE "$<LIST:TRANSFORM,${ARG_out},PREPEND,${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/>")
+    add_dependencies(${name} .${name}.DEP)
     # generated_headers expects the output directory to be in the include path
     target_include_directories(${name} INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/)
-    add_dependencies(${name} ${name}-gen)
     return(PROPAGATE name)
 endfunction()
 
