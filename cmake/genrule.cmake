@@ -51,7 +51,6 @@ function(baker_genrule)
     set(src ".${name}.SRC")
     add_library(${src} INTERFACE)
     target_sources(${src} INTERFACE ${ARG_srcs})
-    baker_apply_sources_transform(${src})
     baker_parse_properties(${src})
     baker_apply_genrule_transform(${src})
 
