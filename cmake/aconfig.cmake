@@ -27,7 +27,7 @@ function(baker_aconfig_declarations)
     set(src ".${name}.SRC")
     add_library(${src} INTERFACE)
     target_sources(${src} INTERFACE ${ARG_srcs})
-    target_apply_sources_transform(${src})
+    baker_apply_sources_transform(${src})
 
     add_library(${name} OBJECT ".")
     baker_parse_properties(${name})
