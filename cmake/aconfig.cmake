@@ -29,8 +29,9 @@ function(baker_aconfig_declarations)
     target_sources(${src} INTERFACE ${ARG_srcs})
     baker_apply_sources_transform(${src})
 
-    add_library(${name} INTERFACE)
+    add_library(${name} OBJECT ".")
     baker_parse_properties(${name})
+    set_target_properties(${name} PROPERTIES LINKER_LANGUAGE CXX)
 
     add_custom_command(
         OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}.pb"
@@ -44,10 +45,9 @@ function(baker_aconfig_declarations)
         DEPENDS $<TARGET_PROPERTY:${src},INTERFACE_SOURCES>
         VERBATIM
     )
-    add_custom_target(${name}-gen SOURCES "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}.pb")
 
-    target_sources(${name} INTERFACE "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}.pb")
-    add_dependencies(${name} ${name}-gen)
+    # Since .pb file can not been built into object, we can safely use it as source
+    target_sources(${name} PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}.pb")
 endfunction()
 
 function(baker_cc_aconfig_library)
