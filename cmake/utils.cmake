@@ -58,7 +58,7 @@ function(baker_parse_repeated_arguments)
         set(${ARG__KEY_}${count} "${values}" PARENT_SCOPE)
         math(EXPR count "${count} + 1")
     endif()
-    list(SUBLIST remaining_args ${index} -1 remaining_args)
+
     # Set the count of keywords found
     set(${ARG__KEY_} ${count} PARENT_SCOPE)
     # Set unparsed arguments
