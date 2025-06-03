@@ -81,4 +81,5 @@ function(baker_filegroup)
 
     add_library(${name} INTERFACE)
     target_sources(${name} INTERFACE ${ARG_srcs})
+    baker_apply_sources_transform(${name})
 endfunction()

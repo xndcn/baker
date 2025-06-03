@@ -51,6 +51,7 @@ function(baker_genrule)
     set(src ".${name}.SRC")
     add_library(${src} INTERFACE)
     target_sources(${src} INTERFACE ${ARG_srcs})
+    baker_apply_sources_transform(${src})
     baker_parse_properties(${src})
     baker_apply_genrule_transform(${src})
 
@@ -91,9 +92,9 @@ function(baker_gensrcs)
     foreach(key IN LISTS ARG__ALL_LIST_KEYS_)
         list(APPEND args "${key}" "${ARG_${key}}")
     endforeach()
+    # TODO: Add support of conditions
     baker_genrule(
         name ${name}
-        srcs ${ARG_srcs}
         ${args}
         _ALL_SINGLE_KEYS_ ${ARG__ALL_SINGLE_KEYS_}
         _ALL_LIST_KEYS_ ${ARG__ALL_LIST_KEYS_}
