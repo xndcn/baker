@@ -15,11 +15,11 @@ class Module(ABC):
         return Utils.evaluate_expression(expr)
 
     def _get_condition_properties(self, properties: dict, condition: str, single_keys: set[str], list_keys: set[str]) -> dict[str, dict[str, any]]:
-        dict = {}
+        dicts = {}
         for key, condition_properties in Utils.get_property(properties, condition, {}).items():
             condition_properties = self._get_internal_properties(condition_properties, single_keys, list_keys)
-            dict[key] = condition_properties
-        return dict
+            dicts[key] = condition_properties
+        return dicts
 
     def _get_internal_properties(self, properties: dict, single_keys: set[str], list_keys: set[str]) -> dict[str, any]:
         dicts = {}
