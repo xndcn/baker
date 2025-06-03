@@ -57,7 +57,7 @@ endfunction()
 
 # Patch all defaults, should be called after all defaults targets are created
 function(baker_patch_defaults)
-    get_all_targets_recursive(all_targets ${CMAKE_SOURCE_DIR})
+    baker_get_all_targets_recursive(all_targets ${CMAKE_SOURCE_DIR})
     set(defaults_list "")
     set(target_list "")
     # Get all defaults
@@ -84,4 +84,5 @@ function(baker_defaults)
     add_library(${name} INTERFACE)
     baker_parse_properties(${name})
     target_sources(${name} INTERFACE ${ARG_srcs})
+    baker_apply_sources_transform(${name})
 endfunction()
