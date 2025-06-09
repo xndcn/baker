@@ -7,11 +7,13 @@
            sync-j="4" />
   <superproject name="platform/superproject" remote="aosp" />
 
+  <project path="build/soong" name="platform/build/soong" groups="pdk,tradefed,sysui-studio" />
   <project path="build/make" name="platform/build" groups="pdk,sysui-studio" >
     <linkfile src="tools" dest="build/tools" />
   </project>
 
   <project path="external/boringssl" name="platform/external/boringssl" groups="pdk" />
+  <project path="external/conscrypt" name="platform/external/conscrypt" groups="pdk" />
   <project path="external/cpu_features" name="platform/external/cpu_features" groups="pdk" />
   <project path="external/dlmalloc" name="platform/external/dlmalloc" groups="pdk" />
   <project path="external/fdlibm" name="platform/external/fdlibm" groups="pdk" />
@@ -33,6 +35,8 @@
   <project path="system/unwinding" name="platform/system/unwinding" groups="pdk" />
 
   <project path="frameworks/native" name="platform/frameworks/native" groups="pdk" />
+
+  <project path="tools/metalava" name="platform/tools/metalava" groups="pdk,tools" />
 
   <project path="packages/modules/ConfigInfrastructure" name="platform/packages/modules/ConfigInfrastructure" groups="pdk-cw-fs,pdk-fs" />
 

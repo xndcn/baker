@@ -24,6 +24,7 @@ add_library(libprocessgroup-shared INTERFACE)
 add_library(libjsoncpp-static INTERFACE)
 add_library(librustc_demangle_static-static STATIC ".")
 set_target_properties(librustc_demangle_static-static PROPERTIES LINKER_LANGUAGE CXX)
+add_library(stub-annotations INTERFACE)
 
 # Most Android.bp add -Werror flags, but create a lot of errors
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
@@ -40,8 +41,10 @@ baker(frameworks/native/libs/math/)
 
 # Currently not built by default
 baker(art/ EXCLUDE_FROM_ALL)
+baker(build/soong/java/core-libraries/ EXCLUDE_FROM_ALL)
 baker(libcore/ EXCLUDE_FROM_ALL)
 baker(libnativehelper/ EXCLUDE_FROM_ALL)
+baker(external/conscrypt/ EXCLUDE_FROM_ALL)
 baker(external/cpu_features/ EXCLUDE_FROM_ALL)
 baker(external/dlmalloc/ EXCLUDE_FROM_ALL)
 baker(external/fdlibm/ EXCLUDE_FROM_ALL)
@@ -93,6 +96,7 @@ set_property(TARGET art_libartbase_operator_srcs PROPERTY EXCLUDE_FROM_ALL FALSE
 set_property(TARGET asm_defines.s PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET libart-shared PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET libjavacore-unit-tests PROPERTY EXCLUDE_FROM_ALL FALSE)
+set_property(TARGET core.current.stubs.from-text PROPERTY EXCLUDE_FROM_ALL FALSE)
 
 set_tests_properties(boringssl_crypto_test DIRECTORY external/boringssl/ PROPERTIES WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/external/boringssl/src/)
 # FIXME: boringssl_crypto_test fails with libcrypto-shared
