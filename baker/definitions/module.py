@@ -44,10 +44,8 @@ class Module(ABC):
             dicts.update(add_property(key, self._evaluate_expression(value)))
         return dicts
 
-    def _convert_module_to_cmake(self, function: str, internal_name: str = None, scope: str = "PRIVATE") -> list[str]:
+    def _convert_module_to_cmake(self, function: str) -> list[str]:
         name = self._get_property("name")
-        if not internal_name:
-            internal_name = name
 
         single_keys = set()
         list_keys = set()
