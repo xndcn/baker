@@ -1,6 +1,5 @@
 from ..blueprint import ast
 from .module import Module
-from .utils import Utils
 
 class GenRule(Module):
     def __init__(self, blueprint: ast.Blueprint, module: ast.Module):
@@ -11,9 +10,7 @@ class GenRule(Module):
         return name.find("genrule") >= 0
 
     def convert_to_cmake(self):
-        name = self._get_property("name")
-        src = Utils.to_internal_name(name, "SRC")
-        return self._convert_module_to_cmake("baker_genrule", src, "INTERFACE")
+        return self._convert_module_to_cmake("baker_genrule")
 
 
 class GenSrcs(Module):
@@ -25,6 +22,4 @@ class GenSrcs(Module):
         return name.find("gensrcs") >= 0
 
     def convert_to_cmake(self):
-        name = self._get_property("name")
-        src = Utils.to_internal_name(name, "SRC")
-        return self._convert_module_to_cmake("baker_gensrcs", src, "INTERFACE")
+        return self._convert_module_to_cmake("baker_gensrcs")

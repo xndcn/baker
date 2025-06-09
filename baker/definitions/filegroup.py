@@ -10,4 +10,4 @@ class FileGroup(Module):
         return name.find("filegroup") >= 0
 
     def convert_to_cmake(self):
-        return self._convert_module_to_cmake("baker_filegroup", None, "INTERFACE")
+        return self._convert_module_to_cmake("baker_filegroup")

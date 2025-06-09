@@ -10,4 +10,4 @@ class Defaults(Module):
         return name.find("defaults") >= 0
 
     def convert_to_cmake(self) -> list[str]:
-        return self._convert_module_to_cmake("baker_defaults", None, "INTERFACE")
+        return self._convert_module_to_cmake("baker_defaults")

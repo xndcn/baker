@@ -10,7 +10,7 @@ class AConfigDeclarations(Module):
         return name.find("aconfig_declarations") >= 0
 
     def convert_to_cmake(self):
-        return self._convert_module_to_cmake("baker_aconfig_declarations", None, "INTERFACE")
+        return self._convert_module_to_cmake("baker_aconfig_declarations")
 
 
 class CCAConfigLibrary(Module):
@@ -22,5 +22,4 @@ class CCAConfigLibrary(Module):
         return name.find("cc_aconfig_library") >= 0
 
     def convert_to_cmake(self):
-        name = self._get_property("name")
-        return self._convert_module_to_cmake("baker_cc_aconfig_library", f"{name}-static", "INTERFACE")
+        return self._convert_module_to_cmake("baker_cc_aconfig_library")

@@ -10,4 +10,4 @@ class PythonBinaryHost(Module):
         return name.find("python_binary_host") >= 0
 
     def convert_to_cmake(self):
-        return self._convert_module_to_cmake("baker_python_binary_host", None, "INTERFACE")
+        return self._convert_module_to_cmake("baker_python_binary_host")
