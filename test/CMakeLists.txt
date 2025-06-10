@@ -97,6 +97,7 @@ set_property(TARGET asm_defines.s PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET libart-shared PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET libjavacore-unit-tests PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET core.current.stubs.from-text PROPERTY EXCLUDE_FROM_ALL FALSE)
+set_property(TARGET libcore-bootstrap-core-current-from-text-system-modules PROPERTY EXCLUDE_FROM_ALL FALSE)
 
 set_tests_properties(boringssl_crypto_test DIRECTORY external/boringssl/ PROPERTIES WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/external/boringssl/src/)
 # FIXME: boringssl_crypto_test fails with libcrypto-shared
