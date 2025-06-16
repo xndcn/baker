@@ -23,3 +23,15 @@ class CCAConfigLibrary(Module):
 
     def convert_to_cmake(self):
         return self._convert_module_to_cmake("baker_cc_aconfig_library")
+
+
+class JavaAConfigLibrary(Module):
+    def __init__(self, blueprint: ast.Blueprint, module: ast.Module):
+        super().__init__(blueprint, module)
+
+    @staticmethod
+    def match(name: str) -> bool:
+        return name.find("java_aconfig_library") >= 0
+
+    def convert_to_cmake(self):
+        return self._convert_module_to_cmake("baker_java_aconfig_library")

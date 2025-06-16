@@ -5,7 +5,7 @@ from .definitions.defaults import Defaults
 from .definitions.filegroup import FileGroup
 from .definitions.genrule import GenRule, GenSrcs
 from .definitions.python_binary_host import PythonBinaryHost
-from .definitions.aconfig_modules import AConfigDeclarations, CCAConfigLibrary
+from .definitions.aconfig_modules import AConfigDeclarations, CCAConfigLibrary, JavaAConfigLibrary
 from .definitions.java_modules import JavaApiLibrary, JavaSdkLibrary, JavaSystemModules, JavaLibrary
 
 class CMakeConverter:
@@ -14,7 +14,7 @@ class CMakeConverter:
             Defaults, FileGroup,
             CCLibraryHeaders, CCLibrary, CCTestLibrary, CCBinary, CCTest, CCObject,
             GenRule, GenSrcs, PythonBinaryHost,
-            AConfigDeclarations, CCAConfigLibrary,
+            AConfigDeclarations, CCAConfigLibrary, JavaAConfigLibrary,
             JavaApiLibrary, JavaSdkLibrary, JavaSystemModules, JavaLibrary,
         ]
 

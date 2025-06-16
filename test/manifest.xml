@@ -34,9 +34,11 @@
   <project path="system/libziparchive" name="platform/system/libziparchive" groups="pdk" />
   <project path="system/unwinding" name="platform/system/unwinding" groups="pdk" />
 
+  <project path="frameworks/libs/modules-utils" name="platform/frameworks/libs/modules-utils" groups="pdk-cw-fs,pdk-fs,sysui-studio" />
   <project path="frameworks/native" name="platform/frameworks/native" groups="pdk" />
 
   <project path="tools/metalava" name="platform/tools/metalava" groups="pdk,tools" />
+  <project path="tools/platform-compat" name="tools/platform-compat" groups="pdk-cw-fs,pdk-fs,pdk,sysui-studio" />
 
   <project path="packages/modules/ConfigInfrastructure" name="platform/packages/modules/ConfigInfrastructure" groups="pdk-cw-fs,pdk-fs" />
 

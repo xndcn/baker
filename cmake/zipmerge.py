@@ -6,6 +6,8 @@ import os
 
 def zipmerge(output_filename, input_filenames):
     """Merge multiple zip files into one output zip file."""
+    added_files = set()
+    
     with zipfile.ZipFile(output_filename, 'w', zipfile.ZIP_DEFLATED) as output_zip:
         for input_filename in input_filenames:
             if not os.path.exists(input_filename):
@@ -14,6 +16,12 @@ def zipmerge(output_filename, input_filenames):
 
             with zipfile.ZipFile(input_filename, 'r') as input_zip:
                 for file_info in input_zip.infolist():
+                    filename = file_info.filename
+                    if filename in added_files:
+                        print(f"Warning: Duplicate name '{filename}' found, skipping...")
+                        continue
+
+                    added_files.add(filename)
                     # Stream file data from input zip
                     with input_zip.open(file_info.filename) as file_stream:
                         # Write to output zip in chunks
