@@ -89,3 +89,43 @@ function(baker_java_sdk_library)
     )
     set_target_properties(${api_contribution} PROPERTIES TRANSITIVE_LINK_PROPERTIES "_droiddoc_options" "_flags" "_args")
 endfunction()
+
+function(baker_java_system_modules)
+    baker_parse_metadata(${ARGN})
+
+    set(src ".${name}.SRC")
+    add_library(${src} INTERFACE)
+    baker_parse_properties(${src})
+    target_sources(${src} INTERFACE ${ARG_srcs})
+    baker_apply_sources_transform(${src})
+    target_link_libraries(${src} INTERFACE $<TARGET_PROPERTY:${src},_libs>)
+
+    add_library(${name} OBJECT ".")
+    target_link_libraries(${name} PRIVATE ${src})
+    set(outputs
+        "${CMAKE_CURRENT_BINARY_DIR}/${name}/modules/module.jar"
+        "${CMAKE_CURRENT_BINARY_DIR}/${name}/modules/module-info.class"
+        "${CMAKE_CURRENT_BINARY_DIR}/${name}/modules/jmod/java.base.jmod"
+        "${CMAKE_CURRENT_BINARY_DIR}/${name}/system/lib/jrt-fs.jar"
+        "${CMAKE_CURRENT_BINARY_DIR}/${name}/system/lib/modules"
+        "${CMAKE_CURRENT_BINARY_DIR}/${name}/system/release"
+    )
+    add_custom_command(
+        OUTPUT ${outputs}
+        COMMAND ${CMAKE_COMMAND} -E env
+            Java_JAVAC_EXECUTABLE=${Java_JAVAC_EXECUTABLE}
+            Java_JAR_EXECUTABLE=${Java_JAR_EXECUTABLE}
+            ZIPMERGE=${CMAKE_SOURCE_DIR}/cmake/zipmerge.py
+            --
+        ${CMAKE_SOURCE_DIR}/cmake/java_system_modules.sh
+            --jars "$<TARGET_PROPERTY:${name},_CLASSPATH_>"
+            --outDir "${CMAKE_CURRENT_BINARY_DIR}/${name}/"
+            --moduleVersion "${Java_VERSION_STRING}"
+        DEPENDS ${name}
+        VERBATIM
+    )
+    target_sources(${name} PRIVATE ${outputs})
+    set_target_properties(${name} PROPERTIES LINKER_LANGUAGE CXX)
+    set_target_properties(${name} PROPERTIES INTERFACE__SYSTEM_MODULES_PATH_ "${CMAKE_CURRENT_BINARY_DIR}/${name}/system/")
+    set_target_properties(${name} PROPERTIES TRANSITIVE_LINK_PROPERTIES "_SYSTEM_MODULES_PATH_")
+endfunction()
