@@ -1,7 +1,7 @@
 function(baker_transform_source_file target SCOPE SOURCE_FILE)
     get_filename_component(file_name ${SOURCE_FILE} NAME_WE)
     get_filename_component(file_ext ${SOURCE_FILE} EXT)
-    if(file_name MATCHES "\\*")
+    if(SOURCE_FILE MATCHES "\\*")
         file(GLOB_RECURSE file_list ${SOURCE_FILE})
         set(SOURCE_FILE ${file_list})
     elseif(file_name MATCHES "^:")

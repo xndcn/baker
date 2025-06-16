@@ -129,3 +129,42 @@ function(baker_java_system_modules)
     set_target_properties(${name} PROPERTIES INTERFACE__SYSTEM_MODULES_PATH_ "${CMAKE_CURRENT_BINARY_DIR}/${name}/system/")
     set_target_properties(${name} PROPERTIES TRANSITIVE_LINK_PROPERTIES "_SYSTEM_MODULES_PATH_")
 endfunction()
+
+function(baker_java_library)
+    baker_parse_metadata(${ARGN})
+
+    set(src ".${name}.SRC")
+    add_library(${src} INTERFACE)
+    baker_parse_properties(${src})
+    target_sources(${src} INTERFACE ${ARG_srcs})
+    baker_apply_sources_transform(${src})
+    target_link_libraries(${src} INTERFACE $<TARGET_PROPERTY:${src},_libs>)
+    target_link_libraries(${src} INTERFACE $<TARGET_PROPERTY:${src},_static_libs>)
+    target_link_libraries(${src} INTERFACE $<TARGET_PROPERTY:${src},_system_modules>)
+
+    add_library(${name} OBJECT ".")
+    target_link_libraries(${name} PRIVATE ${src})
+
+    file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${name}.java_library.sh" INPUT "${CMAKE_SOURCE_DIR}/cmake/java_library.template.sh" TARGET ${src})
+    add_custom_command(
+        OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${name}.jar"
+        # Clean up previous build artifacts
+        COMMAND ${CMAKE_COMMAND} -E rm -rf
+            "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/classes/"
+            "${CMAKE_CURRENT_BINARY_DIR}/${name}.jar"
+        # Compile the Java sources and package them into a JAR
+        COMMAND ${CMAKE_COMMAND} -E env Java_JAVAC_EXECUTABLE=${Java_JAVAC_EXECUTABLE}
+            ${CMAKE_CURRENT_BINARY_DIR}/${name}.java_library.sh
+            -d "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/classes/"
+        COMMAND ${Java_JAR_EXECUTABLE}
+            cf "${CMAKE_CURRENT_BINARY_DIR}/${name}.jar"
+            -C "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/classes/" .
+        DEPENDS ${name} ${CMAKE_CURRENT_BINARY_DIR}/${name}.java_library.sh
+        VERBATIM
+    )
+
+    target_sources(${name} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/${name}.jar")
+    set_target_properties(${name} PROPERTIES LINKER_LANGUAGE CXX)
+    set_target_properties(${name} PROPERTIES INTERFACE__CLASSPATH_ "${CMAKE_CURRENT_BINARY_DIR}/${name}.jar")
+    set_target_properties(${name} PROPERTIES TRANSITIVE_LINK_PROPERTIES "_CLASSPATH_")
+endfunction()
