@@ -73,3 +73,61 @@ function(baker_cc_aconfig_library)
     target_sources(${name}-static PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/${package}.cc")
     target_include_directories(${name}-static PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/include")
 endfunction()
+
+function(baker_java_aconfig_library)
+    baker_parse_metadata(${ARGN})
+
+    set(src ".${name}.SRC")
+    add_library(${src} INTERFACE)
+    baker_parse_properties(${src})
+    target_sources(${src} INTERFACE ${ARG_srcs})
+    baker_apply_sources_transform(${src})
+    target_link_libraries(${src} INTERFACE $<TARGET_PROPERTY:${src},_system_modules>)
+
+    get_target_property(package ${ARG_aconfig_declarations} _package)
+    set(package $<LIST:TRANSFORM,${package},REPLACE,[.],/>)
+    set(outputs
+        "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/${package}/Flags.java"
+        "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/${package}/CustomFeatureFlags.java"
+        "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/${package}/FakeFeatureFlagsImpl.java"
+        "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/${package}/FeatureFlagsImpl.java"
+        "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/${package}/FeatureFlags.java"
+    )
+
+    add_custom_command(
+        OUTPUT ${outputs}
+        COMMAND aconfig ARGS create-java-lib
+            --cache "$<TARGET_PROPERTY:$<TARGET_PROPERTY:${src},_aconfig_declarations>,INTERFACE_SOURCES>"
+            --out "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/"
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        DEPENDS $<TARGET_PROPERTY:${src},_aconfig_declarations>
+        VERBATIM
+    )
+    target_sources(${src} INTERFACE "${outputs}")
+
+    add_library(${name} OBJECT ".")
+    target_link_libraries(${name} PRIVATE ${src})
+
+    file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${name}.java_library.sh" INPUT "${CMAKE_SOURCE_DIR}/cmake/java_library.template.sh" TARGET ${src})
+    add_custom_command(
+        OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${name}.jar"
+        # Clean up previous build artifacts
+        COMMAND ${CMAKE_COMMAND} -E rm -rf
+            "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/classes/"
+            "${CMAKE_CURRENT_BINARY_DIR}/${name}.jar"
+        # Compile the Java sources and package them into a JAR
+        COMMAND ${CMAKE_COMMAND} -E env Java_JAVAC_EXECUTABLE=${Java_JAVAC_EXECUTABLE}
+            ${CMAKE_CURRENT_BINARY_DIR}/${name}.java_library.sh
+            -d "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/classes/"
+        COMMAND ${Java_JAR_EXECUTABLE}
+            cf "${CMAKE_CURRENT_BINARY_DIR}/${name}.jar"
+            -C "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/classes/" .
+        DEPENDS ${name} ${outputs} ${CMAKE_CURRENT_BINARY_DIR}/${name}.java_library.sh
+        VERBATIM
+    )
+
+    target_sources(${name} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/${name}.jar")
+    set_target_properties(${name} PROPERTIES LINKER_LANGUAGE CXX)
+    set_target_properties(${name} PROPERTIES INTERFACE__CLASSPATH_ "${CMAKE_CURRENT_BINARY_DIR}/${name}.jar")
+    set_target_properties(${name} PROPERTIES TRANSITIVE_LINK_PROPERTIES "_CLASSPATH_")
+endfunction()

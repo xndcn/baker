@@ -62,6 +62,8 @@ baker(system/core/libutils/ EXCLUDE_FROM_ALL)
 baker(system/tools/aidl/ EXCLUDE_FROM_ALL)
 baker(system/libziparchive/ EXCLUDE_FROM_ALL)
 baker(system/unwinding/libunwindstack/ EXCLUDE_FROM_ALL)
+baker(tools/platform-compat/java/android/compat/annotation/ EXCLUDE_FROM_ALL)
+baker(frameworks/libs/modules-utils/java/ EXCLUDE_FROM_ALL)
 baker(frameworks/native/libs/binder/ EXCLUDE_FROM_ALL)
 # boringssl requires some Android specific flags
 set(TARGET "android" ; "linux" ; "glibc" ; "host")
@@ -98,7 +100,8 @@ set_property(TARGET libart-shared PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET libjavacore-unit-tests PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET core.current.stubs.from-text PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET libcore-bootstrap-core-current-from-text-system-modules PROPERTY EXCLUDE_FROM_ALL FALSE)
-set_property(TARGET libcore-bootstrap-lib-for-flags-lib  PROPERTY EXCLUDE_FROM_ALL FALSE)
+set_property(TARGET libcore-bootstrap-lib-for-flags-lib PROPERTY EXCLUDE_FROM_ALL FALSE)
+set_property(TARGET libcore-aconfig-flags-lib-for-core-all-only PROPERTY EXCLUDE_FROM_ALL FALSE)
 
 set_tests_properties(boringssl_crypto_test DIRECTORY external/boringssl/ PROPERTIES WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/external/boringssl/src/)
 # FIXME: boringssl_crypto_test fails with libcrypto-shared

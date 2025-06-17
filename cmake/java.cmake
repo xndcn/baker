@@ -127,7 +127,11 @@ function(baker_java_system_modules)
     target_sources(${name} PRIVATE ${outputs})
     set_target_properties(${name} PROPERTIES LINKER_LANGUAGE CXX)
     set_target_properties(${name} PROPERTIES INTERFACE__SYSTEM_MODULES_PATH_ "${CMAKE_CURRENT_BINARY_DIR}/${name}/system/")
-    set_target_properties(${name} PROPERTIES TRANSITIVE_LINK_PROPERTIES "_SYSTEM_MODULES_PATH_")
+    # For java_system_modules(a) -> java_library(b) -> java_system_modules(c)
+    # If we use TRANSITIVE_LINK_PROPERTIES, then c will also inherit _SYSTEM_MODULES_PATH_ from a
+    # But we only want the _SYSTEM_MODULES_PATH_ from c itself
+    # So we have to use TRANSITIVE_COMPILE_PROPERTIES instead
+    set_target_properties(${name} PROPERTIES TRANSITIVE_COMPILE_PROPERTIES "_SYSTEM_MODULES_PATH_")
 endfunction()
 
 function(baker_java_library)
