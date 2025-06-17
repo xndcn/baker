@@ -28,7 +28,7 @@ class Module(ABC):
             if not isinstance(value, dict):
                 _key = f"{key}"
                 dicts[_key] = value
-                if isinstance(value, list):
+                if Utils.type_of_expression(value, value) is list:
                     list_keys.add(_key)
                 else:
                     single_keys.add(_key)

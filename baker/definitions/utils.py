@@ -56,7 +56,7 @@ class Utils:
         elif isinstance(expr, ast.MapValue):
             return {key: cls.evaluate_expression(value) for key, value in expr.properties.items()}
         elif isinstance(expr, ast.VariableValue):
-            return cls.evaluate_expression(expr.reference)
+            return expr
         elif isinstance(expr, ast.SelectValue):
             return expr
 
