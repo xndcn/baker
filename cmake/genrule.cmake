@@ -52,6 +52,19 @@ function(baker_genrule)
     add_library(${src} INTERFACE)
     target_sources(${src} INTERFACE ${ARG_srcs})
     baker_apply_sources_transform(${src})
+
+    # gensrcs
+    if(NOT DEFINED ARG_out AND DEFINED ARG_output_extension)
+        set(ARG_out "")
+        baker_get_sources(ARG_srcs ${src} SCOPE INTERFACE)
+        foreach(src IN LISTS ARG_srcs)
+            cmake_path(RELATIVE_PATH src)
+            cmake_path(REPLACE_EXTENSION src .${ARG_output_extension})
+            list(APPEND ARG_out ${src})
+        endforeach()
+        list(APPEND ARG__ALL_LIST_KEYS_ "out")
+    endif()
+
     baker_parse_properties(${src})
     baker_apply_genrule_transform(${src})
 
@@ -62,7 +75,6 @@ function(baker_genrule)
         COMMAND ${command_file} ARGS
             --genDir "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/"
             --outs "$<GENEX_EVAL:$<TARGET_PROPERTY:${src},_out>>"
-            --srcs "$<PATH:RELATIVE_PATH,$<TARGET_PROPERTY:${src},INTERFACE_SOURCES>,${CMAKE_CURRENT_SOURCE_DIR}>"
             --tools "$<GENEX_EVAL:$<TARGET_PROPERTY:${src},_tools>>"
             --tool_files "$<GENEX_EVAL:$<TARGET_PROPERTY:${src},_tool_files>>"
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
@@ -81,22 +93,5 @@ function(baker_genrule)
 endfunction()
 
 function(baker_gensrcs)
-    baker_parse_metadata(${ARGN})
-
-    list(APPEND ARG__ALL_LIST_KEYS_ "out")
-    set(ARG_out "$<PATH:REPLACE_EXTENSION,${ARG_srcs},.${ARG_output_extension}>")
-    set(args "")
-    foreach(key IN LISTS ARG__ALL_SINGLE_KEYS_)
-        list(APPEND args "${key}" "${ARG_${key}}")
-    endforeach()
-    foreach(key IN LISTS ARG__ALL_LIST_KEYS_)
-        list(APPEND args "${key}" "${ARG_${key}}")
-    endforeach()
-    # TODO: Add support of conditions
-    baker_genrule(
-        name ${name}
-        ${args}
-        _ALL_SINGLE_KEYS_ ${ARG__ALL_SINGLE_KEYS_}
-        _ALL_LIST_KEYS_ ${ARG__ALL_LIST_KEYS_}
-    )
+    baker_genrule(${ARGN})
 endfunction()

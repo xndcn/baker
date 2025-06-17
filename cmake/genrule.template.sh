@@ -5,12 +5,18 @@ cmd=$(cat <<'EOF'
 $<TARGET_PROPERTY:_cmd>
 EOF
 )
+# Unescape the content of the command file
+cmd=$(echo -e "${cmd}")
 
 genDir=""
+output_extension=""
 outs=()
-srcs=()
 tools=()
 tool_files=()
+
+# Use generator expression to get the source files to avoid too long arguments list
+srcs="$<PATH:RELATIVE_PATH,$<TARGET_PROPERTY:INTERFACE_SOURCES>,$<TARGET_PROPERTY:SOURCE_DIR>>"
+IFS=';' read -ra srcs <<< "$srcs"
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -26,11 +32,8 @@ while [[ $# -gt 0 ]]; do
             fi
             shift 2
             ;;
-        --srcs)
-            if [ -n "$2" ]; then
-                # Split srcs into arrays
-                IFS=';' read -ra srcs <<< "$2"
-            fi
+        --output_extension)
+            output_extension="$2"
             shift 2
             ;;
         --tools)
@@ -65,9 +68,22 @@ if [ -z "$genDir" ]; then
     exit 1
 fi
 
-if [ -z "$outs" ]; then
-    echo "Error: --outs is required"
+if [ -z "$outs" ] && [ -z "$output_extension" ]; then
+    echo "Error: --outs or --output_extension is required"
     exit 1
+fi
+
+# If output_extension is provided, generate outs based on srcs
+# Currently not used, since add_custom_command() need to know the output files
+if [ -n "$output_extension" ]; then
+    outs=()
+    for src in "${srcs[@]}"; do
+        # Get the base name of the source file without extension
+        base_name=$(basename "$src")
+        # Replace the extension with the output_extension
+        out="${base_name%.*}.$output_extension"
+        outs+=("$out")
+    done
 fi
 
 # Transform cmd
