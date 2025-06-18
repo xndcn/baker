@@ -27,7 +27,7 @@ if [ "$classpath" != "" ]; then
     classpath="-classpath ${classpath}"
 fi
 
-sources="$<TARGET_PROPERTY:INTERFACE_SOURCES>"
+sources="$<TARGET_PROPERTY:INTERFACE_SOURCES>;$<TARGET_PROPERTY:INTERFACE__STUBS_SOURCES_>"
 if [ "$sources" != "" ]; then
     IFS=';' read -ra sources <<< "$sources"
     # Join source files with ' '

@@ -36,14 +36,12 @@ function(baker_java_api_library)
     add_library(${name} OBJECT ".")
     target_link_libraries(${name} PRIVATE ${src})
 
-    file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${name}.metalava.sh" INPUT "${CMAKE_SOURCE_DIR}/cmake/metalava.template.sh" TARGET ${name})
+    file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${name}.metalava.sh" INPUT "${CMAKE_SOURCE_DIR}/cmake/metalava.template.sh" TARGET ${src})
     add_custom_command(
         OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${name}.jar" "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}.metalava.list"
         # Run metalava to generate stubs and classpath
         COMMAND ${CMAKE_CURRENT_BINARY_DIR}/${name}.metalava.sh
             --stubs "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/stubs/"
-            --classpath "$<TARGET_PROPERTY:${name},_CLASSPATH_>"
-            --source-files "$<TARGET_PROPERTY:${src},INTERFACE_SOURCES>"
         COMMAND find "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/stubs/" -name "*.java" -type f > "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}.metalava.list"
         # Clean up previous build artifacts
         COMMAND ${CMAKE_COMMAND} -E rm -rf
@@ -75,6 +73,31 @@ function(baker_java_sdk_library)
     baker_parse_properties(${src})
     target_sources(${src} INTERFACE ${ARG_srcs})
     baker_apply_sources_transform(${src})
+    target_link_libraries(${src} INTERFACE $<TARGET_PROPERTY:${src},_system_modules>)
+    target_link_libraries(${src} INTERFACE $<TARGET_PROPERTY:${src},_merge_inclusion_annotations_dirs>)
+
+    # Add {.public.stubs.source}
+    baker_canonicalize_name(public_stubs_source "${name}{.public.stubs.source}")
+    add_library(${public_stubs_source} OBJECT ".")
+    target_link_libraries(${public_stubs_source} PRIVATE ${src})
+    file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${name}.metalava.sh" INPUT "${CMAKE_SOURCE_DIR}/cmake/metalava.template.sh" TARGET ${src})
+    add_custom_command(
+        OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}.metalava.list"
+        # Clean up previous build artifacts
+        COMMAND ${CMAKE_COMMAND} -E rm -rf
+            "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/stubs/"
+        # Run metalava to generate stubs and classpath
+        COMMAND ${CMAKE_CURRENT_BINARY_DIR}/${name}.metalava.sh
+            --stubs "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/stubs/"
+        COMMAND find "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/stubs/" -name "*.java" -type f > "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}.metalava.list"
+        DEPENDS ${public_stubs_source} metalava
+        VERBATIM
+    )
+    target_sources(${public_stubs_source} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}.metalava.list")
+    set_target_properties(${public_stubs_source} PROPERTIES LINKER_LANGUAGE CXX)
+    # javac accepts @<file> as a list of source files, so we can use it to pass the list of stubs
+    set_target_properties(${public_stubs_source} PROPERTIES INTERFACE__STUBS_SOURCES_ "@${CMAKE_CURRENT_BINARY_DIR}/gen/${name}.metalava.list")
+    set_target_properties(${public_stubs_source} PROPERTIES TRANSITIVE_COMPILE_PROPERTIES "_STUBS_SOURCES_")
 
     # Add api_contribution, which will be used in java_api_library
     set(api_contribution "${name}.stubs.source.api.contribution")
@@ -171,4 +194,16 @@ function(baker_java_library)
     set_target_properties(${name} PROPERTIES LINKER_LANGUAGE CXX)
     set_target_properties(${name} PROPERTIES INTERFACE__CLASSPATH_ "${CMAKE_CURRENT_BINARY_DIR}/${name}.jar")
     set_target_properties(${name} PROPERTIES TRANSITIVE_LINK_PROPERTIES "_CLASSPATH_")
+endfunction()
+
+function(baker_droiddoc_exported_dir)
+    baker_parse_metadata(${ARGN})
+
+    add_library(${name} INTERFACE)
+    baker_parse_properties(${name})
+    target_sources(${name} INTERFACE ${ARG_srcs})
+    baker_apply_sources_transform(${name})
+
+    set_target_properties(${name} PROPERTIES INTERFACE__ANNOTATION_DIR_ "${CMAKE_CURRENT_SOURCE_DIR}/$<TARGET_PROPERTY:${name},_path>")
+    set_target_properties(${name} PROPERTIES TRANSITIVE_LINK_PROPERTIES "_ANNOTATION_DIR_")
 endfunction()
