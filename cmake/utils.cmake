@@ -87,3 +87,12 @@ function(baker_python_binary_host)
         USE_SOURCE_PERMISSIONS
     )
 endfunction()
+
+function(baker_canonicalize_name output_var name)
+    # Canonicalize the name which cmake does not allow
+    # Replace curly braces in file name (foo{bar} becomes foo_bar_)
+    if(name MATCHES "\\{.*\\}")
+        string(REGEX REPLACE "\\{([^}]*)\\}" "_\\1_" name "${name}")
+    endif()
+    set(${output_var} "${name}" PARENT_SCOPE)
+endfunction()

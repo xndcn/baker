@@ -1,4 +1,5 @@
 function(baker_transform_source_file target SCOPE SOURCE_FILE)
+    baker_canonicalize_name(SOURCE_FILE "${SOURCE_FILE}")
     get_filename_component(file_name ${SOURCE_FILE} NAME_WE)
     get_filename_component(file_ext ${SOURCE_FILE} EXT)
     if(SOURCE_FILE MATCHES "\\*")
