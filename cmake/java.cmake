@@ -21,6 +21,23 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/tools/metalava")
     set_target_properties(metalava PROPERTIES IMPORTED_LOCATION ${CMAKE_BINARY_DIR}/metalava/metalava/build/install/metalava/bin/metalava)
 endif()
 
+if(EXISTS "${CMAKE_SOURCE_DIR}/external/turbine")
+    # Build turbine
+    include(ExternalProject)
+    ExternalProject_Add(turbine_build
+        SOURCE_DIR ${CMAKE_SOURCE_DIR}/external/turbine
+        BUILD_IN_SOURCE TRUE
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND mvn package
+        INSTALL_COMMAND ""
+        BUILD_BYPRODUCTS "<SOURCE_DIR>/target/turbine-HEAD-SNAPSHOT-all-deps.jar"
+    )
+    # Import the built binary
+    add_executable(turbine IMPORTED GLOBAL)
+    add_dependencies(turbine turbine_build)
+    set_target_properties(turbine PROPERTIES IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/external/turbine/target/turbine-HEAD-SNAPSHOT-all-deps.jar)
+endif()
+
 
 function(baker_java_api_library)
     baker_parse_metadata(${ARGN})
@@ -98,6 +115,26 @@ function(baker_java_sdk_library)
     # javac accepts @<file> as a list of source files, so we can use it to pass the list of stubs
     set_target_properties(${public_stubs_source} PROPERTIES INTERFACE__STUBS_SOURCES_ "@${CMAKE_CURRENT_BINARY_DIR}/gen/${name}.metalava.list")
     set_target_properties(${public_stubs_source} PROPERTIES TRANSITIVE_COMPILE_PROPERTIES "_STUBS_SOURCES_")
+
+    # Add .stubs
+    set(stubs "${name}.stubs")
+    add_library(${stubs} OBJECT ".")
+    target_link_libraries(${stubs} PRIVATE ${src})
+    file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${name}.turbine.sh" INPUT "${CMAKE_SOURCE_DIR}/cmake/turbine.template.sh" TARGET ${src})
+    add_custom_command(
+        OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${stubs}.jar"
+        # Run metalava to generate stubs and classpath
+        COMMAND ${CMAKE_COMMAND} -E env Java_JAVA_EXECUTABLE=${Java_JAVA_EXECUTABLE} --
+            ${CMAKE_CURRENT_BINARY_DIR}/${name}.turbine.sh
+            --sources "$<TARGET_PROPERTY:${public_stubs_source},INTERFACE__STUBS_SOURCES_>"
+            --output "${CMAKE_CURRENT_BINARY_DIR}/${stubs}.jar"
+        DEPENDS ${public_stubs_source} turbine
+        VERBATIM
+    )
+    target_sources(${stubs} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/${stubs}.jar")
+    set_target_properties(${stubs} PROPERTIES LINKER_LANGUAGE CXX)
+    set_target_properties(${stubs} PROPERTIES INTERFACE__CLASSPATH_ "${CMAKE_CURRENT_BINARY_DIR}/${stubs}.jar")
+    set_target_properties(${stubs} PROPERTIES TRANSITIVE_LINK_PROPERTIES "_CLASSPATH_")
 
     # Add api_contribution, which will be used in java_api_library
     set(api_contribution "${name}.stubs.source.api.contribution")
