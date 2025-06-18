@@ -23,6 +23,7 @@
   <project path="external/libcap" name="platform/external/libcap" groups="pdk" />
   <project path="external/lz4" name="platform/external/lz4" groups="pdk" />
   <project path="external/lzma" name="platform/external/lzma" groups="pdk" />
+  <project path="external/okhttp" name="platform/external/okhttp" groups="pdk" />
   <project path="external/tinyxml2" name="platform/external/tinyxml2" groups="pdk" />
   <project path="external/turbine" name="platform/external/turbine" groups="pdk" />
   <project path="external/zstd" name="platform/external/zstd" groups="pdk" />

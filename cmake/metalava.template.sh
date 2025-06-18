@@ -4,7 +4,7 @@ set -e
 
 metalava=$<TARGET_PROPERTY:metalava,IMPORTED_LOCATION>
 source_files="$<TARGET_PROPERTY:INTERFACE_SOURCES>"
-classpath="$<TARGET_PROPERTY:INTERFACE_CLASSPATH_>"
+classpath="$<TARGET_PROPERTY:INTERFACE__CLASSPATH_>"
 merge_inclusion_annotations_dirs="$<TARGET_PROPERTY:INTERFACE__ANNOTATION_DIR_>"
 
 # Parse arguments
@@ -29,7 +29,9 @@ fi
 
 if [ -n "$classpath" ]; then
     # Split classpath into arrays
-    IFS=';' read -ra classpath <<< "$2"
+    IFS=';' read -ra classpath <<< "$classpath"
+    # Join classpath elements with ':'
+    classpath="$(IFS=: ; echo "${classpath[*]}")"
     classpath="--classpath ${classpath[@]}"
 fi
 
@@ -45,11 +47,12 @@ fi
 # in the src_file. So here we use symbolic links to avoid this issue.
 
 # Make sure metalava directory exists
-rm -rf metalava
-mkdir -p metalava
+link_directory="$<TARGET_PROPERTY:NAME>.metalava"
+rm -rf ${link_directory}
+mkdir -p ${link_directory}
 
-# Create new source file to store symbolic link paths
-links_file="metalava/source_links.txt"
+# Create new response file to store symbolic link paths
+links_file="${link_directory}/source_links.rsp"
 > "${links_file}"  # Create the file
 
 if [[ -n "${source_files}" ]]; then
@@ -59,12 +62,12 @@ if [[ -n "${source_files}" ]]; then
     for filepath in "${source_files[@]}"; do
         if [[ -n "${filepath}" ]]; then
             target_path="${filepath#/}"
-            target_dir="metalava/$(dirname "${target_path}")"
+            target_dir="${link_directory}/$(dirname "${target_path}")"
             # Create parent directory structure
             mkdir -p "${target_dir}"
             # Create symbolic link
-            ln -sf "${filepath}" "metalava/${target_path}"
-            echo "metalava/${target_path}" >> "${links_file}"
+            ln -sf "${filepath}" "${link_directory}/${target_path}"
+            echo "${link_directory}/${target_path}" >> "${links_file}"
         fi
     done
 fi

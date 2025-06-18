@@ -52,6 +52,7 @@ baker(external/googletest/ EXCLUDE_FROM_ALL)
 baker(external/icu EXCLUDE_FROM_ALL)
 baker(external/lz4/lib/ EXCLUDE_FROM_ALL)
 baker(external/lzma/ EXCLUDE_FROM_ALL)
+baker(external/okhttp/ EXCLUDE_FROM_ALL)
 baker(external/tinyxml2/ EXCLUDE_FROM_ALL)
 baker(external/zstd/ EXCLUDE_FROM_ALL)
 baker(system/libbase/ EXCLUDE_FROM_ALL)
@@ -104,6 +105,7 @@ set_property(TARGET libcore-bootstrap-lib-for-flags-lib PROPERTY EXCLUDE_FROM_AL
 set_property(TARGET libcore-aconfig-flags-lib-for-core-all-only PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET core_oj_api_files PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET art.module.intra.core.api_.public.stubs.source_ PROPERTY EXCLUDE_FROM_ALL FALSE)
+set_property(TARGET core-all PROPERTY EXCLUDE_FROM_ALL FALSE)
 
 set_tests_properties(boringssl_crypto_test DIRECTORY external/boringssl/ PROPERTIES WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/external/boringssl/src/)
 # FIXME: boringssl_crypto_test fails with libcrypto-shared
@@ -116,6 +118,8 @@ set_property(TARGET boringssl_test_support-static PROPERTY LINK_LIBRARIES "$<LIS
 get_property(boringssl_test_support_libs TARGET boringssl_test_support-static PROPERTY INTERFACE_LINK_LIBRARIES)
 set_property(TARGET boringssl_test_support-static PROPERTY INTERFACE_LINK_LIBRARIES "$<LIST:FILTER,${boringssl_test_support_libs},EXCLUDE,libcrypto-shared>")
 target_link_libraries(.boringssl_test_support.OBJ PRIVATE libcrypto_static-static)
+set_property(TARGET conscrypt_generate_constants PROPERTY LINK_LIBRARIES "")
+target_link_libraries(conscrypt_generate_constants PRIVATE libcrypto_static-static)
 
 # Default bfd linker may fail to link with protected symbols
 target_link_options(art_defaults INTERFACE "-fuse-ld=lld")

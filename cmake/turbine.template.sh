@@ -40,9 +40,8 @@ fi
 classpath="$<TARGET_PROPERTY:INTERFACE__CLASSPATH_>"
 if [ "$classpath" != "" ]; then
     IFS=';' read -ra classpath <<< "$classpath"
-    # Join classpath elements with ':'
-    classpath="$(IFS=: ; echo "${classpath[*]}")"
-    classpath="--classpath ${classpath}"
+    # turbine classpath is separated by space
+    classpath="--classpath ${classpath[*]}"
 fi
 
 ${turbine} \
