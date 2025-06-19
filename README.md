@@ -30,3 +30,43 @@ Baker is a tool that converts Android.bp build files to CMakeLists.txt, enabling
 pip install -e .
 baker /path/to/Android.bp
 ```
+
+## Example
+
+An example conversion from `art/runtime/Android.bp` to `art/runtime/CMakeLists.txt`:
+
+```cmake
+cmake_minimum_required(VERSION 3.30)
+project(runtime)
+
+set(JIT_DEBUG_REGISTER_CODE_LDFLAGS "-Wl,--keep-unique,__jit_debug_register_code" ; "-Wl,--keep-unique,__dex_debug_register_code")
+
+baker_defaults(
+  name "libart_nativeunwind_defaults"
+  _target_ host
+    cflags "-fsanitize-address-use-after-return=never" ; "-Wno-unused-command-line-argument"
+
+  _ALL_SINGLE_KEYS_ ""
+  _ALL_LIST_KEYS_ "cflags"
+)
+
+baker_cc_library_headers(
+  name "libart_headers"
+  defaults "art_defaults"
+  host_supported ON
+  export_include_dirs "."
+  header_libs "art_libartbase_headers" ; "dlmalloc"
+  export_header_lib_headers "art_libartbase_headers" ; "dlmalloc"
+  apex_available "com.android.art" ; "com.android.art.debug"
+  _target_ android
+    header_libs "bionic_libc_platform_headers"
+    export_header_lib_headers "bionic_libc_platform_headers"
+  _target_ linux_bionic
+    header_libs "bionic_libc_platform_headers"
+    export_header_lib_headers "bionic_libc_platform_headers"
+
+  _ALL_SINGLE_KEYS_ "host_supported"
+  _ALL_LIST_KEYS_ "export_include_dirs" ; "apex_available" ; "defaults" ; "header_libs" ; "export_header_lib_headers"
+)
+...
+```
