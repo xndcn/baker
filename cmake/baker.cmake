@@ -7,6 +7,8 @@ include(${CMAKE_CURRENT_LIST_DIR}/defaults.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cc.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/java.cmake)
 
+set(BAKER_DUMMY_C_SOURCE "${CMAKE_CURRENT_LIST_DIR}/dummy.c" CACHE FILEPATH "dummy.c" FORCE)
+
 function(baker dir)
     cmake_parse_arguments(BAKER "EXCLUDE_FROM_ALL" "OUTPUT" "" ${ARGN})
 

@@ -50,7 +50,7 @@ function(baker_java_api_library)
     target_link_libraries(${src} INTERFACE $<TARGET_PROPERTY:${src},_libs>)
     target_link_libraries(${src} INTERFACE $<TARGET_PROPERTY:${src},_api_contributions>)
 
-    add_library(${name} OBJECT ".")
+    add_library(${name} OBJECT "${BAKER_DUMMY_C_SOURCE}")
     target_link_libraries(${name} PRIVATE ${src})
 
     file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${name}.metalava.sh" INPUT "${CMAKE_SOURCE_DIR}/cmake/metalava.template.sh" TARGET ${src})
@@ -77,7 +77,6 @@ function(baker_java_api_library)
         VERBATIM
     )
     target_sources(${name} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/${name}.jar")
-    set_target_properties(${name} PROPERTIES LINKER_LANGUAGE CXX)
     set_target_properties(${name} PROPERTIES INTERFACE__CLASSPATH_ "${CMAKE_CURRENT_BINARY_DIR}/${name}.jar")
     set_target_properties(${name} PROPERTIES TRANSITIVE_LINK_PROPERTIES "_CLASSPATH_")
 endfunction()
@@ -95,7 +94,7 @@ function(baker_java_sdk_library)
 
     # Add {.public.stubs.source}
     baker_canonicalize_name(public_stubs_source "${name}{.public.stubs.source}")
-    add_library(${public_stubs_source} OBJECT ".")
+    add_library(${public_stubs_source} OBJECT "${BAKER_DUMMY_C_SOURCE}")
     target_link_libraries(${public_stubs_source} PRIVATE ${src})
     file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${name}.metalava.sh" INPUT "${CMAKE_SOURCE_DIR}/cmake/metalava.template.sh" TARGET ${src})
     add_custom_command(
@@ -111,14 +110,13 @@ function(baker_java_sdk_library)
         VERBATIM
     )
     target_sources(${public_stubs_source} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}.metalava.list")
-    set_target_properties(${public_stubs_source} PROPERTIES LINKER_LANGUAGE CXX)
     # javac accepts @<file> as a list of source files, so we can use it to pass the list of stubs
     set_target_properties(${public_stubs_source} PROPERTIES INTERFACE__STUBS_SOURCES_ "@${CMAKE_CURRENT_BINARY_DIR}/gen/${name}.metalava.list")
     set_target_properties(${public_stubs_source} PROPERTIES TRANSITIVE_COMPILE_PROPERTIES "_STUBS_SOURCES_")
 
     # Add .stubs
     set(stubs "${name}.stubs")
-    add_library(${stubs} OBJECT ".")
+    add_library(${stubs} OBJECT "${BAKER_DUMMY_C_SOURCE}")
     target_link_libraries(${stubs} PRIVATE ${src})
     file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${name}.turbine.sh" INPUT "${CMAKE_SOURCE_DIR}/cmake/turbine.template.sh" TARGET ${src})
     add_custom_command(
@@ -128,11 +126,10 @@ function(baker_java_sdk_library)
             ${CMAKE_CURRENT_BINARY_DIR}/${name}.turbine.sh
             --sources "$<TARGET_PROPERTY:${public_stubs_source},INTERFACE__STUBS_SOURCES_>"
             --output "${CMAKE_CURRENT_BINARY_DIR}/${stubs}.jar"
-        DEPENDS ${public_stubs_source} turbine
+        DEPENDS ${public_stubs_source} turbine ${CMAKE_CURRENT_BINARY_DIR}/gen/${name}.metalava.list
         VERBATIM
     )
     target_sources(${stubs} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/${stubs}.jar")
-    set_target_properties(${stubs} PROPERTIES LINKER_LANGUAGE CXX)
     set_target_properties(${stubs} PROPERTIES INTERFACE__CLASSPATH_ "${CMAKE_CURRENT_BINARY_DIR}/${stubs}.jar")
     set_target_properties(${stubs} PROPERTIES TRANSITIVE_LINK_PROPERTIES "_CLASSPATH_")
 
@@ -160,7 +157,7 @@ function(baker_java_system_modules)
     baker_apply_sources_transform(${src})
     target_link_libraries(${src} INTERFACE $<TARGET_PROPERTY:${src},_libs>)
 
-    add_library(${name} OBJECT ".")
+    add_library(${name} OBJECT "${BAKER_DUMMY_C_SOURCE}")
     target_link_libraries(${name} PRIVATE ${src})
     set(outputs
         "${CMAKE_CURRENT_BINARY_DIR}/${name}/modules/module.jar"
@@ -185,7 +182,6 @@ function(baker_java_system_modules)
         VERBATIM
     )
     target_sources(${name} PRIVATE ${outputs})
-    set_target_properties(${name} PROPERTIES LINKER_LANGUAGE CXX)
     set_target_properties(${name} PROPERTIES INTERFACE__SYSTEM_MODULES_PATH_ "${CMAKE_CURRENT_BINARY_DIR}/${name}/system/")
     # For java_system_modules(a) -> java_library(b) -> java_system_modules(c)
     # If we use TRANSITIVE_LINK_PROPERTIES, then c will also inherit _SYSTEM_MODULES_PATH_ from a
@@ -208,7 +204,7 @@ function(baker_java_library)
     target_link_libraries(${src} INTERFACE $<TARGET_PROPERTY:${src},_static_libs>)
     target_link_libraries(${src} INTERFACE $<TARGET_PROPERTY:${src},_system_modules>)
 
-    add_library(${name} OBJECT ".")
+    add_library(${name} OBJECT "${BAKER_DUMMY_C_SOURCE}")
     target_link_libraries(${name} PRIVATE ${src})
 
     file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${name}.java_library.sh" INPUT "${CMAKE_SOURCE_DIR}/cmake/java_library.template.sh" TARGET ${src})
@@ -230,7 +226,6 @@ function(baker_java_library)
     )
 
     target_sources(${name} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/${name}.jar")
-    set_target_properties(${name} PROPERTIES LINKER_LANGUAGE CXX)
     set_target_properties(${name} PROPERTIES INTERFACE__CLASSPATH_ "${CMAKE_CURRENT_BINARY_DIR}/${name}.jar")
     set_target_properties(${name} PROPERTIES TRANSITIVE_LINK_PROPERTIES "_CLASSPATH_")
 endfunction()
