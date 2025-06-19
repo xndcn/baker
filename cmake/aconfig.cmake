@@ -29,9 +29,8 @@ function(baker_aconfig_declarations)
     target_sources(${src} INTERFACE ${ARG_srcs})
     baker_apply_sources_transform(${src})
 
-    add_library(${name} OBJECT ".")
+    add_library(${name} OBJECT "${BAKER_DUMMY_C_SOURCE}")
     baker_parse_properties(${name})
-    set_target_properties(${name} PROPERTIES LINKER_LANGUAGE CXX)
 
     add_custom_command(
         OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}.pb"
@@ -105,7 +104,7 @@ function(baker_java_aconfig_library)
     )
     target_sources(${src} INTERFACE "${outputs}")
 
-    add_library(${name} OBJECT ".")
+    add_library(${name} OBJECT "${BAKER_DUMMY_C_SOURCE}")
     target_link_libraries(${name} PRIVATE ${src})
 
     file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${name}.java_library.sh" INPUT "${CMAKE_SOURCE_DIR}/cmake/java_library.template.sh" TARGET ${src})
@@ -127,7 +126,6 @@ function(baker_java_aconfig_library)
     )
 
     target_sources(${name} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/${name}.jar")
-    set_target_properties(${name} PROPERTIES LINKER_LANGUAGE CXX)
     set_target_properties(${name} PROPERTIES INTERFACE__CLASSPATH_ "${CMAKE_CURRENT_BINARY_DIR}/${name}.jar")
     set_target_properties(${name} PROPERTIES TRANSITIVE_LINK_PROPERTIES "_CLASSPATH_")
 endfunction()

@@ -1,0 +1,1 @@
+// dummy c source file to make cmake add_library happy
