@@ -206,6 +206,7 @@ function(baker_java_library)
     add_library(${name} OBJECT "${BAKER_DUMMY_C_SOURCE}")
     target_link_libraries(${name} PRIVATE ${src})
 
+    # Use a interface library to collect all static_libs classpath
     add_library(.${name}.LINK INTERFACE)
     target_link_libraries(.${name}.LINK INTERFACE $<TARGET_PROPERTY:${src},_static_libs>)
     set_target_properties(${src} PROPERTIES _STATIC_CLASSPATH_ "$<TARGET_PROPERTY:.${name}.LINK,INTERFACE__CLASSPATH_>")
