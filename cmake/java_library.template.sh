@@ -20,7 +20,7 @@ if [ "$source_target" != "" ]; then
 fi
 
 jars=""
-classpath="$<TARGET_PROPERTY:INTERFACE__CLASSPATH_>"
+classpath="$<JOIN:$<GENEX_EVAL:$<TARGET_PROPERTY:INTERFACE__CLASSPATH_>;$<TARGET_PROPERTY:_STATIC_CLASSPATH_>>,;>"
 if [ "$classpath" != "" ]; then
     IFS=';' read -ra jars <<< "$classpath"
     # Join jars elements with ':'
