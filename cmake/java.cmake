@@ -201,11 +201,14 @@ function(baker_java_library)
     # TODO: may need to apply sources transform to {openjdk9: { srcs: ["..."] } as well
     target_sources(${src} INTERFACE "$<LIST:TRANSFORM,$<TARGET_PROPERTY:${src},_openjdk9_srcs>,PREPEND,${CMAKE_CURRENT_SOURCE_DIR}/>")
     target_link_libraries(${src} INTERFACE $<TARGET_PROPERTY:${src},_libs>)
-    target_link_libraries(${src} INTERFACE $<TARGET_PROPERTY:${src},_static_libs>)
     target_link_libraries(${src} INTERFACE $<TARGET_PROPERTY:${src},_system_modules>)
 
     add_library(${name} OBJECT "${BAKER_DUMMY_C_SOURCE}")
     target_link_libraries(${name} PRIVATE ${src})
+
+    add_library(.${name}.LINK INTERFACE)
+    target_link_libraries(.${name}.LINK INTERFACE $<TARGET_PROPERTY:${src},_static_libs>)
+    set_target_properties(${src} PROPERTIES _STATIC_CLASSPATH_ "$<TARGET_PROPERTY:.${name}.LINK,INTERFACE__CLASSPATH_>")
 
     file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${name}.java_library.sh" INPUT "${CMAKE_SOURCE_DIR}/cmake/java_library.template.sh" TARGET ${src})
     add_custom_command(
@@ -221,8 +224,13 @@ function(baker_java_library)
         COMMAND ${Java_JAR_EXECUTABLE}
             cf "${CMAKE_CURRENT_BINARY_DIR}/${name}.jar"
             -C "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/classes/" .
-        DEPENDS ${name} ${CMAKE_CURRENT_BINARY_DIR}/${name}.java_library.sh
+        # Merge the JARs from the static_libs
+        COMMAND ${CMAKE_SOURCE_DIR}/cmake/zipmerge.py --append
+            "${CMAKE_CURRENT_BINARY_DIR}/${name}.jar"
+            $<TARGET_PROPERTY:.${name}.LINK,INTERFACE__CLASSPATH_>
+        DEPENDS ${name} ${CMAKE_CURRENT_BINARY_DIR}/${name}.java_library.sh $<TARGET_PROPERTY:${src},_static_libs>
         VERBATIM
+        COMMAND_EXPAND_LISTS
     )
 
     target_sources(${name} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/${name}.jar")
