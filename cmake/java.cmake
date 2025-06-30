@@ -130,8 +130,9 @@ function(baker_java_sdk_library)
         VERBATIM
     )
     target_sources(${stubs} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/${stubs}.jar")
-    set_target_properties(${stubs} PROPERTIES INTERFACE__CLASSPATH_ "${CMAKE_CURRENT_BINARY_DIR}/${stubs}.jar")
-    set_target_properties(${stubs} PROPERTIES TRANSITIVE_LINK_PROPERTIES "_CLASSPATH_")
+    # stubs jar can not be used as classpath for java_library
+    set_target_properties(${stubs} PROPERTIES INTERFACE__STUBS_CLASSPATH_ "${CMAKE_CURRENT_BINARY_DIR}/${stubs}.jar")
+    set_target_properties(${stubs} PROPERTIES TRANSITIVE_LINK_PROPERTIES "_STUBS_CLASSPATH_")
 
     # Add api_contribution, which will be used in java_api_library
     set(api_contribution "${name}.stubs.source.api.contribution")
@@ -175,7 +176,7 @@ function(baker_java_system_modules)
             ZIPMERGE=${CMAKE_SOURCE_DIR}/cmake/zipmerge.py
             --
         ${CMAKE_SOURCE_DIR}/cmake/java_system_modules.sh
-            --jars "$<TARGET_PROPERTY:${name},_CLASSPATH_>"
+            --jars "$<JOIN:$<TARGET_PROPERTY:${name},_CLASSPATH_>;$<TARGET_PROPERTY:${name},_STUBS_CLASSPATH_>,;>"
             --outDir "${CMAKE_CURRENT_BINARY_DIR}/${name}/"
             --moduleVersion "${Java_VERSION_STRING}"
         DEPENDS ${name}
@@ -237,6 +238,18 @@ function(baker_java_library)
     target_sources(${name} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/${name}.jar")
     set_target_properties(${name} PROPERTIES INTERFACE__CLASSPATH_ "${CMAKE_CURRENT_BINARY_DIR}/${name}.jar")
     set_target_properties(${name} PROPERTIES TRANSITIVE_LINK_PROPERTIES "_CLASSPATH_")
+
+    file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${name}.dex.sh" INPUT "${CMAKE_SOURCE_DIR}/cmake/dex.template.sh" TARGET ${src})
+    add_custom_command(
+        OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${name}.dex.jar"
+        COMMAND ${CMAKE_CURRENT_BINARY_DIR}/${name}.dex.sh
+            --source "${CMAKE_CURRENT_BINARY_DIR}/${name}.jar"
+            --output "${CMAKE_CURRENT_BINARY_DIR}/${name}.dex.jar"
+        DEPENDS ${name} ${CMAKE_CURRENT_BINARY_DIR}/${name}.jar d8
+        VERBATIM
+    )
+    # TODO: zipalign
+    target_sources(${name} PRIVATE "$<$<BOOL:$<TARGET_PROPERTY:${src},_installable>>:${CMAKE_CURRENT_BINARY_DIR}/${name}.dex.jar>")
 endfunction()
 
 function(baker_droiddoc_exported_dir)
@@ -249,4 +262,16 @@ function(baker_droiddoc_exported_dir)
 
     set_target_properties(${name} PROPERTIES INTERFACE__ANNOTATION_DIR_ "${CMAKE_CURRENT_SOURCE_DIR}/$<TARGET_PROPERTY:${name},_path>")
     set_target_properties(${name} PROPERTIES TRANSITIVE_COMPILE_PROPERTIES "_ANNOTATION_DIR_")
+endfunction()
+
+function(baker_java_import)
+    baker_parse_metadata(${ARGN})
+
+    add_library(${name} INTERFACE)
+    baker_parse_properties(${name})
+    target_sources(${name} INTERFACE ${ARG_srcs})
+    baker_apply_sources_transform(${name})
+
+    set_target_properties(${name} PROPERTIES INTERFACE__CLASSPATH_ "${CMAKE_CURRENT_SOURCE_DIR}/$<TARGET_PROPERTY:${name},_jars>")
+    set_target_properties(${name} PROPERTIES TRANSITIVE_LINK_PROPERTIES "_CLASSPATH_")
 endfunction()

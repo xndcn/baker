@@ -44,6 +44,7 @@ baker(art/ EXCLUDE_FROM_ALL)
 baker(build/soong/java/core-libraries/ EXCLUDE_FROM_ALL)
 baker(libcore/ EXCLUDE_FROM_ALL)
 baker(libnativehelper/ EXCLUDE_FROM_ALL)
+baker(prebuilts/r8/ EXCLUDE_FROM_ALL OUTPUT "prebuilts/r8/CMakeLists.txt") # no recursive
 baker(external/conscrypt/ EXCLUDE_FROM_ALL)
 baker(external/cpu_features/ EXCLUDE_FROM_ALL)
 baker(external/dlmalloc/ EXCLUDE_FROM_ALL)
@@ -83,6 +84,7 @@ target_link_libraries(libz-shared INTERFACE ZLIB::ZLIB)
 # Fix for missing linkage
 set_property(TARGET liblog.defaults APPEND PROPERTY _export_header_lib_headers libutils_headers)
 target_link_libraries(libmath-static PUBLIC libutils_headers)
+target_link_libraries(dalvikvm PRIVATE libart-shared)
 # Fix for these defaults which use directories with relative paths from the root
 target_include_directories(gtest_test_defaults INTERFACE external/googletest/googletest/)
 target_include_directories(gtest_ndk_test_defaults INTERFACE external/googletest/googletest/)
@@ -106,6 +108,7 @@ set_property(TARGET libcore-aconfig-flags-lib-for-core-all-only PROPERTY EXCLUDE
 set_property(TARGET core_oj_api_files PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET art.module.intra.core.api_.public.stubs.source_ PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET core-all PROPERTY EXCLUDE_FROM_ALL FALSE)
+set_property(TARGET core-oj PROPERTY EXCLUDE_FROM_ALL FALSE)
 
 set_tests_properties(boringssl_crypto_test DIRECTORY external/boringssl/ PROPERTIES WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/external/boringssl/src/)
 # FIXME: boringssl_crypto_test fails with libcrypto-shared
@@ -125,6 +128,7 @@ target_link_libraries(conscrypt_generate_constants PRIVATE libcrypto_static-stat
 target_link_options(art_defaults INTERFACE "-fuse-ld=lld")
 # Add some extra definitions for ART, from art/build/art.go
 target_compile_definitions(art_defaults INTERFACE
+    "-DUSE_D8_DESUGAR=1"
     "-DART_TARGET"
     "-DART_TARGET_LINUX"
     "-DART_FRAME_SIZE_LIMIT=1744"
@@ -142,3 +146,26 @@ set_property(TARGET libnativehelper_defaults PROPERTY _cflags "-U_GNU_SOURCE" ; 
 
 # Patch defaults at the end
 baker_patch_defaults()
+
+# r8 depends on r8lib built from prebuilts/r8, so we can not leave it in java.cmake
+if(EXISTS "${CMAKE_SOURCE_DIR}/prebuilts/r8")
+    # Copy prebuilt r8
+    include(ExternalProject)
+    ExternalProject_Add(r8_build
+        SOURCE_DIR ${CMAKE_SOURCE_DIR}/prebuilts/r8
+        BUILD_IN_SOURCE TRUE
+        CONFIGURE_COMMAND
+            "${CMAKE_COMMAND}" -E make_directory ${CMAKE_BINARY_DIR}/r8/framework/ &&
+            "${CMAKE_COMMAND}" -E make_directory ${CMAKE_BINARY_DIR}/r8/bin/
+        BUILD_COMMAND ""
+        INSTALL_COMMAND
+            "${CMAKE_COMMAND}" -E copy ${CMAKE_SOURCE_DIR}/prebuilts/r8/d8 ${CMAKE_BINARY_DIR}/r8/bin/d8 &&
+            "${CMAKE_COMMAND}" -E copy $<TARGET_PROPERTY:r8lib,INTERFACE__CLASSPATH_> ${CMAKE_BINARY_DIR}/r8/framework/d8.jar
+        BUILD_BYPRODUCTS "${CMAKE_BINARY_DIR}/r8/bin/d8" "${CMAKE_BINARY_DIR}/r8/framework/d8.jar"
+        DEPENDS r8lib
+    )
+    # Import the built binary
+    add_executable(d8 IMPORTED GLOBAL)
+    add_dependencies(d8 r8_build)
+    set_target_properties(d8 PROPERTIES IMPORTED_LOCATION ${CMAKE_BINARY_DIR}/r8/bin/d8)
+endif()

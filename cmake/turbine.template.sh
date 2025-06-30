@@ -37,7 +37,7 @@ if [ -z "$sources" ]; then
 fi
 
 
-classpath="$<TARGET_PROPERTY:INTERFACE__CLASSPATH_>"
+classpath="$<JOIN:$<TARGET_PROPERTY:INTERFACE__CLASSPATH_>;$<TARGET_PROPERTY:INTERFACE__STUBS_CLASSPATH_>,;>"
 if [ "$classpath" != "" ]; then
     IFS=';' read -ra classpath <<< "$classpath"
     # turbine classpath is separated by space

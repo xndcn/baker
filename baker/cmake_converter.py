@@ -6,7 +6,7 @@ from .definitions.filegroup import FileGroup
 from .definitions.genrule import GenRule, GenSrcs
 from .definitions.python_binary_host import PythonBinaryHost
 from .definitions.aconfig_modules import AConfigDeclarations, CCAConfigLibrary, JavaAConfigLibrary
-from .definitions.java_modules import JavaApiLibrary, JavaSdkLibrary, JavaSystemModules, JavaLibrary, DroiddocExportedDir
+from .definitions.java_modules import JavaApiLibrary, JavaSdkLibrary, JavaSystemModules, JavaLibrary, DroiddocExportedDir, JavaImport
 
 class CMakeConverter:
     def __init__(self):
@@ -15,7 +15,7 @@ class CMakeConverter:
             CCLibraryHeaders, CCLibrary, CCTestLibrary, CCBinary, CCTest, CCObject,
             GenRule, GenSrcs, PythonBinaryHost,
             AConfigDeclarations, CCAConfigLibrary, JavaAConfigLibrary,
-            JavaApiLibrary, JavaSdkLibrary, JavaSystemModules, JavaLibrary, DroiddocExportedDir,
+            JavaApiLibrary, JavaSdkLibrary, JavaSystemModules, JavaLibrary, DroiddocExportedDir, JavaImport,
         ]
 
     def convert(self, project: str, root: ast.Blueprint, subdirectories=None) -> str:
