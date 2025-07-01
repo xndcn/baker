@@ -130,9 +130,8 @@ function(baker_java_sdk_library)
         VERBATIM
     )
     target_sources(${stubs} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/${stubs}.jar")
-    # stubs jar can not be used as classpath for java_library
-    set_target_properties(${stubs} PROPERTIES INTERFACE__STUBS_CLASSPATH_ "${CMAKE_CURRENT_BINARY_DIR}/${stubs}.jar")
-    set_target_properties(${stubs} PROPERTIES TRANSITIVE_LINK_PROPERTIES "_STUBS_CLASSPATH_")
+    set_target_properties(${stubs} PROPERTIES INTERFACE__CLASSPATH_ "${CMAKE_CURRENT_BINARY_DIR}/${stubs}.jar")
+    set_target_properties(${stubs} PROPERTIES TRANSITIVE_LINK_PROPERTIES "_CLASSPATH_")
 
     # Add api_contribution, which will be used in java_api_library
     set(api_contribution "${name}.stubs.source.api.contribution")
@@ -156,10 +155,16 @@ function(baker_java_system_modules)
     baker_parse_properties(${src})
     target_sources(${src} INTERFACE ${ARG_srcs})
     baker_apply_sources_transform(${src})
-    target_link_libraries(${src} INTERFACE $<TARGET_PROPERTY:${src},_libs>)
+
+    # System modules do not export libs to the classpath
+    # so use a interface library to collect all libs classpath
+    add_library(.${name}.LINK INTERFACE)
+    target_link_libraries(.${name}.LINK INTERFACE $<TARGET_PROPERTY:${src},_libs>)
 
     add_library(${name} OBJECT "${BAKER_DUMMY_C_SOURCE}")
     target_link_libraries(${name} PRIVATE ${src})
+    # Export the classpath of libs to _LINKED_CLASSPATH_
+    set_target_properties(${name} PROPERTIES INTERFACE__LINKED_CLASSPATH_ "$<TARGET_PROPERTY:.${name}.LINK,INTERFACE__CLASSPATH_>")
     set(outputs
         "${CMAKE_CURRENT_BINARY_DIR}/${name}/modules/module.jar"
         "${CMAKE_CURRENT_BINARY_DIR}/${name}/modules/module-info.class"
@@ -176,10 +181,10 @@ function(baker_java_system_modules)
             ZIPMERGE=${CMAKE_SOURCE_DIR}/cmake/zipmerge.py
             --
         ${CMAKE_SOURCE_DIR}/cmake/java_system_modules.sh
-            --jars "$<JOIN:$<TARGET_PROPERTY:${name},_CLASSPATH_>;$<TARGET_PROPERTY:${name},_STUBS_CLASSPATH_>,;>"
+            --jars "$<GENEX_EVAL:$<TARGET_PROPERTY:${name},INTERFACE__LINKED_CLASSPATH_>>"
             --outDir "${CMAKE_CURRENT_BINARY_DIR}/${name}/"
             --moduleVersion "${Java_VERSION_STRING}"
-        DEPENDS ${name}
+        DEPENDS ${name} $<TARGET_PROPERTY:${src},_libs>
         VERBATIM
     )
     target_sources(${name} PRIVATE ${outputs})
@@ -189,6 +194,7 @@ function(baker_java_system_modules)
     # But we only want the _SYSTEM_MODULES_PATH_ from c itself
     # So we have to use TRANSITIVE_COMPILE_PROPERTIES instead
     set_target_properties(${name} PROPERTIES TRANSITIVE_COMPILE_PROPERTIES "_SYSTEM_MODULES_PATH_")
+    set_target_properties(${name} PROPERTIES TRANSITIVE_LINK_PROPERTIES "_LINKED_CLASSPATH_")
 endfunction()
 
 function(baker_java_library)

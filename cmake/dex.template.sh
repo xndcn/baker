@@ -31,7 +31,7 @@ if [ -z "$output_dir" ] || [ -z "$source_jar" ]; then
     exit 1
 fi
 
-libs="$<TARGET_PROPERTY:INTERFACE__CLASSPATH_>"
+libs="$<GENEX_EVAL:$<JOIN:$<TARGET_PROPERTY:INTERFACE__CLASSPATH_>;$<TARGET_PROPERTY:INTERFACE__LINKED_CLASSPATH_>,;>>"
 if [ "$libs" != "" ]; then
     IFS=';' read -ra libs <<< "$libs"
     lib_args=""
