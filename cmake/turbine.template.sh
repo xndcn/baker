@@ -36,8 +36,14 @@ if [ -z "$sources" ]; then
     exit 1
 fi
 
+bootclasspath="$<TARGET_PROPERTY:INTERFACE__LINKED_CLASSPATH_>"
+if [ "$bootclasspath" != "" ]; then
+    IFS=';' read -ra bootclasspath <<< "$bootclasspath"
+    # turbine bootclasspath is separated by space
+    bootclasspath="--bootclasspath ${bootclasspath[*]}"
+fi
 
-classpath="$<JOIN:$<TARGET_PROPERTY:INTERFACE__CLASSPATH_>;$<TARGET_PROPERTY:INTERFACE__STUBS_CLASSPATH_>,;>"
+classpath="$<TARGET_PROPERTY:INTERFACE__CLASSPATH_>"
 if [ "$classpath" != "" ]; then
     IFS=';' read -ra classpath <<< "$classpath"
     # turbine classpath is separated by space
@@ -47,4 +53,5 @@ fi
 ${turbine} \
     --output "${output}" \
     --sources "${sources}" \
+    ${bootclasspath} \
     ${classpath}
