@@ -60,7 +60,7 @@ fi
 # TODO: handle patch_module sources in different directories
 patch_module="$<TARGET_PROPERTY:_patch_module>"
 if [ "$patch_module" != "" ]; then
-    patch_module="--patch-module ${patch_module}=${source_dir}"
+    patch_module="--patch-module ${patch_module}=.:${source_dir}"
     if [ "$jars" != "" ]; then
         patch_module="${patch_module}:${jars}"
     fi
