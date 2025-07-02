@@ -109,6 +109,7 @@ set_property(TARGET core_oj_api_files PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET art.module.intra.core.api_.public.stubs.source_ PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET core-all PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET core-oj PROPERTY EXCLUDE_FROM_ALL FALSE)
+set_property(TARGET core-icu4j PROPERTY EXCLUDE_FROM_ALL FALSE)
 
 set_tests_properties(boringssl_crypto_test DIRECTORY external/boringssl/ PROPERTIES WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/external/boringssl/src/)
 # FIXME: boringssl_crypto_test fails with libcrypto-shared
