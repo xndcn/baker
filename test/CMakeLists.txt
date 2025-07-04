@@ -25,6 +25,7 @@ add_library(libjsoncpp-static INTERFACE)
 add_library(librustc_demangle_static-static STATIC ".")
 set_target_properties(librustc_demangle_static-static PROPERTIES LINKER_LANGUAGE CXX)
 add_library(stub-annotations INTERFACE)
+add_library(current_android_jar INTERFACE)
 
 # Most Android.bp add -Werror flags, but create a lot of errors
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
@@ -65,6 +66,7 @@ baker(system/tools/aidl/ EXCLUDE_FROM_ALL)
 baker(system/libziparchive/ EXCLUDE_FROM_ALL)
 baker(system/unwinding/libunwindstack/ EXCLUDE_FROM_ALL)
 baker(tools/platform-compat/java/android/compat/annotation/ EXCLUDE_FROM_ALL)
+baker(frameworks/base/ EXCLUDE_FROM_ALL)
 baker(frameworks/libs/modules-utils/java/ EXCLUDE_FROM_ALL)
 baker(frameworks/native/libs/binder/ EXCLUDE_FROM_ALL)
 # boringssl requires some Android specific flags

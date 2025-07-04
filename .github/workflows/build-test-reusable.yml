@@ -61,8 +61,8 @@ jobs:
       working-directory: test
       run: |
         # Use local manifest directory
-        ~/repo init -u "$GITHUB_WORKSPACE" -m test/manifest.xml -b $GITHUB_SHA --manifest-depth=1
-        ~/repo sync -c
+        ~/repo init -u "$GITHUB_WORKSPACE" -m test/manifest.xml -b $GITHUB_SHA --manifest-depth=1 -c --depth=1
+        ~/repo sync
 
     - name: Configure with CMake
       working-directory: test
