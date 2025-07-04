@@ -1,4 +1,5 @@
 from ..blueprint import ast
+import json
 
 class Utils:
     @classmethod
@@ -124,7 +125,7 @@ class Utils:
         return var_name
 
     @classmethod
-    def to_cmake_expression(cls, value, lines: list[str]) -> str:
+    def to_cmake_expression(cls, value, lines: list[str], injson=False) -> str:
         if value is None:
             return ""
         elif isinstance(value, bool):
@@ -132,19 +133,30 @@ class Utils:
         elif isinstance(value, int):
             return str(value)
         elif isinstance(value, str):
+            if injson:
+                return value
             # Use bracket argument if contains special CMake characters
             if any(c in value for c in ";()#$ \t\n\"'\\"):
                 return f'[=[{value}]=]'
             return f'"{value}"'
         elif isinstance(value, list):
             # For lists, join elements with semicolons which is CMake's list separator
-            elements = [cls.to_cmake_expression(elem, lines) for elem in value]
-            return " ; ".join(elements) if elements else '""'
+            elements = [cls.to_cmake_expression(elem, lines, injson) for elem in value]
+            if elements:
+                return " ; ".join(elements)
+            elif injson:
+                return ""
+            else:
+                return '""'
         elif isinstance(value, ast.VariableValue):
             return f"${{{value.name}}}"
         elif isinstance(value, ast.SelectValue):
             var_name = cls.select_value_to_cmake(value, lines)
             return f"${{{var_name}}}"
+        elif isinstance(value, dict):
+            # For dict, convert to a string, which can be parsed by CMake with string(JSON)
+            data = {k: cls.to_cmake_expression(v, lines, injson=True) for k, v in value.items()}
+            return cls.to_cmake_expression(json.dumps(data), lines)
         else:
             # default case, convert to string
             return str(value)
