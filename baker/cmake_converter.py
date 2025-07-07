@@ -3,6 +3,7 @@ from .definitions.assignment import Assignment
 from .definitions.cc_modules import CCLibrary, CCTestLibrary, CCLibraryHeaders, CCBinary, CCTest, CCObject
 from .definitions.defaults import Defaults
 from .definitions.filegroup import FileGroup
+from .definitions.aidl_interface import AidlInterface
 from .definitions.genrule import GenRule, GenSrcs
 from .definitions.python_binary_host import PythonBinaryHost
 from .definitions.aconfig_modules import AConfigDeclarations, CCAConfigLibrary, JavaAConfigLibrary
@@ -12,6 +13,7 @@ class CMakeConverter:
     def __init__(self):
         self._handlers = [
             Defaults, FileGroup,
+            AidlInterface,
             CCLibraryHeaders, CCLibrary, CCTestLibrary, CCBinary, CCTest, CCObject,
             GenRule, GenSrcs, PythonBinaryHost,
             AConfigDeclarations, CCAConfigLibrary, JavaAConfigLibrary,

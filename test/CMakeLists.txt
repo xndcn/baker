@@ -110,6 +110,11 @@ set_property(TARGET art.module.intra.core.api_.public.stubs.source_ PROPERTY EXC
 set_property(TARGET core-all PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET core-oj PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET core-icu4j PROPERTY EXCLUDE_FROM_ALL FALSE)
+# Currently cmake does not support EXCLUDE_FROM_ALL for sub-subdirectory, so workaround
+get_property(aidl_targets DIRECTORY system/tools/aidl/build PROPERTY BUILDSYSTEM_TARGETS)
+foreach(target IN LISTS aidl_targets)
+    set_property(TARGET ${target} PROPERTY EXCLUDE_FROM_ALL FALSE)
+endforeach()
 
 set_tests_properties(boringssl_crypto_test DIRECTORY external/boringssl/ PROPERTIES WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/external/boringssl/src/)
 # FIXME: boringssl_crypto_test fails with libcrypto-shared
@@ -124,6 +129,9 @@ set_property(TARGET boringssl_test_support-static PROPERTY INTERFACE_LINK_LIBRAR
 target_link_libraries(.boringssl_test_support.OBJ PRIVATE libcrypto_static-static)
 set_property(TARGET conscrypt_generate_constants PROPERTY LINK_LIBRARIES "")
 target_link_libraries(conscrypt_generate_constants PRIVATE libcrypto_static-static)
+
+# libbinder includes stdatomic.h, which may not work until C++23
+set_target_properties(.libbinder.OBJ PROPERTIES CXX_STANDARD 23)
 
 # Default bfd linker may fail to link with protected symbols
 target_link_options(art_defaults INTERFACE "-fuse-ld=lld")
