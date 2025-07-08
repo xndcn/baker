@@ -6,6 +6,14 @@ function(baker_transform_source_file target SCOPE SOURCE_FILE)
     if(SOURCE_FILE MATCHES "\\*")
         file(GLOB_RECURSE file_list ${SOURCE_FILE})
         set(SOURCE_FILE ${file_list})
+    elseif(SOURCE_FILE MATCHES "^//.*:.*")
+        # Convert "//visibility:name" to target link "name"
+        # TODO: handle visibility
+        string(REGEX MATCH "^//(.*):(.*)" _match "${SOURCE_FILE}")
+        set(visibility "${CMAKE_MATCH_1}")
+        set(name "${CMAKE_MATCH_2}")
+        set(SOURCE_FILE "")
+        target_link_libraries(${target} ${SCOPE} ${name})
     elseif(file_name MATCHES "^:")
         # Convert ":file_name" to target link "file_name"
         string(SUBSTRING ${file_name} 1 -1 dependency)

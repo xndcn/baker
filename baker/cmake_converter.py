@@ -8,11 +8,12 @@ from .definitions.genrule import GenRule, GenSrcs
 from .definitions.python_binary_host import PythonBinaryHost
 from .definitions.aconfig_modules import AConfigDeclarations, CCAConfigLibrary, JavaAConfigLibrary
 from .definitions.java_modules import JavaApiLibrary, JavaSdkLibrary, JavaSystemModules, JavaLibrary, DroiddocExportedDir, JavaImport, DroidStubs
+from .definitions.soong_namespace import SoongNamespace
 
 class CMakeConverter:
     def __init__(self):
         self._handlers = [
-            Defaults, FileGroup,
+            Defaults, FileGroup, SoongNamespace,
             AidlInterface,
             CCLibraryHeaders, CCLibrary, CCTestLibrary, CCBinary, CCTest, CCObject,
             GenRule, GenSrcs, PythonBinaryHost,
