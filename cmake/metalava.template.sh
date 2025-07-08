@@ -81,7 +81,7 @@ ${metalava} \
     ${merge_inclusion_annotations_dirs} \
     $<JOIN:$<TARGET_PROPERTY:_droiddoc_options>, > \
     $<JOIN:$<TARGET_PROPERTY:_args>, > \
-    $<JOIN:$<TARGET_PROPERTY:_flags>, > \
+    $<GENEX_EVAL:$<JOIN:$<TARGET_PROPERTY:_flags>, >> \
     --hide UnresolvedImport \
     --hide HiddenSuperclass --hide BroadcastBehavior --hide DeprecationMismatch \
     --hide MissingPermission --hide SdkConstant --hide Todo \
