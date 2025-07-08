@@ -55,6 +55,7 @@ baker(external/icu EXCLUDE_FROM_ALL)
 baker(external/lz4/lib/ EXCLUDE_FROM_ALL)
 baker(external/lzma/ EXCLUDE_FROM_ALL)
 baker(external/okhttp/ EXCLUDE_FROM_ALL)
+baker(external/protobuf/ EXCLUDE_FROM_ALL)
 baker(external/tinyxml2/ EXCLUDE_FROM_ALL)
 baker(external/zstd/ EXCLUDE_FROM_ALL)
 baker(system/libbase/ EXCLUDE_FROM_ALL)
@@ -82,6 +83,11 @@ add_library(gtest_main ALIAS libgtest_main-static)
 find_package(ZLIB REQUIRED)
 add_library(libz-shared INTERFACE)
 target_link_libraries(libz-shared INTERFACE ZLIB::ZLIB)
+add_library(libz-static STATIC IMPORTED GLOBAL)
+set_target_properties(libz-static PROPERTIES
+    IMPORTED_LOCATION "${ZLIB_LIBRARY}"
+    INTERFACE_INCLUDE_DIRECTORIES "${ZLIB_INCLUDE_DIRS}"
+)
 
 # Fix for missing linkage
 set_property(TARGET liblog.defaults APPEND PROPERTY _export_header_lib_headers libutils_headers)
@@ -113,6 +119,7 @@ set_property(TARGET core-all PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET core-oj PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET core-icu4j PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET android-non-updatable-doc-stubs PROPERTY EXCLUDE_FROM_ALL FALSE)
+set_property(TARGET framework-protos PROPERTY EXCLUDE_FROM_ALL FALSE)
 # Currently cmake does not support EXCLUDE_FROM_ALL for sub-subdirectory, so workaround
 get_property(aidl_targets DIRECTORY system/tools/aidl/build PROPERTY BUILDSYSTEM_TARGETS)
 foreach(target IN LISTS aidl_targets)
@@ -155,6 +162,7 @@ target_compile_definitions(art_defaults INTERFACE
     "-DART_STACK_OVERFLOW_GAP_x86_64=8192")
 # Fix for using XSI-compliant strerror_r
 set_property(TARGET libnativehelper_defaults PROPERTY _cflags "-U_GNU_SOURCE" ; "-D_POSIX_C_SOURCE=200112L")
+set_property(TARGET protobuf-cflags-defaults PROPERTY _cflags "")
 
 # Patch defaults at the end
 baker_patch_defaults()
