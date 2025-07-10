@@ -10,7 +10,8 @@ class Utils:
 
     @classmethod
     def type_of_expression(cls, expr: ast.Node, value: any) -> type:
-        if isinstance(expr, ast.VariableValue):
+        # FIXME: handle VariableValue without reference (may be defined in the parent blueprint)
+        if isinstance(expr, ast.VariableValue) and expr.reference:
             expr = expr.reference.value
             value = cls.evaluate_expression(expr)
             return cls.type_of_expression(expr, value)
@@ -137,6 +138,7 @@ class Utils:
                 return value
             # Use bracket argument if contains special CMake characters
             if any(c in value for c in ";()#$ \t\n\"'\\"):
+                value = value.encode().decode('unicode_escape')  # Decode any escaped characters
                 return f'[=[{value}]=]'
             return f'"{value}"'
         elif isinstance(value, list):
