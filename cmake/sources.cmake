@@ -4,6 +4,8 @@ function(baker_transform_source_file target SCOPE SOURCE_FILE)
     get_filename_component(file_name ${SOURCE_FILE} NAME_WE)
     get_filename_component(file_ext ${SOURCE_FILE} EXT)
     if(SOURCE_FILE MATCHES "\\*")
+        # Check for double asterisk and remove it. GLOB_RECURSE already handles recursion
+        string(REPLACE "**/" "" SOURCE_FILE "${SOURCE_FILE}")
         file(GLOB_RECURSE file_list ${SOURCE_FILE})
         set(SOURCE_FILE ${file_list})
     elseif(SOURCE_FILE MATCHES "^//.*:.*")
