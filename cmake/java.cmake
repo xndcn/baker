@@ -91,7 +91,7 @@ function(baker_java_api_library)
         COMMAND ${Java_JAVAC_EXECUTABLE}
             "@${CMAKE_CURRENT_BINARY_DIR}/gen/${name}.metalava.list"
             -source 1.8 -target 1.8
-            -classpath "$<TARGET_PROPERTY:${name},_CLASSPATH_>"
+            -classpath "$<JOIN:$<TARGET_PROPERTY:${name},_CLASSPATH_>,:>"
             -d "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/classes/"
         COMMAND ${Java_JAR_EXECUTABLE}
             cf "${CMAKE_CURRENT_BINARY_DIR}/${name}.jar"

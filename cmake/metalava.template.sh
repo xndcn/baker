@@ -32,7 +32,7 @@ if [ -n "$classpath" ]; then
     IFS=';' read -ra classpath <<< "$classpath"
     # Join classpath elements with ':'
     classpath="$(IFS=: ; echo "${classpath[*]}")"
-    classpath="--classpath ${classpath[@]}"
+    classpath="--classpath ${classpath}"
 fi
 
 if [ -n "$merge_inclusion_annotations_dirs" ]; then
