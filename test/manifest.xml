@@ -30,6 +30,7 @@
   <project path="external/zstd" name="platform/external/zstd" groups="pdk" />
 
   <project path="prebuilts/r8" name="platform/prebuilts/r8" groups="pdk,sysui-studio" clone-depth="1" />
+  <project path="prebuilts/sdk" name="platform/prebuilts/sdk" groups="pdk,sysui-studio" clone-depth="1" />
 
   <project path="system/core" name="platform/system/core" groups="pdk" />
   <project path="system/libbase" name="platform/system/libbase" groups="pdk" />

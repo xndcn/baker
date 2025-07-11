@@ -189,3 +189,11 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/prebuilts/r8")
     add_dependencies(d8 r8_build)
     set_target_properties(d8 PROPERTIES IMPORTED_LOCATION ${CMAKE_BINARY_DIR}/r8/bin/d8)
 endif()
+
+# Add prebuilts sdk, see build/soong/java/prebuilt_apis.go
+add_library(sdk_system_current_android INTERFACE)
+set_target_properties(sdk_system_current_android PROPERTIES INTERFACE__CLASSPATH_ "${CMAKE_SOURCE_DIR}/prebuilts/sdk/current/system/android.jar")
+set_target_properties(sdk_system_current_android PROPERTIES TRANSITIVE_LINK_PROPERTIES "_CLASSPATH_")
+add_library(sdk_module-lib_current_framework-connectivity-t INTERFACE)
+set_target_properties(sdk_module-lib_current_framework-connectivity-t PROPERTIES INTERFACE__CLASSPATH_ "${CMAKE_SOURCE_DIR}/prebuilts/sdk/current/module-lib/framework-connectivity-t.jar")
+set_target_properties(sdk_module-lib_current_framework-connectivity-t PROPERTIES TRANSITIVE_LINK_PROPERTIES "_CLASSPATH_")
