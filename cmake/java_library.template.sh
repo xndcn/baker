@@ -3,8 +3,28 @@
 set -e
 
 javac=${Java_JAVAC_EXECUTABLE}
+output_dir=""
 
 # Parse arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -d)
+            output_dir="$2"
+            shift 2
+            ;;
+        *)
+            echo "Unknown argument: $1"
+            exit 1
+            ;;
+    esac
+done
+
+# Validate required arguments
+if [ -z "$output_dir" ]; then
+    echo "Error: -d is required"
+    exit 1
+fi
+
 system_modules="$<TARGET_PROPERTY:_system_modules>"
 if [ "$system_modules" != "" ]; then
     if [ "$system_modules" != "none" ]; then
@@ -72,10 +92,17 @@ if [ "$java_version" == "1.8" ]; then
     system_modules=""
 fi
 
+is_stubs_module="$<TARGET_PROPERTY:_is_stubs_module>"
+if [ "$is_stubs_module" == "ON" ] && [ -z "$sources" ]; then
+    echo "Skip compiling stubs module without sources"
+    mkdir -p "${output_dir}"
+    exit 0
+fi
+
 ${javac} \
     ${system_modules} \
     ${source_target} \
     ${patch_module} \
     ${classpath} \
     ${sources} \
-    $@
+    -d "${output_dir}"
