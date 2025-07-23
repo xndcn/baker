@@ -242,6 +242,8 @@ function(baker_java_library)
             "${CMAKE_CURRENT_BINARY_DIR}/${name}.jar"
             $<TARGET_PROPERTY:.${name}.LINK,INTERFACE__CLASSPATH_>
         DEPENDS ${name} ${CMAKE_CURRENT_BINARY_DIR}/${name}.java_library.sh $<TARGET_PROPERTY:${src},_static_libs>
+        # --patch-module java.base=. relies on the top level directory
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         VERBATIM
         COMMAND_EXPAND_LISTS
     )

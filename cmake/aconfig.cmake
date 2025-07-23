@@ -103,7 +103,6 @@ function(baker_java_aconfig_library)
         VERBATIM
     )
     target_sources(${src} INTERFACE "${outputs}")
-    set_target_properties(${src} PROPERTIES _SOURCE_DIR_ "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/")
 
     add_library(${name} OBJECT "${BAKER_DUMMY_C_SOURCE}")
     target_link_libraries(${name} PRIVATE ${src})

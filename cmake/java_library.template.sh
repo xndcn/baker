@@ -50,17 +50,10 @@ if [ "$stubs_sources" != "" ]; then
     sources="${sources} ${stubs_sources[*]}"
 fi
 
-# SOURCE_DIR seems read only
-# Modules like java_aconfig_library will build from _SOURCE_DIR_
-source_dir="$<TARGET_PROPERTY:_SOURCE_DIR_>"
-if [ "$source_dir" == "" ]; then
-    source_dir="$<TARGET_PROPERTY:SOURCE_DIR>"
-fi
-
 # TODO: handle patch_module sources in different directories
 patch_module="$<TARGET_PROPERTY:_patch_module>"
 if [ "$patch_module" != "" ]; then
-    patch_module="--patch-module ${patch_module}=.:${source_dir}"
+    patch_module="--patch-module ${patch_module}=."
     if [ "$jars" != "" ]; then
         patch_module="${patch_module}:${jars}"
     fi
