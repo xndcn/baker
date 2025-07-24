@@ -221,7 +221,7 @@ function(baker_java_library)
     target_link_libraries(${name} PRIVATE ${src})
 
     # Use a interface library to collect all static_libs classpath
-    # For static_libs, we use COMPILE_ONLY to only link theirselves classpath
+    # For static_libs, we use COMPILE_ONLY to only link their own classpath
     add_library(.${name}.LINK INTERFACE)
     target_link_libraries(.${name}.LINK INTERFACE $<COMPILE_ONLY:$<TARGET_PROPERTY:${src},_static_libs>>)
     set_target_properties(${src} PROPERTIES _STATIC_CLASSPATH_ "$<TARGET_PROPERTY:.${name}.LINK,INTERFACE__CLASSPATH_>")
