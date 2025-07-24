@@ -102,6 +102,7 @@ function(baker_java_api_library)
     target_sources(${name} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/${name}.jar")
     set_target_properties(${name} PROPERTIES INTERFACE__CLASSPATH_ "${CMAKE_CURRENT_BINARY_DIR}/${name}.jar")
     set_target_properties(${name} PROPERTIES TRANSITIVE_LINK_PROPERTIES "_CLASSPATH_")
+    set_target_properties(${name} PROPERTIES TRANSITIVE_COMPILE_PROPERTIES "_CLASSPATH_")
 endfunction()
 
 function(baker_java_sdk_library)
@@ -137,6 +138,7 @@ function(baker_java_sdk_library)
     target_sources(${stubs} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/${stubs}.jar")
     set_target_properties(${stubs} PROPERTIES INTERFACE__CLASSPATH_ "${CMAKE_CURRENT_BINARY_DIR}/${stubs}.jar")
     set_target_properties(${stubs} PROPERTIES TRANSITIVE_LINK_PROPERTIES "_CLASSPATH_")
+    set_target_properties(${stubs} PROPERTIES TRANSITIVE_COMPILE_PROPERTIES "_CLASSPATH_")
 
     # Add api_contribution, which will be used in java_api_library
     set(api_contribution "${name}.stubs.source.api.contribution")
@@ -219,8 +221,9 @@ function(baker_java_library)
     target_link_libraries(${name} PRIVATE ${src})
 
     # Use a interface library to collect all static_libs classpath
+    # For static_libs, we use COMPILE_ONLY to only link theirselves classpath
     add_library(.${name}.LINK INTERFACE)
-    target_link_libraries(.${name}.LINK INTERFACE $<TARGET_PROPERTY:${src},_static_libs>)
+    target_link_libraries(.${name}.LINK INTERFACE $<COMPILE_ONLY:$<TARGET_PROPERTY:${src},_static_libs>>)
     set_target_properties(${src} PROPERTIES _STATIC_CLASSPATH_ "$<TARGET_PROPERTY:.${name}.LINK,INTERFACE__CLASSPATH_>")
 
     file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${name}.java_library.sh" INPUT "${CMAKE_SOURCE_DIR}/cmake/java_library.template.sh" TARGET ${src})
@@ -251,6 +254,7 @@ function(baker_java_library)
     target_sources(${name} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/${name}.jar")
     set_target_properties(${name} PROPERTIES INTERFACE__CLASSPATH_ "${CMAKE_CURRENT_BINARY_DIR}/${name}.jar")
     set_target_properties(${name} PROPERTIES TRANSITIVE_LINK_PROPERTIES "_CLASSPATH_")
+    set_target_properties(${name} PROPERTIES TRANSITIVE_COMPILE_PROPERTIES "_CLASSPATH_")
 
     file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${name}.dex.sh" INPUT "${CMAKE_SOURCE_DIR}/cmake/dex.template.sh" TARGET ${src})
     add_custom_command(
@@ -287,6 +291,7 @@ function(baker_java_import)
 
     set_target_properties(${name} PROPERTIES INTERFACE__CLASSPATH_ "${CMAKE_CURRENT_SOURCE_DIR}/$<TARGET_PROPERTY:${name},_jars>")
     set_target_properties(${name} PROPERTIES TRANSITIVE_LINK_PROPERTIES "_CLASSPATH_")
+    set_target_properties(${name} PROPERTIES TRANSITIVE_COMPILE_PROPERTIES "_CLASSPATH_")
 endfunction()
 
 function(baker_droidstubs)
