@@ -302,6 +302,7 @@ function(baker_droidstubs)
     baker_parse_properties(${src})
     target_sources(${src} INTERFACE ${ARG_srcs})
     baker_apply_sources_transform(${src})
+    baker_apply_args_transform(${src})
 
     # Special flags for droidstubs
     # See build/soong/java/droidstubs.go
