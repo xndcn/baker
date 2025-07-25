@@ -52,6 +52,12 @@ endfunction()
 function(baker_cc_aconfig_library)
     baker_parse_metadata(${ARGN})
 
+    # TODO: support aconfig_declarations defined later
+    if(NOT TARGET ${ARG_aconfig_declarations})
+        message(WARNING "Aconfig declarations '${ARG_aconfig_declarations}' not found. Skipping aconfig library generation for ${name}.")
+        return()
+    endif()
+
     add_library(${name}-static STATIC)
     baker_parse_properties(${name}-static)
 
@@ -75,6 +81,12 @@ endfunction()
 
 function(baker_java_aconfig_library)
     baker_parse_metadata(${ARGN})
+
+    # TODO: support aconfig_declarations defined later
+    if(NOT TARGET ${ARG_aconfig_declarations})
+        message(WARNING "Aconfig declarations '${ARG_aconfig_declarations}' not found. Skipping aconfig library generation for ${name}.")
+        return()
+    endif()
 
     set(src ".${name}.SRC")
     add_library(${src} INTERFACE)

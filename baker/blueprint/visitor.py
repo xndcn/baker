@@ -54,12 +54,12 @@ class AstBuilder(blueprintVisitor):
     def visitValue(self, ctx:blueprintParser.ValueContext):
         if ctx.BOOLEAN():
             return BooleanValue(ctx.BOOLEAN().getText() == "true")
-        elif ctx.INTEGER():
-            return IntegerValue(int(ctx.INTEGER().getText()))
         elif ctx.STRING():
             text = ctx.STRING().getText()
             # Remove the surrounding quotes and handle escaped quotes
             return StringValue(text[1:-1].replace('\\"', '"'))
+        elif ctx.INTEGER():
+            return IntegerValue(int(ctx.INTEGER().getText()))
         elif ctx.variable():
             return self.visit(ctx.variable())
         elif ctx.select():

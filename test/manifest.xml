@@ -37,6 +37,7 @@
   <project path="system/libziparchive" name="platform/system/libziparchive" groups="pdk" />
   <project path="system/unwinding" name="platform/system/unwinding" groups="pdk" />
 
+  <project path="frameworks/base" name="platform/frameworks/base" groups="pdk-cw-fs,pdk-fs,sysui-studio" />
   <project path="frameworks/libs/modules-utils" name="platform/frameworks/libs/modules-utils" groups="pdk-cw-fs,pdk-fs,sysui-studio" />
   <project path="frameworks/native" name="platform/frameworks/native" groups="pdk" />
 
