@@ -14,7 +14,14 @@ if [ "$system_modules" != "" ]; then
     fi
 fi
 
-source_target="$<TARGET_PROPERTY:_java_version>"
+# Check java_version
+java_version="$<TARGET_PROPERTY:_java_version>"
+# Java 1.7 is deprecated, treat it as 1.8
+if [ "$java_version" == "1.7" ]; then
+    java_version="1.8"
+fi
+
+source_target="${java_version}"
 if [ "$source_target" != "" ]; then
     source_target="-source ${source_target} -target ${source_target}"
 fi
@@ -59,8 +66,6 @@ if [ "$patch_module" != "" ]; then
     fi
 fi
 
-# Check java_version
-java_version="$<TARGET_PROPERTY:_java_version>"
 if [ "$java_version" == "1.8" ]; then
     # For Java 8, ignore patch-module and system modules
     patch_module=""
