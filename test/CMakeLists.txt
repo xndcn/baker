@@ -165,8 +165,8 @@ target_compile_definitions(art_defaults INTERFACE
 set_property(TARGET libnativehelper_defaults PROPERTY _cflags "-U_GNU_SOURCE" ; "-D_POSIX_C_SOURCE=200112L")
 set_property(TARGET protobuf-cflags-defaults PROPERTY _cflags "")
 
-# Patch defaults at the end
-baker_patch_defaults()
+# Patch baker at the end
+baker_patch()
 
 # r8 depends on r8lib built from prebuilts/r8, so we can not leave it in java.cmake
 if(EXISTS "${CMAKE_SOURCE_DIR}/prebuilts/r8")
