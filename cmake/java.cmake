@@ -91,7 +91,7 @@ function(baker_java_api_library)
         COMMAND ${Java_JAVAC_EXECUTABLE}
             "@${CMAKE_CURRENT_BINARY_DIR}/gen/${name}.metalava.list"
             -source 1.8 -target 1.8
-            -classpath "$<TARGET_PROPERTY:${name},_CLASSPATH_>"
+            -classpath "$<JOIN:$<TARGET_PROPERTY:${name},_CLASSPATH_>,:>"
             -d "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/classes/"
         COMMAND ${Java_JAR_EXECUTABLE}
             cf "${CMAKE_CURRENT_BINARY_DIR}/${name}.jar"
@@ -308,4 +308,11 @@ function(baker_droidstubs)
     # See build/soong/java/droidstubs.go
     set_property(TARGET ${src} APPEND PROPERTY _flags "--exclude-documentation-from-stubs")
     baker_add_metalava(${name} ${name} ${src})
+
+    # Add api_contribution
+    set(api_contribution "${name}.api.contribution")
+    add_library(${api_contribution} INTERFACE)
+    # TODO: support check_api_current_api_file in defaults
+    target_sources(${api_contribution} INTERFACE ${ARG_check_api_current_api_file})
+    baker_apply_sources_transform(${api_contribution})
 endfunction()
