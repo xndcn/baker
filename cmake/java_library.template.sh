@@ -92,8 +92,9 @@ if [ "$java_version" == "1.8" ]; then
     system_modules=""
 fi
 
-is_stubs_module="$<TARGET_PROPERTY:_is_stubs_module>"
-if [ "$is_stubs_module" == "ON" ] && [ -z "$sources" ]; then
+# is_stubs_module may be ON or TRUE, using BOOL to handle both cases
+is_stubs_module="$<BOOL:$<TARGET_PROPERTY:_is_stubs_module>>"
+if [ "$is_stubs_module" == "1" ] && [ -z "$sources" ]; then
     echo "Skip compiling stubs module without sources"
     mkdir -p "${output_dir}"
     exit 0

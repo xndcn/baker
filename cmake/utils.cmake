@@ -112,6 +112,7 @@ function(baker_apply_args_transform target)
 endfunction()
 
 function(baker_patch_eval_value out_var value)
+    set(resolved_value "${value}")
     # Replace $<TARGET_PROPERTY:foo,bar>
     if(value MATCHES "\\$<TARGET_PROPERTY:([^,]+),([^>]+)>")
         string(REGEX MATCH "\\$<TARGET_PROPERTY:([^,]+),([^>]+)>" match "${value}")
@@ -120,9 +121,9 @@ function(baker_patch_eval_value out_var value)
             list(GET target_prop 0 target_name)
             list(GET target_prop 1 property_name)
             get_property(resolved_value TARGET ${target_name} PROPERTY ${property_name})
-            set(${out_var} "${resolved_value}" PARENT_SCOPE)
         endif()
     endif()
+    set(${out_var} "${resolved_value}" PARENT_SCOPE)
 endfunction()
 
 function(baker_patch_eval)
