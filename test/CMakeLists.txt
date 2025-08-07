@@ -121,6 +121,7 @@ set_property(TARGET core-icu4j PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET android-non-updatable-doc-stubs PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET framework-protos PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET android-non-updatable.stubs.module_lib PROPERTY EXCLUDE_FROM_ALL FALSE)
+set_property(TARGET android_module_lib_stubs_current PROPERTY EXCLUDE_FROM_ALL FALSE)
 # Currently cmake does not support EXCLUDE_FROM_ALL for sub-subdirectory, so workaround
 get_property(aidl_targets DIRECTORY system/tools/aidl/build PROPERTY BUILDSYSTEM_TARGETS)
 foreach(target IN LISTS aidl_targets)
@@ -165,8 +166,8 @@ target_compile_definitions(art_defaults INTERFACE
 set_property(TARGET libnativehelper_defaults PROPERTY _cflags "-U_GNU_SOURCE" ; "-D_POSIX_C_SOURCE=200112L")
 set_property(TARGET protobuf-cflags-defaults PROPERTY _cflags "")
 
-# Patch defaults at the end
-baker_patch_defaults()
+# Patch baker at the end
+baker_patch()
 
 # r8 depends on r8lib built from prebuilts/r8, so we can not leave it in java.cmake
 if(EXISTS "${CMAKE_SOURCE_DIR}/prebuilts/r8")

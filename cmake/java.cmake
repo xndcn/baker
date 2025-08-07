@@ -3,6 +3,16 @@ if(Java_FOUND)
     message(STATUS "Java ${Java_VERSION} found: ${Java_JAVAC_EXECUTABLE}")
 endif()
 
+set(API_SCOPE_public_moduleSuffix "")
+set(API_SCOPE_public_apiFilePrefix "")
+set(API_SCOPE_public_extends "")
+set(API_SCOPE_system_moduleSuffix ".system")
+set(API_SCOPE_system_apiFilePrefix "system-")
+set(API_SCOPE_system_extends "public")
+set(API_SCOPE_module_lib_moduleSuffix ".module_lib")
+set(API_SCOPE_module_lib_apiFilePrefix "module-lib-")
+set(API_SCOPE_module_lib_extends "system")
+
 if(EXISTS "${CMAKE_SOURCE_DIR}/tools/metalava")
     # Build metalava
     include(ExternalProject)
@@ -105,6 +115,123 @@ function(baker_java_api_library)
     set_target_properties(${name} PROPERTIES TRANSITIVE_COMPILE_PROPERTIES "_CLASSPATH_")
 endfunction()
 
+function(baker_java_sdk_library_scope_from_text)
+    cmake_parse_arguments(ARG "" "name;scope" "" ${ARGN})
+
+    set(name "${ARG_name}")
+    set(src ".${name}.SRC")
+    set(scope "${ARG_scope}")
+    set(api_contributions "")
+    while(NOT scope STREQUAL "")
+        set(moduleSuffix "${API_SCOPE_${scope}_moduleSuffix}")
+        list(APPEND api_contributions "${name}.stubs.source${moduleSuffix}.api.contribution")
+        set(scope "${API_SCOPE_${scope}_extends}")
+    endwhile()
+
+    set(scope "${ARG_scope}")
+    set(moduleSuffix "${API_SCOPE_${scope}_moduleSuffix}")
+    baker_java_api_library(
+        name ${name}.stubs${moduleSuffix}.from-text
+        api_contributions ${api_contributions}
+        srcs ""
+        system_modules $<TARGET_PROPERTY:${src},_system_modules>
+        libs "stub-annotations" ; $<TARGET_PROPERTY:${src},_libs> ; $<TARGET_PROPERTY:${src},_static_libs> ; $<TARGET_PROPERTY:${src},_stub_only_libs> ; $<TARGET_PROPERTY:${src},_${scope}_libs>
+        static_libs $<TARGET_PROPERTY:${src},_stub_only_static_libs>
+
+        _ALL_SINGLE_KEYS_ "system_modules"
+        _ALL_LIST_KEYS_ "srcs;api_contributions;libs;static_libs"
+        _ALL_EVAL_KEYS_ "system_modules;libs;static_libs"
+    )
+endfunction()
+
+function(baker_java_sdk_library_scope_from_source)
+    cmake_parse_arguments(ARG "" "name;scope" "" ${ARGN})
+
+    set(name "${ARG_name}")
+    set(src ".${name}.SRC")
+    set(scope "${ARG_scope}")
+    set(moduleSuffix "${API_SCOPE_${scope}_moduleSuffix}")
+    baker_java_library(
+        name ${name}.stubs${moduleSuffix}.from-source
+        srcs ":${name}.stubs.source${moduleSuffix}"
+        # TODO: sdk_version
+        system_modules $<TARGET_PROPERTY:${src},_system_modules>
+        patch_module $<TARGET_PROPERTY:${src},_patch_module>
+        installable FALSE
+        libs $<TARGET_PROPERTY:${src},_stub_only_libs> ; $<TARGET_PROPERTY:${src},_${scope}_libs>
+        static_libs $<TARGET_PROPERTY:${src},_stub_only_static_libs>
+        openjdk9_srcs $<TARGET_PROPERTY:${src},_openjdk9_srcs>
+        java_version "1.8"
+        is_stubs_module TRUE
+
+        _ALL_SINGLE_KEYS_ "system_modules;patch_module;installable;java_version;is_stubs_module"
+        _ALL_LIST_KEYS_ "srcs;libs;static_libs;openjdk9_srcs"
+        _ALL_EVAL_KEYS_ "system_modules;patch_module;libs;static_libs;openjdk9_srcs"
+    )
+endfunction()
+
+function(baker_java_sdk_library_scope_droidstubs)
+    cmake_parse_arguments(ARG "" "name;scope" "" ${ARGN})
+    set(name "${ARG_name}")
+    set(src ".${name}.SRC")
+    set(scope "${ARG_scope}")
+    set(moduleSuffix "${API_SCOPE_${scope}_moduleSuffix}")
+
+    set(apiFilePrefix "${API_SCOPE_${scope}_apiFilePrefix}")
+    set(api_dir "$<IF:$<BOOL:$<TARGET_PROPERTY:${src},_api_dir>>,$<TARGET_PROPERTY:${src},_api_dir>,api>")
+    # TODO: more droidstubs args
+    baker_droidstubs(
+        name ${name}.stubs.source${moduleSuffix}
+        # TODO: support ${scope}_api_srcs with :foo
+        srcs $<TARGET_PROPERTY:${src},INTERFACE_SOURCES> ; $<TARGET_PROPERTY:${src},_${scope}_api_srcs>
+        system_modules $<TARGET_PROPERTY:${src},_system_modules>
+        installable FALSE
+        libs $<TARGET_PROPERTY:${src},_libs> ; $<TARGET_PROPERTY:${src},_static_libs> ; $<TARGET_PROPERTY:${src},_stub_only_libs> ; $<TARGET_PROPERTY:${src},_${scope}_libs>
+        java_version $<TARGET_PROPERTY:${src},_java_version>
+        droiddoc_options $<TARGET_PROPERTY:${src},_droiddoc_options>
+        check_api_current_api_file "${CMAKE_CURRENT_SOURCE_DIR}/${api_dir}/${apiFilePrefix}current.txt"
+
+        _ALL_SINGLE_KEYS_ "system_modules;installable;java_version;check_api_current_api_file"
+        _ALL_LIST_KEYS_ "srcs;libs;droiddoc_options"
+        _ALL_EVAL_KEYS_ "system_modules;libs;java_version;droiddoc_options"
+    )
+endfunction()
+
+function(baker_java_sdk_library_scope_stubs)
+    cmake_parse_arguments(ARG "" "name;scope" "" ${ARGN})
+
+    set(name "${ARG_name}")
+    set(src ".${name}.SRC")
+    set(scope "${ARG_scope}")
+    set(moduleSuffix "${API_SCOPE_${scope}_moduleSuffix}")
+
+    baker_java_library(
+        name ${name}.stubs${moduleSuffix}
+        srcs ""
+        system_modules $<TARGET_PROPERTY:${src},_system_modules>
+        # TODO: determine from-text or from-source
+        static_libs ${name}.stubs${moduleSuffix}.from-text
+        is_stubs_module TRUE
+
+        _ALL_SINGLE_KEYS_ "system_modules;is_stubs_module"
+        _ALL_LIST_KEYS_ "srcs;static_libs"
+        _ALL_EVAL_KEYS_ "system_modules"
+    )
+endfunction()
+
+function(baker_java_sdk_library_scope)
+    cmake_parse_arguments(ARG "" "name;scope" "" ${ARGN})
+
+    # .stubs.source${moduleSuffix}, .stubs.source${moduleSuffix}.api.contribution
+    baker_java_sdk_library_scope_droidstubs(name ${ARG_name} scope ${ARG_scope})
+    # .stubs${moduleSuffix}.from-text
+    baker_java_sdk_library_scope_from_text(name ${ARG_name} scope ${ARG_scope})
+    # .stubs${moduleSuffix}.from-source
+    baker_java_sdk_library_scope_from_source(name ${ARG_name} scope ${ARG_scope})
+    # .stubs${moduleSuffix}
+    baker_java_sdk_library_scope_stubs(name ${ARG_name} scope ${ARG_scope})
+endfunction()
+
 function(baker_java_sdk_library)
     baker_parse_metadata(${ARGN})
 
@@ -152,6 +279,12 @@ function(baker_java_sdk_library)
         INTERFACE__args "$<TARGET_PROPERTY:${src},_args>"
     )
     set_target_properties(${api_contribution} PROPERTIES TRANSITIVE_LINK_PROPERTIES "_droiddoc_options" "_flags" "_args")
+
+    # TODO: support ${scope}_enabled defined in defaults
+    # Add .stubs.module_lib
+    if(${ARG_module_lib_enabled})
+        baker_java_sdk_library_scope(name ${name} scope "module_lib")
+    endif()
 endfunction()
 
 function(baker_java_system_modules)
