@@ -49,6 +49,54 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/external/turbine")
 endif()
 
 
+function(baker_patch_java)
+    baker_patch_sdk_version()
+
+    # remove not build stubs for all-updatable-modules-system-stubs
+    get_target_property(static_libs .all-updatable-modules-system-stubs.SRC _static_libs)
+    set(libs "")
+    foreach(lib IN LISTS static_libs)
+        if(TARGET ${lib})
+            list(APPEND libs ${lib})
+        else()
+            message(WARNING "all-updatable-modules-system-stubs static_libs ${lib} not found")
+        endif()
+    endforeach()
+    set_property(TARGET .all-updatable-modules-system-stubs.SRC PROPERTY _static_libs "${libs}")
+endfunction()
+
+function(baker_patch_sdk_version)
+    # Patch sdk_version with baker_sdk_${sdk_version} defaults
+    # See build/soong/java/sdk.go:decodeSdkDep
+    # Define module_current sdk_version
+    baker_defaults(
+        name baker_sdk_module_current
+        system_modules "core-module-lib-stubs-system-modules"
+        libs "android_module_lib_stubs_current"
+        _ALL_SINGLE_KEYS_ "system_modules"
+        _ALL_LIST_KEYS_ "libs"
+    )
+    # Define system_current sdk_version
+    baker_defaults(
+        name baker_sdk_system_current
+        system_modules "core-public-stubs-system-modules"
+        libs "android_system_stubs_current"
+        _ALL_SINGLE_KEYS_ "system_modules"
+        _ALL_LIST_KEYS_ "libs"
+    )
+
+    baker_get_all_targets_recursive(all_targets ${CMAKE_SOURCE_DIR})
+    # Get all sdk_version
+    foreach(target ${all_targets})
+        get_property(sdk_version TARGET ${target} PROPERTY _sdk_version)
+        # Use sdk_version as defaults
+        if(sdk_version)
+            set_property(TARGET ${target} APPEND PROPERTY _defaults "baker_sdk_${sdk_version}")
+        endif()
+    endforeach()
+endfunction()
+
+
 function(baker_add_metalava lib name src)
     add_library(${lib} OBJECT "${BAKER_DUMMY_C_SOURCE}")
     target_link_libraries(${lib} PRIVATE ${src})
@@ -285,6 +333,10 @@ function(baker_java_sdk_library)
     if(${ARG_module_lib_enabled})
         baker_java_sdk_library_scope(name ${name} scope "module_lib")
     endif()
+    # Add .stubs.system
+    if(${ARG_system_enabled})
+        baker_java_sdk_library_scope(name ${name} scope "system")
+    endif()
 endfunction()
 
 function(baker_java_system_modules)
@@ -377,7 +429,7 @@ function(baker_java_library)
         COMMAND ${CMAKE_SOURCE_DIR}/cmake/zipmerge.py --append
             "${CMAKE_CURRENT_BINARY_DIR}/${name}.jar"
             $<TARGET_PROPERTY:.${name}.LINK,INTERFACE__CLASSPATH_>
-        DEPENDS ${name} ${CMAKE_CURRENT_BINARY_DIR}/${name}.java_library.sh $<TARGET_PROPERTY:${src},_static_libs>
+        DEPENDS ${name} ${CMAKE_CURRENT_BINARY_DIR}/${name}.java_library.sh $<TARGET_PROPERTY:${src},_static_libs> $<TARGET_PROPERTY:.${name}.LINK,INTERFACE__CLASSPATH_>
         # --patch-module java.base=. relies on the top level directory
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         VERBATIM
@@ -448,4 +500,30 @@ function(baker_droidstubs)
     # TODO: support check_api_current_api_file in defaults
     target_sources(${api_contribution} INTERFACE ${ARG_check_api_current_api_file})
     baker_apply_sources_transform(${api_contribution})
+endfunction()
+
+
+function(baker_combined_apis)
+    baker_parse_metadata(${ARGN})
+    # See frameworks/base/api/api.go:createMergedSystemStubs
+    # TODO: add non_updatable_modules
+    baker_java_library(
+        name all-modules-system-stubs
+        static_libs "all-updatable-modules-system-stubs"
+        sdk_version "module_current"
+        is_stubs_module TRUE
+        _ALL_SINGLE_KEYS_ "sdk_version;is_stubs_module"
+        _ALL_LIST_KEYS_ "static_libs"
+    )
+
+    set(updatable_modules "${ARG_bootclasspath}")
+    list(TRANSFORM updatable_modules APPEND ".stubs.system")
+    baker_java_library(
+        name "all-updatable-modules-system-stubs"
+        static_libs "${updatable_modules}"
+        sdk_version "module_current"
+        is_stubs_module TRUE
+        _ALL_SINGLE_KEYS_ "sdk_version;is_stubs_module"
+        _ALL_LIST_KEYS_ "static_libs"
+    )
 endfunction()

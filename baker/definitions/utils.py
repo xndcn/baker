@@ -15,6 +15,10 @@ class Utils:
             expr = expr.reference.value
             value = cls.evaluate_expression(expr)
             return cls.type_of_expression(expr, value)
+        if isinstance(expr, ast.SelectValue):
+            expr = expr.cases[0].value
+            value = cls.evaluate_expression(expr)
+            return cls.type_of_expression(expr, value)
         return type(value)
 
     @classmethod

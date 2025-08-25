@@ -184,6 +184,7 @@ function(baker_soong_namespace)
 endfunction(baker_soong_namespace)
 
 function(baker_patch)
+    baker_patch_java()
     baker_patch_defaults()
     baker_patch_eval()
 endfunction()

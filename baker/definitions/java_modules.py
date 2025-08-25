@@ -83,3 +83,15 @@ class DroidStubs(Module):
 
     def convert_to_cmake(self):
         return self._convert_module_to_cmake("baker_droidstubs")
+
+
+class CombinedApis(Module):
+    def __init__(self, blueprint: ast.Blueprint, module: ast.Module):
+        super().__init__(blueprint, module)
+
+    @staticmethod
+    def match(name: str) -> bool:
+        return name.find("combined_apis") >= 0
+
+    def convert_to_cmake(self):
+        return self._convert_module_to_cmake("baker_combined_apis")
