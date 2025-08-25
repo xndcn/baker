@@ -101,5 +101,35 @@ function(baker_aidl_interface)
         target_link_libraries(.${lib}-cpp.OBJ PUBLIC ${lib}-cpp-headers)
         target_link_libraries(${lib}-cpp-static PUBLIC ${lib}-cpp-headers "$<LIST:TRANSFORM,${imports},APPEND,-cpp-static>")
         target_link_libraries(${lib}-cpp-shared PUBLIC ${lib}-cpp-headers "$<LIST:TRANSFORM,${imports},APPEND,-cpp-shared>")
+
+        # backend: java
+        set(output_dir "${CMAKE_CURRENT_BINARY_DIR}/gen/${lib}-java-source")
+        set(outputs "$<PATH:REPLACE_EXTENSION,$<LIST:TRANSFORM,${lib_sources},PREPEND,${output_dir}/>,.java>")
+        add_custom_command(OUTPUT "${outputs}"
+            COMMAND ${CMAKE_CURRENT_BINARY_DIR}/${lib}.aidl.sh
+                --lang java --output ${output_dir} ${args}
+            DEPENDS aidl ${version_imports}
+        )
+        add_custom_target(${lib}-java-source SOURCES "${outputs}")
+        # TODO: support sdk_version in defaults
+        set(sdk_version "${ARG_backend_java_sdk_version}")
+        set(platform_apis "${ARG_backend_java_platform_apis}")
+        if(NOT ARG_backend_java_platform_apis OR ARG_backend_java_platform_apis STREQUAL "")
+            set(platform_apis FALSE)
+        endif()
+        if(sdk_version STREQUAL "" AND NOT platform_apis)
+            set(sdk_version "system_current")
+        endif()
+        baker_java_library(
+            name ${lib}-java
+            srcs ""
+            sdk_version ${sdk_version}
+            is_stubs_module TRUE
+            _ALL_SINGLE_KEYS_ "is_stubs_module;sdk_version"
+            _ALL_LIST_KEYS_ ""
+        )
+        target_sources(.${lib}-java.SRC INTERFACE "${outputs}")
+        target_link_libraries(.${lib}-java.SRC INTERFACE "$<LIST:TRANSFORM,${imports},APPEND,-java>")
+        add_dependencies(${lib}-java ${lib}-java-source)
     endforeach()
 endfunction()
