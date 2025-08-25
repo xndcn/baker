@@ -26,6 +26,7 @@ add_library(librustc_demangle_static-static STATIC ".")
 set_target_properties(librustc_demangle_static-static PROPERTIES LINKER_LANGUAGE CXX)
 add_library(stub-annotations INTERFACE)
 add_library(current_android_jar INTERFACE)
+add_library(private-stub-annotations-jar INTERFACE)
 
 # Most Android.bp add -Werror flags, but create a lot of errors
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
@@ -124,6 +125,7 @@ set_property(TARGET android-non-updatable.stubs.module_lib PROPERTY EXCLUDE_FROM
 set_property(TARGET android_module_lib_stubs_current PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET modules-utils-fastxmlserializer PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET all-modules-system-stubs PROPERTY EXCLUDE_FROM_ALL FALSE)
+set_property(TARGET android_system_stubs_current PROPERTY EXCLUDE_FROM_ALL FALSE)
 # Currently cmake does not support EXCLUDE_FROM_ALL for sub-subdirectory, so workaround
 get_property(aidl_targets DIRECTORY system/tools/aidl/build PROPERTY BUILDSYSTEM_TARGETS)
 foreach(target IN LISTS aidl_targets)
@@ -167,6 +169,29 @@ target_compile_definitions(art_defaults INTERFACE
 # Fix for using XSI-compliant strerror_r
 set_property(TARGET libnativehelper_defaults PROPERTY _cflags "-U_GNU_SOURCE" ; "-D_POSIX_C_SOURCE=200112L")
 set_property(TARGET protobuf-cflags-defaults PROPERTY _cflags "")
+
+# Some stubs library for android_system_stubs_current
+add_library(framework-media.stubs.system INTERFACE)
+set_target_properties(framework-media.stubs.system PROPERTIES INTERFACE__CLASSPATH_ "${CMAKE_SOURCE_DIR}/prebuilts/sdk/current/system/framework-media.jar")
+set_target_properties(framework-media.stubs.system PROPERTIES TRANSITIVE_LINK_PROPERTIES "_CLASSPATH_")
+add_library(framework-connectivity.stubs.system INTERFACE)
+set_target_properties(framework-connectivity.stubs.system PROPERTIES INTERFACE__CLASSPATH_ "${CMAKE_SOURCE_DIR}/prebuilts/sdk/current/system/framework-connectivity.jar")
+set_target_properties(framework-connectivity.stubs.system PROPERTIES TRANSITIVE_LINK_PROPERTIES "_CLASSPATH_")
+add_library(framework-appsearch.stubs.system INTERFACE)
+set_target_properties(framework-appsearch.stubs.system PROPERTIES INTERFACE__CLASSPATH_ "${CMAKE_SOURCE_DIR}/prebuilts/sdk/current/system/framework-appsearch.jar")
+set_target_properties(framework-appsearch.stubs.system PROPERTIES TRANSITIVE_LINK_PROPERTIES "_CLASSPATH_")
+add_library(framework-bluetooth.stubs.system INTERFACE)
+set_target_properties(framework-bluetooth.stubs.system PROPERTIES INTERFACE__CLASSPATH_ "${CMAKE_SOURCE_DIR}/prebuilts/sdk/current/system/framework-bluetooth.jar")
+set_target_properties(framework-bluetooth.stubs.system PROPERTIES TRANSITIVE_LINK_PROPERTIES "_CLASSPATH_")
+add_library(framework-graphics.stubs.system INTERFACE)
+set_target_properties(framework-graphics.stubs.system PROPERTIES INTERFACE__CLASSPATH_ "${CMAKE_SOURCE_DIR}/prebuilts/sdk/current/system/framework-graphics.jar")
+set_target_properties(framework-graphics.stubs.system PROPERTIES TRANSITIVE_LINK_PROPERTIES "_CLASSPATH_")
+add_library(android.net.ipsec.ike.stubs.system INTERFACE)
+set_target_properties(android.net.ipsec.ike.stubs.system PROPERTIES INTERFACE__CLASSPATH_ "${CMAKE_SOURCE_DIR}/prebuilts/sdk/current/system/android.net.ipsec.ike.jar")
+set_target_properties(android.net.ipsec.ike.stubs.system PROPERTIES TRANSITIVE_LINK_PROPERTIES "_CLASSPATH_")
+add_library(framework-wifi.stubs.system INTERFACE)
+set_target_properties(framework-wifi.stubs.system PROPERTIES INTERFACE__CLASSPATH_ "${CMAKE_SOURCE_DIR}/prebuilts/sdk/current/system/framework-wifi.jar")
+set_target_properties(framework-wifi.stubs.system PROPERTIES TRANSITIVE_LINK_PROPERTIES "_CLASSPATH_")
 
 # Patch baker at the end
 baker_patch()
