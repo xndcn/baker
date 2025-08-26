@@ -8,7 +8,10 @@ function(baker_aidl_interface)
     set(ARG_srcs "")
     # Disable aidl transform for the src, since we will handle it by ourselves
     baker_apply_sources_transform(${src} _DISABLED_MODULES_ "aidl")
-    baker_get_sources(sources ${src} SCOPE INTERFACE RELATIVE)
+    if(NOT DEFINED ARG_local_include_dir)
+        set(ARG_local_include_dir ".")
+    endif()
+    baker_get_sources(sources ${src} SCOPE INTERFACE RELATIVE "${ARG_local_include_dir}")
 
     # TODO: support versions in defaults
     set(versions "")
@@ -48,8 +51,7 @@ function(baker_aidl_interface)
                 set(version "${next_version}")
                 list(APPEND args --version ${next_version} --current)
             endif()
-            # add_custom_command OUTPUT do not support TARGET_PROPERTY, use ARG_local_include_dir instead
-            set(lib_sources "$<PATH:RELATIVE_PATH,${sources},${ARG_local_include_dir}>")
+            set(lib_sources "${sources}")
             add_library(${lib} OBJECT)
         endif()
         set_target_properties(${lib} PROPERTIES LINKER_LANGUAGE CXX _name ${name})
