@@ -267,6 +267,26 @@ function(baker_java_sdk_library_scope_stubs)
     )
 endfunction()
 
+function(baker_java_sdk_library_impl)
+    cmake_parse_arguments(ARG "" "name" "" ${ARGN})
+
+    set(name "${ARG_name}")
+    set(src ".${name}.SRC")
+
+    baker_java_library(
+        name ${name}.impl
+        # Use ${src} as defaults, so .impl will inherit the original properties
+        defaults "${src}"
+        srcs ""
+        libs "$<TARGET_PROPERTY:${src},_impl_only_libs>"
+        static_libs "$<TARGET_PROPERTY:${src},_impl_only_static_libs>"
+
+        _ALL_SINGLE_KEYS_ ""
+        _ALL_LIST_KEYS_ "srcs;libs;static_libs;defaults"
+        _ALL_EVAL_KEYS_ "libs;static_libs"
+    )
+endfunction()
+
 function(baker_java_sdk_library_scope)
     cmake_parse_arguments(ARG "" "name;scope" "" ${ARGN})
 
@@ -336,6 +356,10 @@ function(baker_java_sdk_library)
     # Add .stubs.system
     if(${ARG_system_enabled})
         baker_java_sdk_library_scope(name ${name} scope "system")
+    endif()
+    # Add .impl
+    if(NOT DEFINED ARG_api_only OR NOT ${ARG_api_only})
+        baker_java_sdk_library_impl(name ${name})
     endif()
 endfunction()
 
