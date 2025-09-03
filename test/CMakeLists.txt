@@ -128,6 +128,7 @@ set_property(TARGET modules-utils-fastxmlserializer PROPERTY EXCLUDE_FROM_ALL FA
 set_property(TARGET all-modules-system-stubs PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET android_system_stubs_current PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET soundtrigger_middleware-aidl-java PROPERTY EXCLUDE_FROM_ALL FALSE)
+set_property(TARGET mime.types.minimized PROPERTY EXCLUDE_FROM_ALL FALSE)
 # Currently cmake does not support EXCLUDE_FROM_ALL for sub-subdirectory, so workaround
 get_property(aidl_targets DIRECTORY system/tools/aidl/build PROPERTY BUILDSYSTEM_TARGETS)
 foreach(target IN LISTS aidl_targets)
@@ -171,6 +172,9 @@ target_compile_definitions(art_defaults INTERFACE
 # Fix for using XSI-compliant strerror_r
 set_property(TARGET libnativehelper_defaults PROPERTY _cflags "-U_GNU_SOURCE" ; "-D_POSIX_C_SOURCE=200112L")
 set_property(TARGET protobuf-cflags-defaults PROPERTY _cflags "")
+# mime.types.minimized references android.mime.types.minimized in device_common_srcs
+target_link_libraries(mime.types.minimized INTERFACE android.mime.types.minimized)
+add_dependencies(mime.types.minimized android.mime.types.minimized)
 
 # Some stubs library for android_system_stubs_current
 add_library(framework-media.stubs.system INTERFACE)
