@@ -7,7 +7,7 @@ from .definitions.aidl_interface import AidlInterface
 from .definitions.genrule import GenRule, GenSrcs
 from .definitions.python_binary_host import PythonBinaryHost
 from .definitions.aconfig_modules import AConfigDeclarations, CCAConfigLibrary, JavaAConfigLibrary
-from .definitions.java_modules import JavaApiLibrary, JavaSdkLibrary, JavaSystemModules, JavaLibrary, DroiddocExportedDir, JavaImport, DroidStubs, CombinedApis
+from .definitions.java_modules import JavaApiLibrary, JavaSdkLibrary, JavaSystemModules, JavaLibrary, DroiddocExportedDir, JavaImport, JavaGenrule, DroidStubs, CombinedApis
 from .definitions.soong_namespace import SoongNamespace
 
 class CMakeConverter:
@@ -16,7 +16,7 @@ class CMakeConverter:
             Defaults, FileGroup, SoongNamespace,
             AidlInterface,
             CCLibraryHeaders, CCLibrary, CCTestLibrary, CCBinary, CCTest, CCObject,
-            GenRule, GenSrcs, PythonBinaryHost,
+            JavaGenrule, GenRule, GenSrcs, PythonBinaryHost,
             AConfigDeclarations, CCAConfigLibrary, JavaAConfigLibrary,
             JavaApiLibrary, JavaSdkLibrary, JavaSystemModules, JavaLibrary, DroiddocExportedDir, JavaImport, DroidStubs, CombinedApis,
         ]

@@ -503,6 +503,15 @@ function(baker_java_import)
     set_target_properties(${name} PROPERTIES TRANSITIVE_COMPILE_PROPERTIES "_CLASSPATH_")
 endfunction()
 
+function(baker_java_genrule)
+    #baker_parse_metadata(${ARGN})
+    baker_genrule(${ARGN})
+
+    set_target_properties(${name} PROPERTIES INTERFACE__CLASSPATH_ "$<TARGET_PROPERTY:${name},INTERFACE_SOURCES>")
+    set_target_properties(${name} PROPERTIES TRANSITIVE_LINK_PROPERTIES "_CLASSPATH_")
+    set_target_properties(${name} PROPERTIES TRANSITIVE_COMPILE_PROPERTIES "_CLASSPATH_")
+endfunction()
+
 function(baker_droidstubs)
     baker_parse_metadata(${ARGN})
 

@@ -129,6 +129,7 @@ set_property(TARGET all-modules-system-stubs PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET android_system_stubs_current PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET soundtrigger_middleware-aidl-java PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET mime.types.minimized PROPERTY EXCLUDE_FROM_ALL FALSE)
+set_property(TARGET mimemap-res.jar PROPERTY EXCLUDE_FROM_ALL FALSE)
 # Currently cmake does not support EXCLUDE_FROM_ALL for sub-subdirectory, so workaround
 get_property(aidl_targets DIRECTORY system/tools/aidl/build PROPERTY BUILDSYSTEM_TARGETS)
 foreach(target IN LISTS aidl_targets)
