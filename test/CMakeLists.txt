@@ -133,7 +133,10 @@ set_property(TARGET mimemap-res.jar PROPERTY EXCLUDE_FROM_ALL FALSE)
 # Currently cmake does not support EXCLUDE_FROM_ALL for sub-subdirectory, so workaround
 get_property(aidl_targets DIRECTORY system/tools/aidl/build PROPERTY BUILDSYSTEM_TARGETS)
 foreach(target IN LISTS aidl_targets)
-    set_property(TARGET ${target} PROPERTY EXCLUDE_FROM_ALL FALSE)
+    get_target_property(type ${target} TYPE)
+    if(NOT "${type}" STREQUAL "INTERFACE_LIBRARY" AND NOT "${type}" STREQUAL "UTILITY")
+        set_property(TARGET ${target} PROPERTY EXCLUDE_FROM_ALL FALSE)
+    endif()
 endforeach()
 
 set_tests_properties(boringssl_crypto_test DIRECTORY external/boringssl/ PROPERTIES WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/external/boringssl/src/)
