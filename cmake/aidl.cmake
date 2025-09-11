@@ -130,8 +130,8 @@ function(baker_aidl_interface)
             _ALL_SINGLE_KEYS_ "is_stubs_module;sdk_version"
             _ALL_LIST_KEYS_ ""
         )
-        target_sources(.${lib}-java.SRC INTERFACE "${outputs}")
-        target_link_libraries(.${lib}-java.SRC INTERFACE "$<LIST:TRANSFORM,${imports},APPEND,-java>")
+        target_sources(.${lib}-java.SRC PRIVATE "${outputs}")
+        target_link_libraries(.${lib}-java.SRC PRIVATE "$<LIST:TRANSFORM,${imports},APPEND,-java>")
         add_dependencies(${lib}-java ${lib}-java-source)
     endforeach()
 endfunction()

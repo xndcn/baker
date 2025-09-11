@@ -417,14 +417,16 @@ function(baker_java_library)
     baker_parse_metadata(${ARGN})
 
     set(src ".${name}.SRC")
-    add_library(${src} INTERFACE)
+    add_library(${src} OBJECT ${BAKER_DUMMY_C_SOURCE})
+    # Use OBJECT library otherwise LINKER_LANGUAGE will not work
+    set_target_properties(${src} PROPERTIES LINKER_LANGUAGE JAVA)
     baker_parse_properties(${src})
-    target_sources(${src} INTERFACE ${ARG_srcs})
+    target_sources(${src} PRIVATE ${ARG_srcs})
     baker_apply_sources_transform(${src})
     # TODO: may need to apply sources transform to {openjdk9: { srcs: ["..."] } as well
-    target_sources(${src} INTERFACE "$<LIST:TRANSFORM,$<TARGET_PROPERTY:${src},_openjdk9_srcs>,PREPEND,${CMAKE_CURRENT_SOURCE_DIR}/>")
-    target_link_libraries(${src} INTERFACE $<TARGET_PROPERTY:${src},_libs>)
-    target_link_libraries(${src} INTERFACE $<TARGET_PROPERTY:${src},_system_modules>)
+    target_sources(${src} PRIVATE "$<LIST:TRANSFORM,$<TARGET_PROPERTY:${src},_openjdk9_srcs>,PREPEND,${CMAKE_CURRENT_SOURCE_DIR}/>")
+    target_link_libraries(${src} PRIVATE $<TARGET_PROPERTY:${src},_libs>)
+    target_link_libraries(${src} PRIVATE $<TARGET_PROPERTY:${src},_system_modules>)
 
     add_library(${name} OBJECT "${BAKER_DUMMY_C_SOURCE}")
     target_link_libraries(${name} PRIVATE ${src})

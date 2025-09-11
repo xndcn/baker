@@ -48,6 +48,25 @@ function(baker_transform_source_file target SCOPE SOURCE_FILE)
         target_sources(.${target}.AIDL.CPP INTERFACE ${output_file})
         target_include_directories(.${target}.AIDL.CPP INTERFACE ${output_path})
         target_link_libraries(${target} ${SCOPE} $<$<LINK_LANGUAGE:CXX>:.${target}.AIDL.CPP>)
+
+        # java
+        set(output_file ${CMAKE_CURRENT_BINARY_DIR}/gen/${dir_path}/${file_name}.java)
+        add_custom_command(
+            OUTPUT ${output_file}
+            COMMAND aidl --lang=java
+                -o ${output_path}
+                $<LIST:TRANSFORM,${import_path},PREPEND,-I>
+                ${SOURCE_FILE}
+            COMMAND_EXPAND_LISTS
+        )
+        if(NOT TARGET .${target}.AIDL.JAVA)
+            add_library(.${target}.AIDL.JAVA INTERFACE EXCLUDE_FROM_ALL)
+            add_custom_target(.${target}.GEN.AIDL.JAVA)
+            add_dependencies(.${target}.AIDL.JAVA .${target}.GEN.AIDL.JAVA)
+        endif()
+        set_property(TARGET .${target}.GEN.AIDL.JAVA APPEND PROPERTY SOURCES ${output_file})
+        target_sources(.${target}.AIDL.JAVA INTERFACE ${output_file})
+        target_link_libraries(${target} ${SCOPE} $<$<LINK_LANGUAGE:JAVA>:.${target}.AIDL.JAVA>)
         set(SOURCE_FILE "")
     elseif(file_ext STREQUAL ".yy")
         find_package(BISON)

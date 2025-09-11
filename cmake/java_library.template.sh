@@ -28,7 +28,7 @@ fi
 system_modules="$<TARGET_PROPERTY:_system_modules>"
 if [ "$system_modules" != "" ]; then
     if [ "$system_modules" != "none" ]; then
-        system_modules="--system=$<TARGET_PROPERTY:INTERFACE__SYSTEM_MODULES_PATH_>"
+        system_modules="--system=$<TARGET_PROPERTY:_SYSTEM_MODULES_PATH_>"
     else
         system_modules="--system=none"
     fi
@@ -47,7 +47,7 @@ if [ "$source_target" != "" ]; then
 fi
 
 jars=""
-classpath="$<JOIN:$<GENEX_EVAL:$<TARGET_PROPERTY:INTERFACE__CLASSPATH_>;$<TARGET_PROPERTY:_STATIC_CLASSPATH_>>,;>"
+classpath="$<JOIN:$<GENEX_EVAL:$<TARGET_PROPERTY:_CLASSPATH_>;$<TARGET_PROPERTY:_STATIC_CLASSPATH_>>,;>"
 if [ "$classpath" != "" ]; then
     IFS=';' read -ra jars <<< "$classpath"
     # Join jars elements with ':'
@@ -55,23 +55,35 @@ if [ "$classpath" != "" ]; then
     classpath="-classpath ${jars}"
 fi
 
-sources="$<TARGET_PROPERTY:INTERFACE_SOURCES>"
+sources="$<TARGET_PROPERTY:SOURCES>"
+if [ "$sources" != "" ]; then
+    filtered_sources=()
+    IFS=';' read -ra sources <<< "$sources"
+    for filepath in "${sources[@]}"; do
+        if [[ "$filepath" != @* && "$filepath" == *.java ]]; then
+            # Prefix non-absolute paths with SOURCE_DIR
+            if [[ "$filepath" != /* ]]; then
+                filepath="$<TARGET_PROPERTY:SOURCE_DIR>/$filepath"
+            fi
+            filtered_sources+=("$filepath")
+        fi
+    done
+    sources="${filtered_sources[*]}"
+fi
 if [ "$sources" != "" ]; then
     IFS=';' read -ra sources <<< "$sources"
 
     # Create new rsp file to store file list
-    rsp="$<TARGET_PROPERTY:NAME>.sources.rsp"
+    rsp="$<TARGET_PROPERTY:BINARY_DIR>/$<TARGET_PROPERTY:NAME>.sources.rsp"
     > "${rsp}"  # Create the file
     # Process each source file
     for filepath in "${sources[@]}"; do
-        if [[ "$filepath" != @* ]]; then
-            echo "$filepath" >> "${rsp}"
-        fi
+        echo "$filepath" >> "${rsp}"
     done
     sources="@${rsp}"
 fi
 
-stubs_sources="$<TARGET_PROPERTY:INTERFACE__STUBS_SOURCES_>"
+stubs_sources="$<TARGET_PROPERTY:_STUBS_SOURCES_>"
 if [ "$stubs_sources" != "" ]; then
     IFS=';' read -ra stubs_sources <<< "$stubs_sources"
     sources="${sources} ${stubs_sources[*]}"

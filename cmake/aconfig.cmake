@@ -89,11 +89,11 @@ function(baker_java_aconfig_library)
     endif()
 
     set(src ".${name}.SRC")
-    add_library(${src} INTERFACE)
+    add_library(${src} OBJECT "${BAKER_DUMMY_C_SOURCE}")
     baker_parse_properties(${src})
-    target_sources(${src} INTERFACE ${ARG_srcs})
+    target_sources(${src} PRIVATE ${ARG_srcs})
     baker_apply_sources_transform(${src})
-    target_link_libraries(${src} INTERFACE $<TARGET_PROPERTY:${src},_system_modules>)
+    target_link_libraries(${src} PRIVATE $<TARGET_PROPERTY:${src},_system_modules>)
 
     get_target_property(package ${ARG_aconfig_declarations} _package)
     set(package $<LIST:TRANSFORM,${package},REPLACE,[.],/>)
@@ -114,7 +114,7 @@ function(baker_java_aconfig_library)
         DEPENDS $<TARGET_PROPERTY:${src},_aconfig_declarations>
         VERBATIM
     )
-    target_sources(${src} INTERFACE "${outputs}")
+    target_sources(${src} PRIVATE "${outputs}")
 
     add_library(${name} OBJECT "${BAKER_DUMMY_C_SOURCE}")
     target_link_libraries(${name} PRIVATE ${src})
