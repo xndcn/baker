@@ -65,6 +65,7 @@ if [ -n "$version" ] && [ "$current" = false ]; then
     sources=($(find "$directory" -type f -name "*.aidl"))
     local_include_dir="$<TARGET_PROPERTY:SOURCE_DIR>/aidl_api/$<TARGET_PROPERTY:_name>/${version}/"
 fi
+local_include_dir=$(realpath "$local_include_dir")
 
 preprocessed="$<TARGET_PROPERTY:_PREPROCESSED_AIDL_>"
 if [ "$preprocessed" != "" ]; then

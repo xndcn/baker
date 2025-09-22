@@ -131,6 +131,7 @@ set_property(TARGET soundtrigger_middleware-aidl-java PROPERTY EXCLUDE_FROM_ALL 
 set_property(TARGET mime.types.minimized PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET mimemap-res.jar PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET modules-utils-list-slice PROPERTY EXCLUDE_FROM_ALL FALSE)
+set_property(TARGET android.system.suspend.control.internal-java PROPERTY EXCLUDE_FROM_ALL FALSE)
 # Currently cmake does not support EXCLUDE_FROM_ALL for sub-subdirectory, so workaround
 get_property(aidl_targets DIRECTORY system/tools/aidl/build PROPERTY BUILDSYSTEM_TARGETS)
 foreach(target IN LISTS aidl_targets)
@@ -180,6 +181,8 @@ set_property(TARGET protobuf-cflags-defaults PROPERTY _cflags "")
 # mime.types.minimized references android.mime.types.minimized in device_common_srcs
 target_link_libraries(mime.types.minimized INTERFACE android.mime.types.minimized)
 add_dependencies(mime.types.minimized android.mime.types.minimized)
+# Force android.system.suspend.control.internal-java to use current sdk instead of 28
+set_target_properties(.android.system.suspend.control.internal-java.SRC PROPERTIES _sdk_version "system_current")
 
 # Some stubs library for android_system_stubs_current
 add_library(framework-media.stubs.system INTERFACE)
