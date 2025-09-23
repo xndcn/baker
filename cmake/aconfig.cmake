@@ -96,6 +96,12 @@ function(baker_java_aconfig_library)
     baker_apply_sources_transform(${src})
     target_link_libraries(${src} PRIVATE $<TARGET_PROPERTY:${src},_system_modules>)
 
+    # TODO: refactor to use java_library
+
+    # See build/soong/aconfig/codegen/java_aconfig_library.go:DepsMutator
+    # TODO: check sdk_version
+    target_link_libraries(${src} PRIVATE "aconfig-annotations-lib;unsupportedappusage;aconfig_storage_stub")
+
     get_target_property(package ${ARG_aconfig_declarations} _package)
     set(package $<LIST:TRANSFORM,${package},REPLACE,[.],/>)
     set(outputs

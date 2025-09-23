@@ -43,6 +43,7 @@ baker(frameworks/native/libs/math/)
 
 # Currently not built by default
 baker(art/ EXCLUDE_FROM_ALL)
+baker(build/make/tools/aconfig/aconfig_storage_read_api/ EXCLUDE_FROM_ALL)
 baker(build/soong/java/core-libraries/ EXCLUDE_FROM_ALL)
 baker(libcore/ EXCLUDE_FROM_ALL)
 baker(libnativehelper/ EXCLUDE_FROM_ALL)
@@ -133,6 +134,7 @@ set_property(TARGET mimemap-res.jar PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET modules-utils-list-slice PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET android.system.suspend.control.internal-java PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET mimemap PROPERTY EXCLUDE_FROM_ALL FALSE)
+set_property(TARGET android.location.flags-aconfig-java PROPERTY EXCLUDE_FROM_ALL FALSE)
 # Currently cmake does not support EXCLUDE_FROM_ALL for sub-subdirectory, so workaround
 get_property(aidl_targets DIRECTORY system/tools/aidl/build PROPERTY BUILDSYSTEM_TARGETS)
 foreach(target IN LISTS aidl_targets)
