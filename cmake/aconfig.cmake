@@ -39,6 +39,7 @@ function(baker_aconfig_declarations)
             --package "$<TARGET_PROPERTY:${name},_package>"
             --container "$<TARGET_PROPERTY:${name},_container>"
             --cache "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}.pb"
+            --default-permission READ_ONLY
             --declarations "$<TARGET_PROPERTY:${src},INTERFACE_SOURCES>"
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         DEPENDS $<TARGET_PROPERTY:${src},INTERFACE_SOURCES>
