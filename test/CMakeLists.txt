@@ -157,6 +157,10 @@ set_property(TARGET boringssl_test_support-static PROPERTY INTERFACE_LINK_LIBRAR
 target_link_libraries(.boringssl_test_support.OBJ PRIVATE libcrypto_static-static)
 set_property(TARGET conscrypt_generate_constants PROPERTY LINK_LIBRARIES "")
 target_link_libraries(conscrypt_generate_constants PRIVATE libcrypto_static-static)
+#
+get_property(framework-minus-apex-defaults_libs TARGET framework-minus-apex-defaults PROPERTY _static_libs)
+list(REMOVE_ITEM framework-minus-apex-defaults_libs modules-utils-expresslog modules-utils-build modules-utils-preconditions)
+set_property(TARGET framework-minus-apex-defaults PROPERTY _static_libs "")
 
 # libbinder includes stdatomic.h, which may not work until C++23
 set_target_properties(.libbinder.OBJ PROPERTIES CXX_STANDARD 23)
@@ -181,6 +185,9 @@ target_compile_definitions(art_defaults INTERFACE
 # Fix for using XSI-compliant strerror_r
 set_property(TARGET libnativehelper_defaults PROPERTY _cflags "-U_GNU_SOURCE" ; "-D_POSIX_C_SOURCE=200112L")
 set_property(TARGET protobuf-cflags-defaults PROPERTY _cflags "")
+# temporary fix for missing static_libs in framework-internal-utils
+set_target_properties(.framework-internal-utils.SRC PROPERTIES _static_libs "")
+set_target_properties(.ext.SRC PROPERTIES _static_libs "")
 # mime.types.minimized references android.mime.types.minimized in device_common_srcs
 target_link_libraries(mime.types.minimized INTERFACE android.mime.types.minimized)
 add_dependencies(mime.types.minimized android.mime.types.minimized)

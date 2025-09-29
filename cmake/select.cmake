@@ -1,4 +1,7 @@
-function(soong_config_variable)
+function(soong_config_variable out_var a b)
+    if(a STREQUAL "ANDROID" AND b STREQUAL "release_crashrecovery_module")
+        set(${out_var} "true" PARENT_SCOPE)
+    endif()
 endfunction(soong_config_variable)
 
 function(release_flag)
