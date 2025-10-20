@@ -76,6 +76,11 @@ function(baker_patch_defaults)
     foreach(target ${target_list})
         baker_patch_inherit_defaults(${target})
     endforeach()
+    # Remove defaults srcs to avoid duplication, since defaults is linked,
+    # which means its INTERFACE_SOURCES will be transitively included.
+    foreach(defaults ${defaults_list})
+        set_property(TARGET ${defaults} PROPERTY _srcs "")
+    endforeach()
 endfunction()
 
 # Define defaults
@@ -83,8 +88,6 @@ function(baker_defaults)
     baker_parse_metadata(${ARGN})
     add_library(${name} INTERFACE)
     baker_parse_properties(${name})
-    target_sources(${name} INTERFACE ${ARG_srcs})
-    baker_apply_sources_transform(${name})
     # stubs_defaults may contains args with $(location foo)
     baker_apply_args_transform(${name})
 endfunction()

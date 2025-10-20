@@ -7,7 +7,7 @@ class GenRule(Module):
 
     @staticmethod
     def match(name: str) -> bool:
-        return name.find("genrule") >= 0
+        return name.endswith("genrule")
 
     def convert_to_cmake(self):
         return self._convert_module_to_cmake("baker_genrule")

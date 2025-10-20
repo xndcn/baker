@@ -117,7 +117,7 @@ location() {
     else
         # File doesn't start with ":", look for it in tool_files firstly
         for tool_file in "${tool_files[@]}"; do
-        if [[ "${tool_file#./}" == "${file}" ]]; then
+        if [[ "${tool_file#$PWD/}" == "${file}" ]]; then
             echo "$tool_file"
             return 0
         fi
