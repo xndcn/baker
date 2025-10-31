@@ -5,6 +5,7 @@ set -e
 aidl=$<TARGET_FILE:aidl>
 lang=""
 output_dir=""
+header=""
 version=""
 min_sdk_version=""
 current=true
@@ -64,6 +65,7 @@ if [ -n "$version" ] && [ "$current" = false ]; then
     sources=($(find "$directory" -type f -name "*.aidl"))
     local_include_dir="$<TARGET_PROPERTY:SOURCE_DIR>/aidl_api/$<TARGET_PROPERTY:_name>/${version}/"
 fi
+local_include_dir=$(realpath "$local_include_dir")
 
 preprocessed="$<TARGET_PROPERTY:_PREPROCESSED_AIDL_>"
 if [ "$preprocessed" != "" ]; then
@@ -82,13 +84,33 @@ fi
 
 if [ "${lang}" = "cpp" ]; then
     min_sdk_version="$<TARGET_PROPERTY:_backend_cpp_min_sdk_version>"
-fi
-
-if [ -z "$min_sdk_version" ]; then
-    min_sdk_version="$<TARGET_PROPERTY:_min_sdk_version>"
-fi
-if [ -z "$min_sdk_version" ]; then
-    min_sdk_version="current"
+    if [ -z "$min_sdk_version" ]; then
+        min_sdk_version="$<TARGET_PROPERTY:_min_sdk_version>"
+    fi
+    if [ -z "$min_sdk_version" ]; then
+        min_sdk_version="current"
+    fi
+    header="-h ${output_dir}/include/"
+elif [ "${lang}" = "java" ]; then
+    min_sdk_version="$<TARGET_PROPERTY:_backend_java_min_sdk_version>"
+    if [ -z "$min_sdk_version" ]; then
+        min_sdk_version="$<TARGET_PROPERTY:_min_sdk_version>"
+    fi
+    sdk_version="$<TARGET_PROPERTY:_backend_java_sdk_version>"
+    platform_apis="$<BOOL:$<TARGET_PROPERTY:_backend_java_platform_apis>>"
+    if [ "$platform_apis" == 0 ] && [ -z "$sdk_version" ]; then
+        sdk_version="system_current"
+    fi
+    if [ -n "$sdk_version" ] && [ -z "$min_sdk_version" ]; then
+        # sdk_version="foo_ver", make min_sdk_version="ver"
+        IFS='_' read -ra parts <<< "$sdk_version"
+        min_sdk_version="${parts[-1]}"
+    fi
+    if [ "$platform_apis" == 1 ]; then
+        min_sdk_version="platform_apis"
+    elif [ -z "$min_sdk_version" ]; then
+        min_sdk_version="current"
+    fi
 fi
 
 structured=""
@@ -109,7 +131,7 @@ if [ "$preprocess" = true ]; then
 else
     ${aidl} --lang=${lang} \
         -o ${output_dir}/ \
-        -h ${output_dir}/include/ \
+        ${header} \
         ${preprocessed} \
         -N${local_include_dir} \
         --min_sdk_version ${min_sdk_version} \

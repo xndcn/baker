@@ -267,6 +267,26 @@ function(baker_java_sdk_library_scope_stubs)
     )
 endfunction()
 
+function(baker_java_sdk_library_impl)
+    cmake_parse_arguments(ARG "" "name" "" ${ARGN})
+
+    set(name "${ARG_name}")
+    set(src ".${name}.SRC")
+
+    baker_java_library(
+        name ${name}.impl
+        # Use ${src} as defaults, so .impl will inherit the original properties
+        defaults "${src}"
+        srcs ""
+        libs "$<TARGET_PROPERTY:${src},_impl_only_libs>"
+        static_libs "$<TARGET_PROPERTY:${src},_impl_only_static_libs>"
+
+        _ALL_SINGLE_KEYS_ ""
+        _ALL_LIST_KEYS_ "srcs;libs;static_libs;defaults"
+        _ALL_EVAL_KEYS_ "libs;static_libs"
+    )
+endfunction()
+
 function(baker_java_sdk_library_scope)
     cmake_parse_arguments(ARG "" "name;scope" "" ${ARGN})
 
@@ -337,6 +357,10 @@ function(baker_java_sdk_library)
     if(${ARG_system_enabled})
         baker_java_sdk_library_scope(name ${name} scope "system")
     endif()
+    # Add .impl
+    if(NOT DEFINED ARG_api_only OR NOT ${ARG_api_only})
+        baker_java_sdk_library_impl(name ${name})
+    endif()
 endfunction()
 
 function(baker_java_system_modules)
@@ -393,14 +417,16 @@ function(baker_java_library)
     baker_parse_metadata(${ARGN})
 
     set(src ".${name}.SRC")
-    add_library(${src} INTERFACE)
+    add_library(${src} OBJECT ${BAKER_DUMMY_C_SOURCE})
+    # Use OBJECT library otherwise LINKER_LANGUAGE will not work
+    set_target_properties(${src} PROPERTIES LINKER_LANGUAGE JAVA)
     baker_parse_properties(${src})
-    target_sources(${src} INTERFACE ${ARG_srcs})
+    target_sources(${src} PRIVATE ${ARG_srcs})
     baker_apply_sources_transform(${src})
     # TODO: may need to apply sources transform to {openjdk9: { srcs: ["..."] } as well
-    target_sources(${src} INTERFACE "$<LIST:TRANSFORM,$<TARGET_PROPERTY:${src},_openjdk9_srcs>,PREPEND,${CMAKE_CURRENT_SOURCE_DIR}/>")
-    target_link_libraries(${src} INTERFACE $<TARGET_PROPERTY:${src},_libs>)
-    target_link_libraries(${src} INTERFACE $<TARGET_PROPERTY:${src},_system_modules>)
+    target_sources(${src} PRIVATE "$<LIST:TRANSFORM,$<TARGET_PROPERTY:${src},_openjdk9_srcs>,PREPEND,${CMAKE_CURRENT_SOURCE_DIR}/>")
+    target_link_libraries(${src} PRIVATE $<TARGET_PROPERTY:${src},_libs>)
+    target_link_libraries(${src} PRIVATE $<TARGET_PROPERTY:${src},_system_modules>)
 
     add_library(${name} OBJECT "${BAKER_DUMMY_C_SOURCE}")
     target_link_libraries(${name} PRIVATE ${src})
@@ -475,6 +501,15 @@ function(baker_java_import)
     baker_apply_sources_transform(${name})
 
     set_target_properties(${name} PROPERTIES INTERFACE__CLASSPATH_ "${CMAKE_CURRENT_SOURCE_DIR}/$<TARGET_PROPERTY:${name},_jars>")
+    set_target_properties(${name} PROPERTIES TRANSITIVE_LINK_PROPERTIES "_CLASSPATH_")
+    set_target_properties(${name} PROPERTIES TRANSITIVE_COMPILE_PROPERTIES "_CLASSPATH_")
+endfunction()
+
+function(baker_java_genrule)
+    #baker_parse_metadata(${ARGN})
+    baker_genrule(${ARGN})
+
+    set_target_properties(${name} PROPERTIES INTERFACE__CLASSPATH_ "$<TARGET_PROPERTY:${name},INTERFACE_SOURCES>")
     set_target_properties(${name} PROPERTIES TRANSITIVE_LINK_PROPERTIES "_CLASSPATH_")
     set_target_properties(${name} PROPERTIES TRANSITIVE_COMPILE_PROPERTIES "_CLASSPATH_")
 endfunction()

@@ -92,6 +92,14 @@ function(baker_parse_metadata)
         set(ARG_name "${namespace}+${ARG_name}")
     endif()
     set(name ${ARG_name})
+
+    # FIXME: cmd may contains ";", so make it a list here
+    # may need to consider all properties
+    if("cmd" IN_LIST ARG__ALL_SINGLE_KEYS_)
+        list(REMOVE_ITEM ARG__ALL_SINGLE_KEYS_ "cmd")
+        list(APPEND ARG__ALL_LIST_KEYS_ "cmd")
+    endif()
+
     cmake_parse_arguments(ARG "" "${ARG__ALL_SINGLE_KEYS_}" "${ARG__ALL_LIST_KEYS_}" ${ARG_UNPARSED_ARGUMENTS})
 
     foreach(condition "target" "arch" "codegen")

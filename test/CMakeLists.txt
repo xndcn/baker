@@ -64,6 +64,7 @@ baker(system/libprocinfo/ EXCLUDE_FROM_ALL)
 baker(system/logging/liblog/ EXCLUDE_FROM_ALL)
 baker(system/core/libsystem/ EXCLUDE_FROM_ALL)
 baker(system/core/libutils/ EXCLUDE_FROM_ALL)
+baker(system/hardware/interfaces/ EXCLUDE_FROM_ALL)
 baker(system/tools/aidl/ EXCLUDE_FROM_ALL)
 baker(system/libziparchive/ EXCLUDE_FROM_ALL)
 baker(system/unwinding/libunwindstack/ EXCLUDE_FROM_ALL)
@@ -126,10 +127,18 @@ set_property(TARGET android_module_lib_stubs_current PROPERTY EXCLUDE_FROM_ALL F
 set_property(TARGET modules-utils-fastxmlserializer PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET all-modules-system-stubs PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET android_system_stubs_current PROPERTY EXCLUDE_FROM_ALL FALSE)
+set_property(TARGET soundtrigger_middleware-aidl-java PROPERTY EXCLUDE_FROM_ALL FALSE)
+set_property(TARGET mime.types.minimized PROPERTY EXCLUDE_FROM_ALL FALSE)
+set_property(TARGET mimemap-res.jar PROPERTY EXCLUDE_FROM_ALL FALSE)
+set_property(TARGET modules-utils-list-slice PROPERTY EXCLUDE_FROM_ALL FALSE)
+set_property(TARGET android.system.suspend.control.internal-java PROPERTY EXCLUDE_FROM_ALL FALSE)
 # Currently cmake does not support EXCLUDE_FROM_ALL for sub-subdirectory, so workaround
 get_property(aidl_targets DIRECTORY system/tools/aidl/build PROPERTY BUILDSYSTEM_TARGETS)
 foreach(target IN LISTS aidl_targets)
-    set_property(TARGET ${target} PROPERTY EXCLUDE_FROM_ALL FALSE)
+    get_target_property(type ${target} TYPE)
+    if(NOT "${type}" STREQUAL "INTERFACE_LIBRARY" AND NOT "${type}" STREQUAL "UTILITY")
+        set_property(TARGET ${target} PROPERTY EXCLUDE_FROM_ALL FALSE)
+    endif()
 endforeach()
 
 set_tests_properties(boringssl_crypto_test DIRECTORY external/boringssl/ PROPERTIES WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/external/boringssl/src/)
@@ -169,6 +178,11 @@ target_compile_definitions(art_defaults INTERFACE
 # Fix for using XSI-compliant strerror_r
 set_property(TARGET libnativehelper_defaults PROPERTY _cflags "-U_GNU_SOURCE" ; "-D_POSIX_C_SOURCE=200112L")
 set_property(TARGET protobuf-cflags-defaults PROPERTY _cflags "")
+# mime.types.minimized references android.mime.types.minimized in device_common_srcs
+target_link_libraries(mime.types.minimized INTERFACE android.mime.types.minimized)
+add_dependencies(mime.types.minimized android.mime.types.minimized)
+# Force android.system.suspend.control.internal-java to use current sdk instead of 28
+set_target_properties(.android.system.suspend.control.internal-java.SRC PROPERTIES _sdk_version "system_current")
 
 # Some stubs library for android_system_stubs_current
 add_library(framework-media.stubs.system INTERFACE)
@@ -217,6 +231,12 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/prebuilts/r8")
     add_executable(d8 IMPORTED GLOBAL)
     add_dependencies(d8 r8_build)
     set_target_properties(d8 PROPERTIES IMPORTED_LOCATION ${CMAKE_BINARY_DIR}/r8/bin/d8)
+endif()
+
+if(EXISTS "${CMAKE_SOURCE_DIR}/prebuilts/build-tools/linux-x86/bin/soong_zip")
+    # Import the built binary
+    add_executable(soong_zip IMPORTED GLOBAL)
+    set_target_properties(soong_zip PROPERTIES IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/prebuilts/build-tools/linux-x86/bin/soong_zip)
 endif()
 
 # Add prebuilts sdk, see build/soong/java/prebuilt_apis.go

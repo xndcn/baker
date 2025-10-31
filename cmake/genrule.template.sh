@@ -93,7 +93,8 @@ cmd="${cmd//\$(in)/\$\{in\}}"
 cmd="${cmd//\$(out)/\$\{out\}}"
 cmd="${cmd//\$(genDir)/\$\{genDir\}}"
 
-# Create output directory if it doesn't exist
+# Re-create output directory
+rm -rf "$genDir"
 mkdir -p "$genDir"
 
 # Function to determine file location

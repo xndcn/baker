@@ -25,8 +25,10 @@ function(baker_transform_source_file target SCOPE SOURCE_FILE)
         get_filename_component(dir_path ${SOURCE_FILE} DIRECTORY)
         file(RELATIVE_PATH dir_path "${CMAKE_CURRENT_SOURCE_DIR}" "${dir_path}")
         set(output_path ${CMAKE_CURRENT_BINARY_DIR}/gen/$<TARGET_PROPERTY:${target},_path>)
-        set(output_file ${CMAKE_CURRENT_BINARY_DIR}/gen/${dir_path}/${file_name}.cpp)
         set(import_path ${CMAKE_CURRENT_SOURCE_DIR}/$<TARGET_PROPERTY:${target},_path>)
+
+        # cpp
+        set(output_file ${CMAKE_CURRENT_BINARY_DIR}/gen/${dir_path}/${file_name}.cpp)
         # Run aidl on the .aidl file
         add_custom_command(
             OUTPUT ${output_file}
@@ -37,8 +39,35 @@ function(baker_transform_source_file target SCOPE SOURCE_FILE)
                 ${SOURCE_FILE}
             COMMAND_EXPAND_LISTS
         )
-        set(SOURCE_FILE "${output_file}")
-        target_include_directories(${target} ${SCOPE} ${output_path})
+        if(NOT TARGET .${target}.AIDL.CPP)
+            add_library(.${target}.AIDL.CPP INTERFACE EXCLUDE_FROM_ALL)
+            add_custom_target(.${target}.GEN.AIDL.CPP)
+            add_dependencies(.${target}.AIDL.CPP .${target}.GEN.AIDL.CPP)
+        endif()
+        set_property(TARGET .${target}.GEN.AIDL.CPP APPEND PROPERTY SOURCES ${output_file})
+        target_sources(.${target}.AIDL.CPP INTERFACE ${output_file})
+        target_include_directories(.${target}.AIDL.CPP INTERFACE ${output_path})
+        target_link_libraries(${target} ${SCOPE} $<$<LINK_LANGUAGE:CXX>:.${target}.AIDL.CPP>)
+
+        # java
+        set(output_file ${CMAKE_CURRENT_BINARY_DIR}/gen/${dir_path}/${file_name}.java)
+        add_custom_command(
+            OUTPUT ${output_file}
+            COMMAND aidl --lang=java
+                -o ${output_path}
+                $<LIST:TRANSFORM,${import_path},PREPEND,-I>
+                ${SOURCE_FILE}
+            COMMAND_EXPAND_LISTS
+        )
+        if(NOT TARGET .${target}.AIDL.JAVA)
+            add_library(.${target}.AIDL.JAVA INTERFACE EXCLUDE_FROM_ALL)
+            add_custom_target(.${target}.GEN.AIDL.JAVA)
+            add_dependencies(.${target}.AIDL.JAVA .${target}.GEN.AIDL.JAVA)
+        endif()
+        set_property(TARGET .${target}.GEN.AIDL.JAVA APPEND PROPERTY SOURCES ${output_file})
+        target_sources(.${target}.AIDL.JAVA INTERFACE ${output_file})
+        target_link_libraries(${target} ${SCOPE} $<$<LINK_LANGUAGE:JAVA>:.${target}.AIDL.JAVA>)
+        set(SOURCE_FILE "")
     elseif(file_ext STREQUAL ".yy")
         find_package(BISON)
         get_filename_component(file_path ${SOURCE_FILE} ABSOLUTE)
@@ -115,8 +144,8 @@ endfunction(baker_apply_sources_transform)
 
 function(baker_get_sources out_var target)
     # Parse optional arguments
-    set(options RELATIVE)
-    set(oneValueArgs SCOPE)
+    set(options "")
+    set(oneValueArgs "SCOPE;RELATIVE")
     set(multiValueArgs "")
     cmake_parse_arguments(ARGS "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
@@ -125,8 +154,8 @@ function(baker_get_sources out_var target)
     endif()
 
     set(RELATIVE "")
-    if(ARGS_RELATIVE)
-        set(RELATIVE "RELATIVE_")
+    if(DEFINED ARGS_RELATIVE)
+        set(RELATIVE "RELATIVE_${ARGS_RELATIVE}")
     endif()
 
     set(${out_var} "" PARENT_SCOPE)
@@ -159,12 +188,12 @@ function(baker_get_sources out_var target)
         endif()
     endif()
 
-    if(ARGS_RELATIVE)
+    if(DEFINED ARGS_RELATIVE)
         set(relative_sources "")
         foreach(source_file IN LISTS sources)
             if(IS_ABSOLUTE ${source_file})
                 get_target_property(source_dir ${target} SOURCE_DIR)
-                file(RELATIVE_PATH source_file "${source_dir}" "${source_file}")
+                file(RELATIVE_PATH source_file "${source_dir}/${ARGS_RELATIVE}" "${source_file}")
             endif()
             get_target_property(source_path ${target} _path)
             if(NOT source_path STREQUAL "source_path-NOTFOUND")
@@ -186,7 +215,7 @@ function(baker_get_sources out_var target)
         foreach(lib ${linked_libraries})
             # Recursively get interface sources from linked library
             if(ARGS_RELATIVE)
-                baker_get_sources(lib_sources ${lib} SCOPE INTERFACE RELATIVE)
+                baker_get_sources(lib_sources ${lib} SCOPE INTERFACE RELATIVE ".")
             else()
                 baker_get_sources(lib_sources ${lib} SCOPE INTERFACE)
             endif()
