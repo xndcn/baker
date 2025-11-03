@@ -1,15 +1,11 @@
 find_package(Protobuf)
 
-function(baker_transform_protos)
+function(baker_transform_protos sources_var)
     cmake_parse_arguments(ARGS "" "SCOPE;TARGET" "" ${ARGN})
     get_target_property(source_dir ${ARGS_TARGET} SOURCE_DIR)
     get_target_property(binary_dir ${ARGS_TARGET} BINARY_DIR)
     get_target_property(type ${ARGS_TARGET} _proto_type)
-    if(ARGS_SCOPE STREQUAL "PRIVATE")
-        set(sources "$<TARGET_PROPERTY:${ARGS_TARGET},_PROTO_SOURCES_>")
-    else()
-        set(sources "$<TARGET_PROPERTY:${ARGS_TARGET},INTERFACE__PROTO_SOURCES_>")
-    endif()
+    set(sources "${${sources_var}}")
     if(type STREQUAL "nano")
         set(language "javanano")
         add_custom_command(

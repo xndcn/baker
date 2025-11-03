@@ -79,7 +79,8 @@ class JavaGenrule(Module):
 
     @staticmethod
     def match(name: str) -> bool:
-        return name.find("java_genrule") >= 0
+        # Do not mess with java_genrule_combiner
+        return name.endswith("java_genrule")
 
     def convert_to_cmake(self):
         return self._convert_module_to_cmake("baker_java_genrule")

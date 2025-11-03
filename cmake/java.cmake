@@ -126,8 +126,6 @@ function(baker_java_api_library)
     set(src ".${name}.SRC")
     add_library(${src} INTERFACE)
     baker_parse_properties(${src})
-    target_sources(${src} INTERFACE ${ARG_srcs})
-    baker_apply_sources_transform(${src})
     target_link_libraries(${src} INTERFACE $<TARGET_PROPERTY:${src},_libs>)
     target_link_libraries(${src} INTERFACE $<TARGET_PROPERTY:${src},_api_contributions>)
 
@@ -231,7 +229,7 @@ function(baker_java_sdk_library_scope_droidstubs)
     baker_droidstubs(
         name ${name}.stubs.source${moduleSuffix}
         # TODO: support ${scope}_api_srcs with :foo
-        srcs $<TARGET_PROPERTY:${src},INTERFACE_SOURCES> ; $<TARGET_PROPERTY:${src},_${scope}_api_srcs>
+        srcs ":${src}" ; $<TARGET_PROPERTY:${src},_${scope}_api_srcs>
         system_modules $<TARGET_PROPERTY:${src},_system_modules>
         installable FALSE
         libs $<TARGET_PROPERTY:${src},_libs> ; $<TARGET_PROPERTY:${src},_static_libs> ; $<TARGET_PROPERTY:${src},_stub_only_libs> ; $<TARGET_PROPERTY:${src},_${scope}_libs>
@@ -306,8 +304,6 @@ function(baker_java_sdk_library)
     set(src ".${name}.SRC")
     add_library(${src} INTERFACE)
     baker_parse_properties(${src})
-    target_sources(${src} INTERFACE ${ARG_srcs})
-    baker_apply_sources_transform(${src})
     target_link_libraries(${src} INTERFACE $<TARGET_PROPERTY:${src},_system_modules>)
     target_link_libraries(${src} INTERFACE $<TARGET_PROPERTY:${src},_merge_inclusion_annotations_dirs>)
 
@@ -369,8 +365,6 @@ function(baker_java_system_modules)
     set(src ".${name}.SRC")
     add_library(${src} INTERFACE)
     baker_parse_properties(${src})
-    target_sources(${src} INTERFACE ${ARG_srcs})
-    baker_apply_sources_transform(${src})
 
     # System modules do not export libs to the classpath
     # so use a interface library to collect all libs classpath
@@ -421,8 +415,6 @@ function(baker_java_library)
     # Use OBJECT library otherwise LINKER_LANGUAGE will not work
     set_target_properties(${src} PROPERTIES LINKER_LANGUAGE JAVA)
     baker_parse_properties(${src})
-    target_sources(${src} PRIVATE ${ARG_srcs})
-    baker_apply_sources_transform(${src})
     # TODO: may need to apply sources transform to {openjdk9: { srcs: ["..."] } as well
     target_sources(${src} PRIVATE "$<LIST:TRANSFORM,$<TARGET_PROPERTY:${src},_openjdk9_srcs>,PREPEND,${CMAKE_CURRENT_SOURCE_DIR}/>")
     target_link_libraries(${src} PRIVATE $<TARGET_PROPERTY:${src},_libs>)
@@ -485,8 +477,6 @@ function(baker_droiddoc_exported_dir)
 
     add_library(${name} INTERFACE)
     baker_parse_properties(${name})
-    target_sources(${name} INTERFACE ${ARG_srcs})
-    baker_apply_sources_transform(${name})
 
     set_target_properties(${name} PROPERTIES INTERFACE__ANNOTATION_DIR_ "${CMAKE_CURRENT_SOURCE_DIR}/$<TARGET_PROPERTY:${name},_path>")
     set_target_properties(${name} PROPERTIES TRANSITIVE_COMPILE_PROPERTIES "_ANNOTATION_DIR_")
@@ -497,8 +487,6 @@ function(baker_java_import)
 
     add_library(${name} INTERFACE)
     baker_parse_properties(${name})
-    target_sources(${name} INTERFACE ${ARG_srcs})
-    baker_apply_sources_transform(${name})
 
     set_target_properties(${name} PROPERTIES INTERFACE__CLASSPATH_ "${CMAKE_CURRENT_SOURCE_DIR}/$<TARGET_PROPERTY:${name},_jars>")
     set_target_properties(${name} PROPERTIES TRANSITIVE_LINK_PROPERTIES "_CLASSPATH_")
@@ -520,8 +508,6 @@ function(baker_droidstubs)
     set(src ".${name}.SRC")
     add_library(${src} INTERFACE)
     baker_parse_properties(${src})
-    target_sources(${src} INTERFACE ${ARG_srcs})
-    baker_apply_sources_transform(${src})
     baker_apply_args_transform(${src})
 
     # Special flags for droidstubs
@@ -533,8 +519,7 @@ function(baker_droidstubs)
     set(api_contribution "${name}.api.contribution")
     add_library(${api_contribution} INTERFACE)
     # TODO: support check_api_current_api_file in defaults
-    target_sources(${api_contribution} INTERFACE ${ARG_check_api_current_api_file})
-    baker_apply_sources_transform(${api_contribution})
+    set_property(TARGET ${api_contribution} PROPERTY _srcs ${ARG_check_api_current_api_file})
 endfunction()
 
 

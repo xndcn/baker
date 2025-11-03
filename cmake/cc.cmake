@@ -54,8 +54,6 @@ function(baker_cc_binary)
     baker_parse_metadata(${ARGN})
     add_executable(${name})
     baker_parse_properties(${name})
-    target_sources(${name} PRIVATE ${ARG_srcs})
-    baker_apply_sources_transform(${name})
 
     # hack for no srcs
     target_sources(${name} PRIVATE ".")
@@ -99,8 +97,6 @@ function(baker_cc_object)
 
     set(object ".${name}.OBJ")
     add_library(${object} OBJECT)
-    target_sources(${object} PRIVATE ${ARG_srcs})
-    baker_apply_sources_transform(${object})
     set_target_properties(${object} PROPERTIES POSITION_INDEPENDENT_CODE ON)
     baker_parse_properties(${object})
     baker_cc_apply_properties(${object} ${object})
@@ -135,8 +131,6 @@ function(baker_cc_library)
 
     set(object ".${name}.OBJ")
     add_library(${object} OBJECT)
-    target_sources(${object} PRIVATE ${ARG_srcs})
-    baker_apply_sources_transform(${object})
     baker_parse_properties(${object})
 
     # Some modules need to include themselves

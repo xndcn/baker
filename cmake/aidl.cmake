@@ -4,14 +4,7 @@ function(baker_aidl_interface)
     set(src ".${name}.SRC")
     add_library(${src} INTERFACE)
     baker_parse_properties(${src})
-    target_sources(${src} INTERFACE ${ARG_srcs})
     set(ARG_srcs "")
-    # Disable aidl transform for the src, since we will handle it by ourselves
-    baker_apply_sources_transform(${src} _DISABLED_MODULES_ "aidl")
-    if(NOT DEFINED ARG_local_include_dir)
-        set(ARG_local_include_dir ".")
-    endif()
-    baker_get_sources(sources ${src} SCOPE INTERFACE RELATIVE "${ARG_local_include_dir}")
 
     # TODO: support versions in defaults
     set(versions "")
@@ -51,7 +44,7 @@ function(baker_aidl_interface)
                 set(version "${next_version}")
                 list(APPEND args --version ${next_version} --current)
             endif()
-            set(lib_sources "${sources}")
+            set(lib_sources "")
             add_library(${lib} OBJECT)
         endif()
         set_target_properties(${lib} PROPERTIES LINKER_LANGUAGE CXX _name ${name})
@@ -72,14 +65,6 @@ function(baker_aidl_interface)
         set_target_properties(${lib} PROPERTIES TRANSITIVE_LINK_PROPERTIES "_PREPROCESSED_AIDL_")
 
         # backend: cpp
-        set(output_dir "${CMAKE_CURRENT_BINARY_DIR}/gen/${lib}-cpp-source")
-        set(outputs "$<PATH:REPLACE_EXTENSION,$<LIST:TRANSFORM,${lib_sources},PREPEND,${output_dir}/>,.cpp>")
-        add_custom_command(OUTPUT "${outputs}"
-            COMMAND ${CMAKE_CURRENT_BINARY_DIR}/${lib}.aidl.sh
-                --lang cpp --output ${output_dir} ${args}
-            DEPENDS aidl ${version_imports}
-        )
-        add_custom_target(${lib}-cpp-source SOURCES "${outputs}")
         set(_BACKUP_name_ ${name})
         baker_cc_library(
             name ${lib}-cpp
@@ -94,9 +79,8 @@ function(baker_aidl_interface)
         )
         # Restore the original name after calling baker_cc_library
         set(name ${_BACKUP_name_})
-        target_sources(.${lib}-cpp.OBJ PRIVATE "${outputs}")
         add_library(${lib}-cpp-headers INTERFACE)
-        target_include_directories(${lib}-cpp-headers INTERFACE "${output_dir}/include/")
+        target_include_directories(${lib}-cpp-headers INTERFACE "${CMAKE_CURRENT_BINARY_DIR}/gen/${lib}-cpp-source/include/")
         target_link_libraries(${lib}-cpp-headers INTERFACE "$<LIST:TRANSFORM,${imports},APPEND,-cpp-headers>")
         add_custom_target(.${lib}-cpp.DEP DEPENDS "$<LIST:TRANSFORM,${imports},APPEND,-cpp-source>")
         add_dependencies(.${lib}-cpp.OBJ .${lib}-cpp.DEP)
@@ -105,14 +89,6 @@ function(baker_aidl_interface)
         target_link_libraries(${lib}-cpp-shared PUBLIC ${lib}-cpp-headers "$<LIST:TRANSFORM,${imports},APPEND,-cpp-shared>")
 
         # backend: java
-        set(output_dir "${CMAKE_CURRENT_BINARY_DIR}/gen/${lib}-java-source")
-        set(outputs "$<PATH:REPLACE_EXTENSION,$<LIST:TRANSFORM,${lib_sources},PREPEND,${output_dir}/>,.java>")
-        add_custom_command(OUTPUT "${outputs}"
-            COMMAND ${CMAKE_CURRENT_BINARY_DIR}/${lib}.aidl.sh
-                --lang java --output ${output_dir} ${args}
-            DEPENDS aidl ${version_imports}
-        )
-        add_custom_target(${lib}-java-source SOURCES "${outputs}")
         # TODO: support sdk_version in defaults
         set(sdk_version "${ARG_backend_java_sdk_version}")
         set(platform_apis "${ARG_backend_java_platform_apis}")
@@ -130,8 +106,70 @@ function(baker_aidl_interface)
             _ALL_SINGLE_KEYS_ "is_stubs_module;sdk_version"
             _ALL_LIST_KEYS_ ""
         )
-        target_sources(.${lib}-java.SRC PRIVATE "${outputs}")
         target_link_libraries(.${lib}-java.SRC PRIVATE "$<LIST:TRANSFORM,${imports},APPEND,-java>")
         add_dependencies(${lib}-java ${lib}-java-source)
+
+        if(lib_sources)
+            baker_aidl_interface_patch_sources(${lib} "${lib_sources}" "${version_imports}" "${args}")
+        else()
+            # For the non-versioned aidl, we can not determine the sources, patch it later
+            set_target_properties(${lib} PROPERTIES
+                _AIDL_PATCHED_ FALSE
+                _AIDL_SRC_ "${src}"
+                _AIDL_VERSION_IMPORTS_ "${version_imports}"
+                _AIDL_ARGS_ "${args}"
+            )
+        endif()
+    endforeach()
+endfunction()
+
+function(baker_aidl_interface_patch_sources lib sources version_imports args)
+    get_target_property(binary_dir ${lib} BINARY_DIR)
+    # backend: cpp
+    set(output_dir "${binary_dir}/gen/${lib}-cpp-source")
+    set(outputs "$<PATH:REPLACE_EXTENSION,$<LIST:TRANSFORM,${sources},PREPEND,${output_dir}/>,.cpp>")
+    add_custom_command(OUTPUT "${outputs}"
+        COMMAND ${binary_dir}/${lib}.aidl.sh
+            --lang cpp --output ${output_dir} ${args}
+        DEPENDS aidl ${version_imports}
+    )
+    add_custom_target(${lib}-cpp-source SOURCES "${outputs}")
+    target_sources(.${lib}-cpp.OBJ PRIVATE "${outputs}")
+    add_dependencies(.${lib}-cpp.OBJ ${lib}-cpp-source)
+
+    # backend: java
+    set(output_dir "${binary_dir}/gen/${lib}-java-source")
+    set(outputs "$<PATH:REPLACE_EXTENSION,$<LIST:TRANSFORM,${sources},PREPEND,${output_dir}/>,.java>")
+    add_custom_command(OUTPUT "${outputs}"
+        COMMAND ${binary_dir}/${lib}.aidl.sh
+            --lang java --output ${output_dir} ${args}
+        DEPENDS aidl ${version_imports}
+    )
+    add_custom_target(${lib}-java-source SOURCES "${outputs}")
+    target_sources(.${lib}-java.SRC PRIVATE "${outputs}")
+    add_dependencies(.${lib}-java.SRC ${lib}-java-source)
+endfunction()
+
+
+function(baker_patch_aidl_interface)
+    baker_get_all_targets_recursive(all_targets ${CMAKE_SOURCE_DIR})
+    foreach(target ${all_targets})
+        get_property(is_aidl_patched TARGET ${target} PROPERTY _AIDL_PATCHED_)
+        if(is_aidl_patched STREQUAL "FALSE")
+            get_target_property(source_dir ${target} SOURCE_DIR)
+            set_target_properties(${target} PROPERTIES _AIDL_PATCHED_ TRUE)
+            get_target_property(src ${target} _AIDL_SRC_)
+            get_target_property(version_imports ${target} _AIDL_VERSION_IMPORTS_)
+            get_target_property(args ${target} _AIDL_ARGS_)
+
+            set(rel_sources "")
+            get_property(sources TARGET ${src} PROPERTY INTERFACE_SOURCES)
+            get_property(local_include_dir TARGET ${src} PROPERTY _local_include_dir)
+            foreach(source IN LISTS sources)
+                cmake_path(RELATIVE_PATH source BASE_DIRECTORY "${source_dir}/${local_include_dir}")
+                list(APPEND rel_sources "${source}")
+            endforeach()
+            baker_aidl_interface_patch_sources(${target} "${rel_sources}" "${version_imports}" "${args}")
+        endif()
     endforeach()
 endfunction()

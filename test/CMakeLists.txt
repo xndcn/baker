@@ -179,8 +179,7 @@ target_compile_definitions(art_defaults INTERFACE
 set_property(TARGET libnativehelper_defaults PROPERTY _cflags "-U_GNU_SOURCE" ; "-D_POSIX_C_SOURCE=200112L")
 set_property(TARGET protobuf-cflags-defaults PROPERTY _cflags "")
 # mime.types.minimized references android.mime.types.minimized in device_common_srcs
-target_link_libraries(mime.types.minimized INTERFACE android.mime.types.minimized)
-add_dependencies(mime.types.minimized android.mime.types.minimized)
+set_property(TARGET mime.types.minimized APPEND PROPERTY _srcs ":android.mime.types.minimized")
 # Force android.system.suspend.control.internal-java to use current sdk instead of 28
 set_target_properties(.android.system.suspend.control.internal-java.SRC PROPERTIES _sdk_version "system_current")
 

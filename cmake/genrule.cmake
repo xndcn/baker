@@ -4,7 +4,7 @@ function(baker_transform_tool_file TOOL_FILE)
         string(SUBSTRING ${TOOL_FILE} 1 -1 TOOL_FILE)
         set(TOOL_FILE "$<TARGET_PROPERTY:${TOOL_FILE},INTERFACE_SOURCES>")
     elseif(NOT IS_ABSOLUTE "${TOOL_FILE}")
-        set(TOOL_FILE "./${TOOL_FILE}")
+        set(TOOL_FILE "${CMAKE_CURRENT_SOURCE_DIR}/${TOOL_FILE}")
     endif()
     set(TOOL_FILE "${TOOL_FILE}" PARENT_SCOPE)
 endfunction(baker_transform_tool_file)
@@ -14,7 +14,7 @@ function(baker_transform_tool TOOL)
         # Convert ":tool" to target object of tool
         string(SUBSTRING ${TOOL} 1 -1 TOOL)
     endif()
-    set(TOOL "$<IF:$<TARGET_EXISTS:${TOOL}>,$<TARGET_FILE:${TOOL}>,${TOOL}>")
+    set(TOOL "$<IF:$<TARGET_EXISTS:${TOOL}>,$<TARGET_FILE:${TOOL}>,${CMAKE_CURRENT_SOURCE_DIR}/${TOOL}>")
     set(TOOL "${TOOL}" PARENT_SCOPE)
 endfunction(baker_transform_tool)
 
@@ -50,48 +50,74 @@ function(baker_genrule)
 
     set(src ".${name}.SRC")
     add_library(${src} INTERFACE)
-    target_sources(${src} INTERFACE ${ARG_srcs})
-    baker_apply_sources_transform(${src})
-
-    # gensrcs
-    if(NOT DEFINED ARG_out AND DEFINED ARG_output_extension)
-        set(ARG_out "")
-        baker_get_sources(ARG_srcs ${src} SCOPE INTERFACE)
-        foreach(src IN LISTS ARG_srcs)
-            cmake_path(RELATIVE_PATH src)
-            cmake_path(REPLACE_EXTENSION src .${ARG_output_extension})
-            list(APPEND ARG_out ${src})
-        endforeach()
-        list(APPEND ARG__ALL_LIST_KEYS_ "out")
-    endif()
-
     baker_parse_properties(${src})
     baker_apply_genrule_transform(${src})
 
-    set(command_file "${CMAKE_CURRENT_BINARY_DIR}/${name}.genrule.sh")
-    file(GENERATE OUTPUT "${command_file}" INPUT "${CMAKE_SOURCE_DIR}/cmake/genrule.template.sh" TARGET ${src})
-    add_custom_command(
-        OUTPUT "$<LIST:TRANSFORM,${ARG_out},PREPEND,${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/>"
-        COMMAND ${command_file} ARGS
-            --genDir "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/"
-            --outs "$<GENEX_EVAL:$<TARGET_PROPERTY:${src},_out>>"
-            --tools "$<GENEX_EVAL:$<TARGET_PROPERTY:${src},_tools>>"
-            --tool_files "$<GENEX_EVAL:$<TARGET_PROPERTY:${src},_tool_files>>"
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        DEPENDS $<GENEX_EVAL:$<TARGET_PROPERTY:${src},_tools>> ; $<GENEX_EVAL:$<TARGET_PROPERTY:${src},_tool_files>> ; $<TARGET_PROPERTY:${src},INTERFACE_LINK_LIBRARIES>
-        VERBATIM
-    )
-    add_custom_target(.${name}.DEP SOURCES "$<LIST:TRANSFORM,${ARG_out},PREPEND,${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/>")
-
     add_library(${name} OBJECT ".")
     set_target_properties(${name} PROPERTIES LINKER_LANGUAGE CXX)
-    target_sources(${name} INTERFACE "$<LIST:TRANSFORM,${ARG_out},PREPEND,${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/>")
     # generated_headers expects the output directory to be in the include path
     target_include_directories(${name} INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/)
-    add_dependencies(${name} .${name}.DEP)
+    set_target_properties(${name} PROPERTIES
+        _GENRULE_PATCHED_ FALSE
+        _GENRULE_SRC_ "${src}"
+        _APPEND_SOURCES_ TRUE
+    )
     return(PROPAGATE name)
 endfunction()
 
 function(baker_gensrcs)
     baker_genrule(${ARGN})
+endfunction()
+
+
+function(baker_genrule_patch_sources name)
+    get_target_property(source_dir ${name} SOURCE_DIR)
+    get_target_property(binary_dir ${name} BINARY_DIR)
+
+    get_target_property(src ${name} _GENRULE_SRC_)
+    baker_patch_sources(${src})
+    get_property(sources TARGET ${src} PROPERTY INTERFACE_SOURCES)
+
+    get_property(out TARGET ${src} PROPERTY _out)
+    get_property(output_extension TARGET ${src} PROPERTY _output_extension)
+    # gensrcs
+    if(NOT DEFINED out AND NOT output_extension STREQUAL "")
+        set(out "")
+        foreach(source IN LISTS sources)
+            cmake_path(RELATIVE_PATH source BASE_DIRECTORY "${source_dir}")
+            cmake_path(REPLACE_EXTENSION source .${output_extension})
+            list(APPEND out ${source})
+        endforeach()
+
+        set_property(TARGET ${src} PROPERTY _out "${out}")
+        set_property(TARGET ${src} APPEND PROPERTY ARG__ALL_LIST_KEYS_ "out")
+    endif()
+
+    set(command_file "${binary_dir}/${name}.genrule.sh")
+    file(GENERATE OUTPUT "${command_file}" INPUT "${CMAKE_SOURCE_DIR}/cmake/genrule.template.sh" TARGET ${src})
+    list(TRANSFORM out PREPEND "${binary_dir}/gen/${name}/" OUTPUT_VARIABLE outputs)
+    add_custom_command(
+        OUTPUT ${outputs}
+        COMMAND ${command_file} ARGS
+            --genDir "${binary_dir}/gen/${name}/"
+            --outs "$<GENEX_EVAL:$<TARGET_PROPERTY:${src},_out>>"
+            --tools "$<GENEX_EVAL:$<TARGET_PROPERTY:${src},_tools>>"
+            --tool_files "$<GENEX_EVAL:$<TARGET_PROPERTY:${src},_tool_files>>"
+        WORKING_DIRECTORY ${source_dir}
+        # Avoid too long command line
+        COMMENT "Generating sources for genrule ${name}"
+        DEPENDS ${src} ; $<GENEX_EVAL:$<TARGET_PROPERTY:${src},_tools>> ; $<GENEX_EVAL:$<TARGET_PROPERTY:${src},_tool_files>>
+        VERBATIM
+    )
+    add_custom_target(.${name}.DEP DEPENDS "${outputs}")
+    target_sources(${name} INTERFACE "${outputs}")
+    add_dependencies(${name} .${name}.DEP)
+endfunction()
+
+function(baker_patch_genrule target)
+    get_property(is_genrule_patched TARGET ${target} PROPERTY _GENRULE_PATCHED_)
+    if(is_genrule_patched STREQUAL "FALSE")
+        set_target_properties(${target} PROPERTIES _GENRULE_PATCHED_ TRUE)
+        baker_genrule_patch_sources(${target})
+    endif()
 endfunction()

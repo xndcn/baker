@@ -26,11 +26,11 @@ function(baker_aconfig_declarations)
 
     set(src ".${name}.SRC")
     add_library(${src} INTERFACE)
-    target_sources(${src} INTERFACE ${ARG_srcs})
-    baker_apply_sources_transform(${src})
+    baker_parse_properties(${src})
 
     add_library(${name} OBJECT "${BAKER_DUMMY_C_SOURCE}")
-    baker_parse_properties(${name})
+    set_property(TARGET ${name} PROPERTY _package "${ARG_package}")
+    set_property(TARGET ${name} PROPERTY _container "${ARG_container}")
 
     add_custom_command(
         OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/gen/${name}.pb"
@@ -91,8 +91,6 @@ function(baker_java_aconfig_library)
     set(src ".${name}.SRC")
     add_library(${src} OBJECT "${BAKER_DUMMY_C_SOURCE}")
     baker_parse_properties(${src})
-    target_sources(${src} PRIVATE ${ARG_srcs})
-    baker_apply_sources_transform(${src})
     target_link_libraries(${src} PRIVATE $<TARGET_PROPERTY:${src},_system_modules>)
 
     get_target_property(package ${ARG_aconfig_declarations} _package)
