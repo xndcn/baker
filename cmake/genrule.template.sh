@@ -15,8 +15,16 @@ tools=()
 tool_files=()
 
 # Use generator expression to get the source files to avoid too long arguments list
-srcs="$<PATH:RELATIVE_PATH,$<TARGET_PROPERTY:INTERFACE_SOURCES>,$<TARGET_PROPERTY:SOURCE_DIR>>"
+srcs="$<TARGET_PROPERTY:INTERFACE_SOURCES>"
 IFS=';' read -ra srcs <<< "$srcs"
+# Some genrule prefer relative paths, such as art_libartbase_operator_srcs
+ROOT=$PWD
+for i in "${!srcs[@]}"; do
+    if [[ "${srcs[$i]}" == "$ROOT/"* ]]; then
+        srcs[$i]="${srcs[$i]#"$ROOT/"}"
+    fi
+done
+
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -117,7 +125,7 @@ location() {
     else
         # File doesn't start with ":", look for it in tool_files firstly
         for tool_file in "${tool_files[@]}"; do
-        if [[ "${tool_file#$PWD/}" == "${file}" ]]; then
+        if [[ "${tool_file#$<TARGET_PROPERTY:SOURCE_DIR>/}" == "${file}" ]]; then
             echo "$tool_file"
             return 0
         fi

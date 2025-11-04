@@ -104,7 +104,7 @@ function(baker_genrule_patch_sources name)
             --outs "$<GENEX_EVAL:$<TARGET_PROPERTY:${src},_out>>"
             --tools "$<GENEX_EVAL:$<TARGET_PROPERTY:${src},_tools>>"
             --tool_files "$<GENEX_EVAL:$<TARGET_PROPERTY:${src},_tool_files>>"
-        WORKING_DIRECTORY ${source_dir}
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         # Avoid too long command line
         COMMENT "Generating sources for genrule ${name}"
         DEPENDS ${src} ; $<GENEX_EVAL:$<TARGET_PROPERTY:${src},_tools>> ; $<GENEX_EVAL:$<TARGET_PROPERTY:${src},_tool_files>>
