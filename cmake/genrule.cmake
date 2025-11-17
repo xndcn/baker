@@ -1,4 +1,5 @@
 function(baker_transform_tool_file TOOL_FILE)
+    baker_canonicalize_name(TOOL_FILE "${TOOL_FILE}")
     if(TOOL_FILE MATCHES "^:")
         # Convert ":tool_file" to target sources of tool_file
         string(SUBSTRING ${TOOL_FILE} 1 -1 TOOL_FILE)

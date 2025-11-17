@@ -91,6 +91,7 @@ function(baker_parse_metadata)
     if(NOT namespace STREQUAL "")
         set(ARG_name "${namespace}+${ARG_name}")
     endif()
+    baker_canonicalize_name(ARG_name "${ARG_name}")
     set(name ${ARG_name})
 
     # FIXME: cmd may contains ";", so make it a list here

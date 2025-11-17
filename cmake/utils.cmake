@@ -94,6 +94,8 @@ function(baker_canonicalize_name output_var name)
     if(name MATCHES "\\{.*\\}")
         string(REGEX REPLACE "\\{([^}]*)\\}" "_\\1_" name "${name}")
     endif()
+    # Replace '@' with '_at_'
+    string(REPLACE "@" "_at_" name "${name}")
     set(${output_var} "${name}" PARENT_SCOPE)
 endfunction()
 
