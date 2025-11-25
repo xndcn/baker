@@ -115,7 +115,10 @@ function(baker_cc_object)
     target_link_options(${link} PRIVATE -no-pie -nostdlib -Wl,-r)
     target_link_libraries(${link} PRIVATE ${object})
     baker_cc_apply_properties(${link} ${object})
-    target_link_libraries(${name} INTERFACE $<$<BOOL:$<TARGET_PROPERTY:${object},_linker_script>>:$<TARGET_FILE:${link}>>)
+    # Previously we used object file as INTERFACE_LINK_LIBRARIES, but it will be propagated with static libraries,
+    # so we have to export it via INTERFACE_SOURCES
+    set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/${link}.o PROPERTY GENERATED TRUE)
+    target_sources(${name} INTERFACE $<$<BOOL:$<TARGET_PROPERTY:${object},_linker_script>>:$<TARGET_FILE:${link}>>)
 
     # Add a custom target to handle different dependencies
     add_custom_target(.${name}.DEP DEPENDS
@@ -142,6 +145,8 @@ function(baker_cc_library)
     # Always enable position independent code
     set_target_properties(${object} PROPERTIES POSITION_INDEPENDENT_CODE ON)
     baker_cc_apply_properties(${object} ${object})
+    # NOTE: object library can not use external object files directly, so export them here
+    target_sources(${object} INTERFACE "$<LIST:FILTER,$<TARGET_PROPERTY:${object},SOURCES>,INCLUDE,\.o$>")
 
     # Handle static and shared libraries
     # CMake object library will propagate the interface libraries
