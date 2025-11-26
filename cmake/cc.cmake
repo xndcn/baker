@@ -15,9 +15,10 @@ function(baker_cc_apply_properties target dependency)
         list(APPEND export_link_libs $<TARGET_PROPERTY:${dependency},_export_${lib}>)
     endforeach()
     # Process generated sources
-    list(APPEND link_libs $<TARGET_PROPERTY:${dependency},_generated_sources>)
+    list(APPEND link_libs $<LIST:TRANSFORM,$<TARGET_PROPERTY:${dependency},_generated_sources>,REPLACE,@,_at_>)
     # Process generated headers
-    list(APPEND link_libs $<TARGET_PROPERTY:${dependency},_generated_headers>)
+    list(APPEND link_libs $<LIST:TRANSFORM,$<TARGET_PROPERTY:${dependency},_generated_headers>,REPLACE,@,_at_>)
+    list(APPEND export_link_libs $<LIST:TRANSFORM,$<TARGET_PROPERTY:${dependency},_export_generated_headers>,REPLACE,@,_at_>)
     # Process shared libraries
     foreach(lib "shared_libs" ; "shared_lib_headers" ; "shared_shared_libs") # shared_shared_libs for {"shared": {"shared_libs": [...]}}
         # CMake will export private linked shared libraries for static, but not for shared

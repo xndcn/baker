@@ -4,6 +4,7 @@ from .definitions.cc_modules import CCLibrary, CCTestLibrary, CCLibraryHeaders, 
 from .definitions.defaults import Defaults
 from .definitions.filegroup import FileGroup
 from .definitions.aidl_interface import AidlInterface
+from .definitions.hidl import HidlInterface
 from .definitions.genrule import GenRule, GenSrcs
 from .definitions.python_binary_host import PythonBinaryHost
 from .definitions.aconfig_modules import AConfigDeclarations, CCAConfigLibrary, JavaAConfigLibrary
@@ -14,7 +15,7 @@ class CMakeConverter:
     def __init__(self):
         self._handlers = [
             Defaults, FileGroup, SoongNamespace,
-            AidlInterface,
+            AidlInterface, HidlInterface,
             CCLibraryHeaders, CCLibrary, CCTestLibrary, CCBinary, CCTest, CCObject,
             JavaGenrule, GenRule, GenSrcs, PythonBinaryHost,
             AConfigDeclarations, CCAConfigLibrary, JavaAConfigLibrary,
