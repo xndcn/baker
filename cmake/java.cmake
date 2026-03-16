@@ -84,6 +84,15 @@ function(baker_patch_sdk_version)
         _ALL_SINGLE_KEYS_ "system_modules"
         _ALL_LIST_KEYS_ "libs"
     )
+    # Define core_current sdk_version
+    baker_defaults(
+        name baker_sdk_core_current
+        system_modules "core-public-stubs-system-modules"
+        bootclasspath "core.current.stubs;core-lambda-stubs"
+        libs ""
+        _ALL_SINGLE_KEYS_ "system_modules"
+        _ALL_LIST_KEYS_ "libs;bootclasspath"
+    )
 
     baker_get_all_targets_recursive(all_targets ${CMAKE_SOURCE_DIR})
     # Get all sdk_version
