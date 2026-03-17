@@ -73,6 +73,7 @@ function(baker_hidl_interface)
     add_custom_command(
         OUTPUT ${output_cpp_files}
         # TODO: pass -R and -r options
+        DEPENDS ${ARG_srcs}
         COMMAND hidl-gen -p . -o ${output_cpp_dir} -L c++-sources ${hidl_name}
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     )
@@ -83,6 +84,7 @@ function(baker_hidl_interface)
     # cpp-headers
     add_custom_command(
         OUTPUT ${output_h_files}
+        DEPENDS ${ARG_srcs}
         COMMAND hidl-gen -p . -o ${output_h_dir} -L c++-headers ${hidl_name}
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     )
