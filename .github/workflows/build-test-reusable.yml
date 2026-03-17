@@ -20,13 +20,6 @@ jobs:
     name: Build and Test (${{ inputs.build_name }})
 
     steps:
-    - name: Maximize build space
-      uses: easimon/maximize-build-space@master
-      with:
-        root-reserve-mb: 10240
-        swap-size-mb: 1024
-        remove-dotnet: 'true'
-
     - name: Checkout repository
       uses: actions/checkout@v3
 
@@ -61,6 +54,8 @@ jobs:
         tar xf clang+llvm-18.1.8-x86_64-linux-gnu-ubuntu-18.04.tar.xz
 
     - name: Install Baker package
+      env:
+        ANTLR4_TOOLS_ANTLR_VERSION: 4.13.2
       run: |
         pip install -e .
 

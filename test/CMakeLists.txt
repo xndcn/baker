@@ -21,7 +21,6 @@ include(cmake/baker.cmake)
 add_library(libprocessgroup_headers INTERFACE)
 add_library(libprocessgroup-static INTERFACE)
 add_library(libprocessgroup-shared INTERFACE)
-add_library(libjsoncpp-static INTERFACE)
 add_library(librustc_demangle_static-static STATIC ".")
 set_target_properties(librustc_demangle_static-static PROPERTIES LINKER_LANGUAGE CXX)
 add_library(stub-annotations INTERFACE)
@@ -53,6 +52,7 @@ baker(external/dlmalloc/ EXCLUDE_FROM_ALL)
 baker(external/fdlibm/ EXCLUDE_FROM_ALL)
 baker(external/googletest/ EXCLUDE_FROM_ALL)
 baker(external/icu EXCLUDE_FROM_ALL)
+baker(external/jsoncpp/ EXCLUDE_FROM_ALL)
 baker(external/lz4/lib/ EXCLUDE_FROM_ALL)
 baker(external/lzma/ EXCLUDE_FROM_ALL)
 baker(external/okhttp/ EXCLUDE_FROM_ALL)
@@ -66,6 +66,10 @@ baker(system/core/libsystem/ EXCLUDE_FROM_ALL)
 baker(system/core/libutils/ EXCLUDE_FROM_ALL)
 baker(system/hardware/interfaces/ EXCLUDE_FROM_ALL)
 baker(system/tools/aidl/ EXCLUDE_FROM_ALL)
+baker(system/tools/hidl/ EXCLUDE_FROM_ALL)
+baker(system/libfmq/ EXCLUDE_FROM_ALL)
+baker(system/libhidl/ EXCLUDE_FROM_ALL)
+baker(system/libhwbinder/ EXCLUDE_FROM_ALL)
 baker(system/libziparchive/ EXCLUDE_FROM_ALL)
 baker(system/unwinding/libunwindstack/ EXCLUDE_FROM_ALL)
 baker(tools/platform-compat/java/android/compat/annotation/ EXCLUDE_FROM_ALL)
@@ -132,6 +136,10 @@ set_property(TARGET mime.types.minimized PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET mimemap-res.jar PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET modules-utils-list-slice PROPERTY EXCLUDE_FROM_ALL FALSE)
 set_property(TARGET android.system.suspend.control.internal-java PROPERTY EXCLUDE_FROM_ALL FALSE)
+set_property(TARGET mimemap PROPERTY EXCLUDE_FROM_ALL FALSE)
+baker_canonicalize_name(android.system.suspend "android.system.suspend@1.0-shared")
+set_property(TARGET ${android.system.suspend} PROPERTY EXCLUDE_FROM_ALL FALSE)
+set_property(TARGET android.system.suspend-V1.0-java PROPERTY EXCLUDE_FROM_ALL FALSE)
 # Currently cmake does not support EXCLUDE_FROM_ALL for sub-subdirectory, so workaround
 get_property(aidl_targets DIRECTORY system/tools/aidl/build PROPERTY BUILDSYSTEM_TARGETS)
 foreach(target IN LISTS aidl_targets)
@@ -154,9 +162,20 @@ set_property(TARGET boringssl_test_support-static PROPERTY INTERFACE_LINK_LIBRAR
 target_link_libraries(.boringssl_test_support.OBJ PRIVATE libcrypto_static-static)
 set_property(TARGET conscrypt_generate_constants PROPERTY LINK_LIBRARIES "")
 target_link_libraries(conscrypt_generate_constants PRIVATE libcrypto_static-static)
+# FIXME: hidl-gen fails with libcrypto-shared
+get_property(hidl_gen_libs TARGET hidl-gen PROPERTY LINK_LIBRARIES)
+set_property(TARGET hidl-gen PROPERTY LINK_LIBRARIES "$<LIST:FILTER,${hidl_gen_libs},EXCLUDE,libcrypto-static>")
+set_property(TARGET libhidl-gen-hash-static PROPERTY INTERFACE_LINK_LIBRARIES "")
+target_link_libraries(libhidl-gen-hash-static PUBLIC libcrypto_static-static libbase-static)
+
+# FIXME: figure out where libhwbinder_headers is added
+# hidl libraries need libhwbinder_headers
+target_link_libraries(libhidlbase-shared INTERFACE libhwbinder_headers)
 
 # libbinder includes stdatomic.h, which may not work until C++23
 set_target_properties(.libbinder.OBJ PROPERTIES CXX_STANDARD 23)
+# libutils includes stdatomic.h, which may not work until C++23
+target_compile_options(libutils-shared PUBLIC "-std=c++23")
 
 # Default bfd linker may fail to link with protected symbols
 target_link_options(art_defaults INTERFACE "-fuse-ld=lld")

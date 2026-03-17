@@ -84,6 +84,24 @@ function(baker_patch_sdk_version)
         _ALL_SINGLE_KEYS_ "system_modules"
         _ALL_LIST_KEYS_ "libs"
     )
+    # Define core_current sdk_version
+    baker_defaults(
+        name baker_sdk_core_current
+        system_modules "core-public-stubs-system-modules"
+        bootclasspath "core.current.stubs;core-lambda-stubs"
+        libs ""
+        _ALL_SINGLE_KEYS_ "system_modules"
+        _ALL_LIST_KEYS_ "libs;bootclasspath"
+    )
+    # Define core_platform sdk_version
+    baker_defaults(
+        name baker_sdk_core_platform
+        system_modules "stable-core-platform-api-stubs-system-modules"
+        bootclasspath "stable.core.platform.api.stubs;core-lambda-stubs"
+        libs ""
+        _ALL_SINGLE_KEYS_ "system_modules"
+        _ALL_LIST_KEYS_ "libs;bootclasspath"
+    )
 
     baker_get_all_targets_recursive(all_targets ${CMAKE_SOURCE_DIR})
     # Get all sdk_version
@@ -513,6 +531,8 @@ function(baker_droidstubs)
     # Special flags for droidstubs
     # See build/soong/java/droidstubs.go
     set_property(TARGET ${src} APPEND PROPERTY _flags "--exclude-documentation-from-stubs")
+    # See build/soong/java/droidstubs.go:metalavaCmd, metalava also use bootclasspath
+    target_link_libraries(${src} INTERFACE "$<TARGET_PROPERTY:${src},_bootclasspath>")
     baker_add_metalava(${name} ${name} ${src})
 
     # Add api_contribution
