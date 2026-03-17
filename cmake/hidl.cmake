@@ -139,6 +139,7 @@ function(baker_hidl_interface)
     add_custom_command(
         OUTPUT "${outputs}"
         COMMAND hidl-gen -p . -o ${CMAKE_CURRENT_BINARY_DIR}/gen/${name}/java-constants/ -L java-constants ${hidl_name}
+        DEPENDS ${hidl_name}
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     )
     add_custom_target(.${name}.GEN.JAVA_CONSTANTS SOURCES "${outputs}")
