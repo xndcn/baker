@@ -513,6 +513,8 @@ function(baker_droidstubs)
     # Special flags for droidstubs
     # See build/soong/java/droidstubs.go
     set_property(TARGET ${src} APPEND PROPERTY _flags "--exclude-documentation-from-stubs")
+    # See build/soong/java/droidstubs.go:metalavaCmd, metalava also use bootclasspath
+    target_link_libraries(${src} INTERFACE "$<TARGET_PROPERTY:${src},_bootclasspath>")
     baker_add_metalava(${name} ${name} ${src})
 
     # Add api_contribution
