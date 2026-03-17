@@ -76,6 +76,7 @@ function(baker_hidl_interface)
         DEPENDS ${ARG_srcs}
         COMMAND hidl-gen -p . -o ${output_cpp_dir} -L c++-sources ${hidl_name}
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        DEPENDS ${ARG_srcs}
     )
     add_custom_target(.${name}.GEN.CPP SOURCES ${output_cpp_files})
     add_library(${name}_genc++ OBJECT "${BAKER_DUMMY_C_SOURCE}")
@@ -87,6 +88,7 @@ function(baker_hidl_interface)
         DEPENDS ${ARG_srcs}
         COMMAND hidl-gen -p . -o ${output_h_dir} -L c++-headers ${hidl_name}
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        DEPENDS ${ARG_srcs}
     )
     add_custom_target(.${name}.GEN.H SOURCES ${output_h_files})
     add_library(${name}_genc++_headers OBJECT "${BAKER_DUMMY_C_SOURCE}")
